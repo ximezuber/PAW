@@ -1,0 +1,26 @@
+.admin_row {
+    background-color: #d9d9d9;
+}
+
+.admin_card {
+    margin-top: 1rem;
+    background-color: whitesmoke;
+    width: 20rem;
+    height: 20rem;
+    display: flex;
+}
+
+.card_img {
+    width: 10rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 1rem;
+}
+
+.card_body {
+    position: absolute;
+    bottom: 1rem;
+    width: 20rem;
+
+}

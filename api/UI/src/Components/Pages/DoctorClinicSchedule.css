@@ -1,0 +1,26 @@
+.schedule-table {
+    width: auto !important;
+    margin: 2rem !important;
+}
+
+.user-schedule-table {
+    width: auto !important;
+}
+
+.content {
+    display: grid;
+}
+
+.current-clinic {
+    color: #3c677e;
+}
+
+.other-clinic {
+    color: gray;
+    font-size: 0.9rem;
+}
+
+.user-clinic {
+    color: #3c677e;
+    font-size: 0.75rem;
+}

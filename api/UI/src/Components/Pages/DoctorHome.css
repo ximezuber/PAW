@@ -1,0 +1,39 @@
+.info-label {
+    margin-bottom: 0.5rem;
+    justify-self: center;
+}
+
+.user-info-label {
+    margin-bottom: 0.5rem;
+    justify-self: flex-start;
+}
+
+.img-size {
+    height: 20rem;
+}
+
+.user-img-size {
+    height: 10rem;
+    border: 1px solid #3c677e;
+}
+
+.edit-button {
+    width: fit-content;
+    justify-self: center;
+}
+
+.info-col {
+    display: grid;
+    align-content: center;
+}
+
+.info-col-user {
+    display: grid;
+    justify-content: flex-start;
+}
+
+.img-col-user {
+    display: grid;
+    justify-content: flex-end;
+    align-content: center;
+}

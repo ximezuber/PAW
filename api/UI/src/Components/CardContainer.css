@@ -1,0 +1,147 @@
+.admin-info-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    grid-gap: 0.5em;
+    height: 100vh;
+    overflow: auto;
+    background-color: #d9d9d9;
+    justify-items: center;
+}
+
+.admin-doctor-container {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    height: 75vh;
+}
+
+.app-user-container {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    height: 75vh;
+}
+
+.search-doctor-container {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    height: 75vh;
+    margin-top: 1rem;
+}
+
+.favorite-doctor-container {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    height: 75vh;
+    margin-top: 1rem;
+}
+
+.admin-clinic-container {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    height: 75vh;
+}
+
+.admin-clinic-prepaid-container {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    height: 75vh;
+}
+
+
+.background {
+    background-color: #d9d9d9;
+    border-color: #d9d9d9;
+}
+
+.add-margin {
+    margin: 1rem;
+}
+
+.doc-card {
+    color: #000;
+    width: 20rem;
+    height: 8.5rem;
+}
+
+.app-card {
+    color: #000;
+    width: 25rem;
+    height: 12rem;
+}
+
+.fav-doc-card {
+    color: #000;
+    width: 18rem;
+    height: 8.5rem;
+}
+
+.remove-button, .remove-button:focus {
+    align-self: flex-end;
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.remove-button-color, .remove-button-color:focus {
+    background-color: white;
+    color: #ad3f3f;
+    border-color: #ad3f3f;
+}
+
+.remove-button-color:hover {
+    background-color: #ad3f3f;
+    border-color: #ad3f3f;
+    color: white;
+}
+
+.edit-remove-button {
+    align-self: center;
+    margin: 0.5rem;
+}
+
+.edit-button {
+    width: 5rem;
+}
+
+.doc-button {
+    align-self: flex-end;
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.doc-button-color, .doc-button-color:focus {
+    background-color: #3c677e;
+    border-color: #3c677e;
+    color: whitesmoke;
+}
+
+.doc-button-color:hover {
+    background-color: whitesmoke;
+    color: #3c677e;
+    border-color: #3c677e;
+}
+
+.buttons-div {
+    align-content: center;
+    margin: 0 0.5rem 0.5rem;
+}
+
+.see-prepaid-button {
+    width: 18rem;
+    align-self: center;
+}
+
+.clinic-prepaid-title {
+    color: #000;
+    justify-content: flex-start;
+    display: flex;
+    margin: 1rem 1rem 0;
+}
+
+.label-signup {
+    justify-self: flex-start;
+    width: fit-content;
+}
+
+.div-signup {
+    display: grid;
+}
