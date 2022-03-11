@@ -52,17 +52,17 @@ import java.util.concurrent.Executor;
 @Configuration
 public class WebConfig extends WebMvcConfigurerAdapter {
     
-    private String dbUser = "paw-2019b-4";
+//    private String dbUser = "paw-2019b-4";
+//
+//    private String dbPassword = "7Up7gfwcS";
+//
+//    private String jdbcPath = "jdbc:postgresql://localhost/paw-2019b-4";
+//
+    private String dbUser = "root";
 
-    private String dbPassword = "7Up7gfwcS";
+    private String dbPassword = "root";
 
-    private String jdbcPath = "jdbc:postgresql://localhost/paw-2019b-4";
-//
-//    private String dbUser = "root";
-//
-//    private String dbPassword = "root";
-//
-//    private String jdbcPath = "jdbc:postgresql://localhost/paw";
+    private String jdbcPath = "jdbc:postgresql://localhost/paw";
 
     @Value("classpath:schema.sql")
     private Resource schemaSql;
