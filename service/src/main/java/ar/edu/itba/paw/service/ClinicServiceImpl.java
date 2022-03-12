@@ -32,11 +32,6 @@ public class ClinicServiceImpl implements ClinicService {
     }
 
     @Override
-    public Clinic getClinicByName(String name) {
-        return clinicDao.getClinicByName(name);
-    }
-
-    @Override
     public Clinic getClinicById(int id) {
         return clinicDao.getClinicById(id);
     }

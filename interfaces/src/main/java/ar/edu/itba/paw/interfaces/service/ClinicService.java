@@ -12,8 +12,6 @@ public interface ClinicService extends PaginationService<Clinic> {
 
     List<Clinic> getClinics();
 
-    Clinic getClinicByName(String name);
-
     Clinic getClinicById(int id);
 
     List<Clinic> getClinicsByLocation(Location location);

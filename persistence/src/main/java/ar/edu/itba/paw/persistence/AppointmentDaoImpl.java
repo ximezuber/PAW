@@ -105,7 +105,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
     @Transactional
     @Override
-    public int cancelAppointment(DoctorClinic doctorClinic, User patient, LocalDateTime date){
+    public int cancelAppointment(DoctorClinic doctorClinic, User patient, LocalDateTime date) {
         final Query query = entityManager.createQuery(
                 "delete from Appointment as ap where ap.patient = :email and " +
                         "ap.appointmentKey.doctor = :doctor and ap.clinic = :clinic " +
@@ -118,7 +118,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
 
     @Override
-    public int cancelAllAppointmentsOnSchedule(DoctorClinic doctorClinic, int day, int hour){
+    public int cancelAllAppointmentsOnSchedule(DoctorClinic doctorClinic, int day, int hour) {
         final Query query = entityManager.createQuery("delete from Appointment as ap where " +
                 "ap.appointmentKey.doctor = :doctor and ap.clinic = :clinic and " +
                 "DAY(ap.appointmentKey.date) = :day and HOUR(ap.appointmentKey.date) = :hour");
@@ -130,7 +130,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
 
     @Override
-    public Appointment hasAppointment(DoctorClinic doctorClinic, LocalDateTime date){
+    public Appointment hasAppointment(DoctorClinic doctorClinic, LocalDateTime date) {
         TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap" +
                 " where ap.doctorClinic.doctor.license = :doctor and ap.clinic = :clinic " +
                 "and ap.appointmentKey.date = :date", Appointment.class);
@@ -142,7 +142,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
 
     @Override
-    public boolean hasAppointment(String doctorLicense, String patientEmail, LocalDateTime date){
+    public boolean hasAppointment(String doctorLicense, String patientEmail, LocalDateTime date) {
         TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap" +
                 " where ap.doctorClinic.doctor.license = :doctor and ap.patient = :email " +
                 "and ap.appointmentKey.date = :date",Appointment.class);
