@@ -71,19 +71,6 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
 
     @Override
-    public List<Appointment> getDoctorAppointmentsWithinWeek(Doctor doctor, LocalDate weekBeginning, LocalDate weekEnd) {
-        TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap" +
-                " where ap.doctorClinic.doctor.license = :doctor and" +
-                " ap.appointmentKey.date between :startDate and :endDate" +
-                " order by ap.appointmentKey.date",Appointment.class);
-        query.setParameter("doctor",doctor.getLicense())
-                .setParameter("startDate", weekBeginning)
-                .setParameter("endDate", weekEnd);
-        List<Appointment> list = query.getResultList();
-        return list;
-    }
-
-    @Override
     public List<Appointment> getPaginatedAppointments(int page, Doctor doctor) {
         TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap" +
                 " where ap.doctorClinic.doctor.license = :doctor",Appointment.class);

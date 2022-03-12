@@ -18,8 +18,6 @@ public interface AppointmentDao {
 
     List<Appointment> getAllDoctorsAppointments(Doctor doctor);
 
-    List<Appointment> getDoctorAppointmentsWithinWeek(Doctor doctor, LocalDate beginning, LocalDate end);
-
     List<Appointment> getPaginatedAppointments(int page, Doctor doctor);
 
     List<Appointment> getPaginatedAppointments(int page, Patient patient);
