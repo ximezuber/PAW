@@ -13,15 +13,11 @@ public interface DoctorService extends PaginationService<Doctor> {
 
     List<Doctor> getDoctors();
 
-    List<Doctor> getDoctorByName(String firstName,String lastName);
-
     List<Doctor> getDoctorBySpecialty(Specialty specialty);
 
     Doctor getDoctorByLicense(String license);
 
     Doctor getDoctorByEmail(String email);
-
-    List<Doctor> getDoctorsWithAvailability();
 
     boolean isDoctor(String email);
 
@@ -31,18 +27,11 @@ public interface DoctorService extends PaginationService<Doctor> {
 
     void updateDoctorProfile(
             String email, String newPassword, String firstName, String lastName,
-            String phoneNumber, String specialty,
-            MultipartFile file);
-
-    void updateDoctorProfile(
-            String email, String newPassword, String firstName, String lastName, // updates user fields
             String phoneNumber, String specialty);
 
     List<String> getFilteredLicenses(
             Location location, Specialty specialty,
             String firstName, String lastName, Prepaid prepaid, int consultPrice, boolean includeUnavailable);
-
-    List<String> getAvailableDoctorsLicenses();
 
     List<Doctor> getPaginatedDoctors(List<String> licenses, int page);
 

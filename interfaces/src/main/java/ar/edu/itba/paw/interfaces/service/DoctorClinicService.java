@@ -11,15 +11,11 @@ public interface DoctorClinicService {
 
     long deleteDoctorClinic(String license, int clinicid) throws EntityNotFoundException;
 
-    List<DoctorClinic> getDoctorClinics();
+    List<DoctorClinic> getDoctorsSubscribedClinics(Doctor doctor);
 
-    List<DoctorClinic> getDoctorClinicsForDoctor(Doctor doctor);
+    DoctorClinic getDoctorClinic(String doctor, int clinic);
 
-    List<DoctorClinic> getDoctorsFromClinic(Clinic clinic);
-
-    DoctorClinic getDoctorInClinic(String doctor, int clinic);
-
-    DoctorClinic getDoctorClinicFromDoctorAndClinic(Doctor doctor, Clinic clinic);
+    DoctorClinic getDoctorClinicWithSchedule(String doctor, int clinic);
 
     List<DoctorClinic> getFilteredDoctorClinics(Location location, Specialty specialty,
                     String firstName, String lastName, Prepaid prepaid, int consultPrice);

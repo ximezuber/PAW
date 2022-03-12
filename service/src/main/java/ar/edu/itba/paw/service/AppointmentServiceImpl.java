@@ -10,7 +10,6 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
@@ -62,8 +61,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         LocalDateTime date = createAppointmentCalendar(year, month, day, time);
 
         Doctor doctor = doctorService.getDoctorByLicense(license);
-        Clinic clinic = clinicService.getClinicById(clinicId);
-        DoctorClinic doctorClinic = doctorClinicService.getDoctorClinicFromDoctorAndClinic(doctor, clinic);
+        DoctorClinic doctorClinic = doctorClinicService.getDoctorClinicWithSchedule(license, clinicId);
 
         User user = userService.findUserByEmail(userEmail);
 
@@ -111,7 +109,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         if(userService.isDoctor(user.getEmail())) {
             Doctor doctor = doctorService.getDoctorByEmail(user.getEmail());
             DoctorClinic doctorClinic = doctorClinicService
-                    .getDoctorInClinic(doctor.getLicense(), clinic.getId());
+                    .getDoctorClinic(doctor.getLicense(), clinic.getId());
             return getDoctorsAppointments(doctorClinic);
         } else {
             return getPatientsAppointments(user, clinic.getId());
@@ -185,7 +183,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     public void cancelUserAppointment(String userEmail, String license, int clinicId, int year, int month, int day, int time)
             throws EntityNotFoundException, RequestEntityNotFoundException {
         boolean cancelledByDoctor = userService.isDoctor(userEmail);
-        DoctorClinic dc = doctorClinicService.getDoctorInClinic(license, clinicId);
+        DoctorClinic dc = doctorClinicService.getDoctorClinic(license, clinicId);
         if(dc == null) throw new RequestEntityNotFoundException("doctor-clinic");
 
         LocalDateTime appointmentDate = createAppointmentCalendar(year, month, day, time);

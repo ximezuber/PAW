@@ -355,7 +355,7 @@ public class DoctorController {
                                          @Context Request request) throws EntityNotFoundException {
         Doctor doctor = doctorService.getDoctorByLicense(license);
         if(doctor == null) throw new EntityNotFoundException("doctor");
-        final List<DoctorClinicDto> doctorClinics = doctorClinicService.getDoctorClinicsForDoctor(doctor)
+        final List<DoctorClinicDto> doctorClinics = doctorClinicService.getDoctorsSubscribedClinics(doctor)
                 .stream().map(dc -> DoctorClinicDto.fromDoctorClinic(dc, uriInfo))
                 .collect(Collectors.toList());
         return CacheHelper.handleResponse(doctorClinics, doctorClinicCaching,
@@ -428,7 +428,7 @@ public class DoctorController {
                                     @PathParam("clinic") final Integer clinic,
                                     @QueryParam("week") @DefaultValue("1") final Integer week,
                                     @Context Request request) {
-        DoctorClinic dc = doctorClinicService.getDoctorInClinic(license,clinic);
+        DoctorClinic dc = doctorClinicService.getDoctorClinic(license,clinic);
 
         if(dc != null) {
             DoctorClinicDto dto = DoctorClinicDto.fromDoctorClinic(dc, uriInfo);
@@ -450,7 +450,7 @@ public class DoctorController {
     public Response getDoctorClinicSchedules(@PathParam("license") final String license,
                                              @PathParam("clinic") final Integer clinic,
                                              @Context Request request) throws EntityNotFoundException {
-        DoctorClinic dc = doctorClinicService.getDoctorInClinic(license, clinic);
+        DoctorClinic dc = doctorClinicService.getDoctorClinic(license, clinic);
         if(dc == null) throw new EntityNotFoundException("doctor-clinic");
         List<ScheduleDto> schedules = scheduleService.getDoctorClinicSchedule(dc)
                 .stream().map(s -> ScheduleDto.fromSchedule(s, uriInfo)).collect(Collectors.toList());
@@ -494,7 +494,7 @@ public class DoctorController {
                                                @QueryParam("day") final Integer day,
                                                @QueryParam("hour") final Integer hour)
             throws EntityNotFoundException, OutOfRangeException {
-        DoctorClinic dc = doctorClinicService.getDoctorInClinic(license,clinic);
+        DoctorClinic dc = doctorClinicService.getDoctorClinic(license,clinic);
         if(dc == null) throw new EntityNotFoundException("doctor-clinic");
 
         scheduleService.deleteSchedule(hour, day, license, clinic);
@@ -516,7 +516,7 @@ public class DoctorController {
     public Response createSchedule(@PathParam("license") final String license,
                                    @PathParam("clinic") final Integer clinic,
                                    ScheduleForm form) throws EntityNotFoundException, ConflictException {
-        DoctorClinic dc = doctorClinicService.getDoctorInClinic(license,clinic);
+        DoctorClinic dc = doctorClinicService.getDoctorClinic(license,clinic);
         if(dc == null) throw new EntityNotFoundException("doctor-clinic");
 
         scheduleService.createSchedule(form.getHour(), form.getDay(), dc.getDoctor().getEmail(),

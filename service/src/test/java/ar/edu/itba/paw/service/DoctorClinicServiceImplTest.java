@@ -120,14 +120,13 @@ public class DoctorClinicServiceImplTest {
         s.add(new Schedule(3,10, doctorClinic));
         Mockito.when(scheduleService.getDoctorClinicSchedule(Mockito.eq(doctorClinic)))
                 .thenReturn(s);
-        Mockito.when(appointmentService.getDoctorsAppointments(Mockito.eq(doctorClinic)))
-                .thenReturn(null);
 
-        Mockito.when(mockDao.getDoctorInClinic(Mockito.eq(doc.getLicense()), Mockito.eq(clinic.getId())))
+        Mockito.when(mockDao.getDoctorClinic(Mockito.eq(doc.getLicense()), Mockito.eq(clinic.getId())))
                 .thenReturn(new DoctorClinic(doc, clinic, consultPrice));
 
         //Execute
-        DoctorClinic doctorClinic = doctorClinicService.getDoctorClinicFromDoctorAndClinic(doc, clinic);
+        DoctorClinic doctorClinic = doctorClinicService.getDoctorClinicWithSchedule(doc.getLicense(),
+                clinic.getId());
 
         //Assert
         Assert.assertNotNull(doctorClinic);

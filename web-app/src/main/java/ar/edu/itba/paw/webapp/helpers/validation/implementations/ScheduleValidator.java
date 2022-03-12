@@ -40,7 +40,7 @@ public class ScheduleValidator implements ConstraintValidator<UniqueSchedule,Obj
         Object scheduleClinic = new BeanWrapperImpl(value).getPropertyValue(clinic);
         Object scheduleHour = new BeanWrapperImpl(value).getPropertyValue(hour);
         Object scheduleDay = new BeanWrapperImpl(value).getPropertyValue(day);
-        DoctorClinic doctorClinic = doctorClinicService.getDoctorInClinic(scheduleLicense.toString(), (int)scheduleClinic);
+        DoctorClinic doctorClinic = doctorClinicService.getDoctorClinic(scheduleLicense.toString(), (int)scheduleClinic);
         return !scheduleService.doctorHasScheduleInClinic(doctorClinic, (int)scheduleDay, (int)scheduleHour);
     }
 }

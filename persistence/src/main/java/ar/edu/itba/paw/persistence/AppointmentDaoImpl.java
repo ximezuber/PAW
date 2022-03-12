@@ -73,7 +73,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
     @Override
     public List<Appointment> getPaginatedAppointments(int page, Doctor doctor) {
         TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap" +
-                " where ap.doctorClinic.doctor.license = :doctor",Appointment.class);
+                " where ap.doctorClinic.doctor.license = :doctor ORDER BY ap.appointmentKey.date, " +
+                "ap.patient", Appointment.class);
         query.setParameter("doctor",doctor.getLicense());
         List<Appointment> list = query
                 .setFirstResult(page * MAX_APPOINTMENTS_PER_PAGE)
@@ -85,7 +86,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
     @Override
     public List<Appointment> getPaginatedAppointments(int page, Patient patient) {
         TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap " +
-                "where ap.patient = :email ORDER BY ap.appointmentKey.date",Appointment.class);
+                "where ap.patient = :email ORDER BY ap.appointmentKey.date, ap.doctorClinic.doctor.license",
+                Appointment.class);
         query.setParameter("email",patient.getEmail());
         List<Appointment> list = query
                 .setFirstResult(page * MAX_APPOINTMENTS_PER_PAGE)

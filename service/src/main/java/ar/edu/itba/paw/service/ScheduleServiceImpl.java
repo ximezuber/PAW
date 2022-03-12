@@ -36,11 +36,12 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public Schedule createSchedule(int hour, int day, String email, int clinicId) throws ConflictException {
 
-        DoctorClinic doctorClinic = doctorClinicService.getDoctorClinicFromDoctorAndClinic(
-                doctorService.getDoctorByEmail(email),
-                clinicService.getClinicById(clinicId));
+        DoctorClinic doctorClinic = doctorClinicService.getDoctorClinic(
+                //Todo: change this to receive license instead of email
+                doctorService.getDoctorByEmail(email).getLicense(),
+                clinicId);
 
-        if(!doctorHasSchedule(doctorClinic.getDoctor(),day,hour)) {
+        if(!doctorHasSchedule(doctorClinic.getDoctor(), day, hour)) {
             return scheduleDao.createSchedule(day, hour, doctorClinic);
         } else {
             throw new ConflictException("schedule-exists");
@@ -67,9 +68,9 @@ public class ScheduleServiceImpl implements ScheduleService {
     public void deleteSchedule(int hour, int day, String license, int clinicId)
             throws OutOfRangeException, EntityNotFoundException {
         if(hour > 0 && hour < 24 && day > 0 && day < 8) {
-            DoctorClinic doctorClinic = doctorClinicService.getDoctorClinicFromDoctorAndClinic(
-                    doctorService.getDoctorByLicense(license),
-                    clinicService.getClinicById(clinicId));
+            DoctorClinic doctorClinic = doctorClinicService.getDoctorClinicWithSchedule(
+                    license,
+                    clinicId);
 
             if(doctorHasSchedule(doctorClinic.getDoctor(), day, hour)) {
                 if(doctorHasScheduleInClinic(doctorClinic, day, hour)) {

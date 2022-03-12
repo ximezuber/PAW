@@ -88,11 +88,10 @@ public class AppointmentServiceImplTest {
 
         Mockito.when(doctorService.getDoctorByLicense(Mockito.eq(license1)))
                 .thenReturn(doc);
-        Mockito.when(clinicService.getClinicById(Mockito.eq(id1)))
-                .thenReturn(clinic);
-        Mockito.when(doctorClinicService.getDoctorClinicFromDoctorAndClinic(Mockito.eq(doc), Mockito.eq(clinic)))
+        Mockito.when(doctorClinicService.getDoctorClinicWithSchedule(Mockito.eq(doc.getLicense()),
+                        Mockito.eq(clinic.getId())))
                 .thenReturn(dc);
-        Mockito.when(doctorClinicService.getDoctorInClinic(license1, id1))
+        Mockito.when(doctorClinicService.getDoctorClinic(license1, id1))
                         .thenReturn(dc);
         Mockito.when(userService.findUserByEmail(Mockito.eq(email2)))
                 .thenReturn(user2);

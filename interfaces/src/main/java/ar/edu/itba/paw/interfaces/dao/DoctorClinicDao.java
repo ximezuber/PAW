@@ -9,15 +9,9 @@ public interface DoctorClinicDao {
 
         long deleteDoctorClinic(String license, int clinicid);
 
-        List<DoctorClinic> getDoctorClinics();
+        List<DoctorClinic> getDoctorsSubscribedClinics(Doctor doctor);
 
-        List<DoctorClinic> getDoctorClinicsForDoctor(Doctor doctor);
-
-        List<DoctorClinic> getDoctorsInClinic(int clinic);
-
-        DoctorClinic getDoctorInClinic(String doctor, int clinic);
-
-        List<DoctorClinic> getClinicsWithDoctor(String doctor);
+        DoctorClinic getDoctorClinic(String doctor, int clinic);
 
         List<DoctorClinic> getFilteredDoctors(Location location, Specialty specialty,
                                               String firstName,String lastName,Prepaid prepaid,int consultPrice);

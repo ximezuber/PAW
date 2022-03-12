@@ -2,19 +2,16 @@ package ar.edu.itba.paw.service;
 
 import ar.edu.itba.paw.interfaces.dao.DoctorDao;
 import ar.edu.itba.paw.interfaces.service.DoctorClinicService;
-import ar.edu.itba.paw.interfaces.service.DoctorService;
 import ar.edu.itba.paw.interfaces.service.UserService;
 import ar.edu.itba.paw.model.*;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.jmx.export.annotation.ManagedOperation;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -108,30 +105,5 @@ public class DoctorServiceImplTest {
         //Execute
         doctorService.createDoctor(specialty, license, phone, firstName,
                 lastName, password, email);
-    }
-
-        @Test
-    public void testGetDoctorsWithAvailability(){
-        //Set Up
-        List<Schedule> s = new ArrayList<>();
-        s.add(new Schedule(day, hour, doctorClinic));
-        List<Doctor> docs = new ArrayList<>();
-        docs.add(doctor);
-        Mockito.when(mockDao.getDoctors())
-                .thenReturn(docs);
-        doctorClinic.setSchedule(s);
-        List<DoctorClinic> doctorClinics = new ArrayList<>();
-        doctorClinics.add(doctorClinic);
-        Mockito.when(doctorClinicService.getDoctorClinicsForDoctor(doctor))
-                .thenReturn(doctorClinics);
-
-        //Execute
-        List<Doctor> doctors = doctorService.getDoctorsWithAvailability();
-
-        //Assert
-        Assert.assertNotNull(doctors);
-        Assert.assertFalse(doctors.isEmpty());
-        Assert.assertEquals(doctor.getLicense(), doctors.get(0).getLicense());
-
     }
 }

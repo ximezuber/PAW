@@ -1,20 +1,13 @@
 package ar.edu.itba.paw.persistence;
 
 import ar.edu.itba.paw.model.*;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.sql.DataSource;
 
 import java.util.List;
 
@@ -61,30 +54,12 @@ public class DoctorClinicDaoImplTest {
     }
 
     @Test
-    public void testGetDoctorClinics(){
-        List<DoctorClinic> doctorClinics = doctorClinicDao.getDoctorClinics();
-
-        assertNotNull(doctorClinics);
-        assertEquals(2, doctorClinics.size());
-    }
-
-    @Test
     public void testGetDoctorClinicsForDoctor(){
-        List<DoctorClinic> doctorClinics = doctorClinicDao.getDoctorClinicsForDoctor(doc);
+        List<DoctorClinic> doctorClinics = doctorClinicDao.getDoctorsSubscribedClinics(doc);
 
         assertNotNull(doctorClinics);
         assertEquals(1, doctorClinics.size());
         assertEquals(doc.getLicense(), doctorClinics.get(0).getDoctor().getLicense());
-        assertEquals(clinic.getId(), doctorClinics.get(0).getClinic().getId());
-
-    }
-
-    @Test
-    public void testGetDoctorsInClinic(){
-        List<DoctorClinic> doctorClinics = doctorClinicDao.getDoctorsInClinic(clinic.getId());
-
-        assertNotNull(doctorClinics);
-        assertEquals(2, doctorClinics.size());
         assertEquals(clinic.getId(), doctorClinics.get(0).getClinic().getId());
 
     }

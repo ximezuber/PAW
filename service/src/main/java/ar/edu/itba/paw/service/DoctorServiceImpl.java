@@ -49,11 +49,6 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public List<Doctor> getDoctorByName(String firstName, String lastName) {
-        return doctorDao.getDoctorByName(firstName, lastName);
-    }
-
-    @Override
     public List<Doctor> getDoctorBySpecialty(Specialty specialty) {
         return doctorDao.getDoctorBySpecialty(specialty);
     }
@@ -66,23 +61,6 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public Doctor getDoctorByEmail(String email) {
         return doctorDao.getDoctorByEmail(email);
-    }
-
-    @Override
-    public List<Doctor> getDoctorsWithAvailability() {
-
-        List<Doctor> doctorsWithAvailability = new ArrayList<>();
-        List<Doctor> doctors = getDoctors();
-
-        for (Doctor doc : doctors) {
-            List<DoctorClinic> doctorsClinics = doctorClinicService.getDoctorClinicsForDoctor(doc);
-            for (DoctorClinic dc : doctorsClinics) {
-                if ((dc.getSchedule() != null) && !(doctorsWithAvailability.contains(doc))) {
-                    doctorsWithAvailability.add(doc);
-                }
-            }
-        }
-        return doctorsWithAvailability;
     }
 
     @Override
@@ -114,19 +92,6 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public void updateDoctorProfile(
             String email, String newPassword, String firstName, String lastName, // updates user fields
-            String phoneNumber, String specialty, // updates doctor fields
-            MultipartFile file) { // updates image field
-
-        userService.updateUser(email, newPassword, firstName, lastName);
-        Doctor doctor = getDoctorByEmail(email);
-        updateDoctor(doctor.getLicense(), phoneNumber, specialty);
-        imageService.updateProfileImage(file, doctor);
-    }
-
-    @Transactional
-    @Override
-    public void updateDoctorProfile(
-            String email, String newPassword, String firstName, String lastName, // updates user fields
             String phoneNumber, String specialty) { // updates image field
 
         userService.updateUser(email, newPassword, firstName, lastName);
@@ -138,7 +103,7 @@ public class DoctorServiceImpl implements DoctorService {
     public List<String> getFilteredLicenses(Location location, Specialty specialty,
                                                      String firstName, String lastName,
                                                      Prepaid prepaid, int consultPrice, boolean includeUnavailable) {
-
+        // Todo: see a better way of doing this
         List<String> licenses = new ArrayList<>();
         List<DoctorClinic> doctorClinics = doctorClinicService.getFilteredDoctorClinics(location, specialty,
                 firstName, lastName, prepaid, consultPrice);
@@ -154,18 +119,6 @@ public class DoctorServiceImpl implements DoctorService {
             }
         }
 
-        return licenses;
-    }
-
-    @Override
-    public List<String> getAvailableDoctorsLicenses() {
-        List<String> licenses = new ArrayList<>();
-        List<DoctorClinic> doctorClinics = doctorClinicService.getDoctorClinics();
-        for (DoctorClinic dc : doctorClinics) {
-            if ((!dc.getSchedule().isEmpty()) && !(licenses.contains(dc.getDoctor().getLicense()))) {
-                licenses.add(dc.getDoctor().getLicense());
-            }
-        }
         return licenses;
     }
 

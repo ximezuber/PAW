@@ -44,12 +44,11 @@ public class ScheduleServiceImplTest {
     @Test
     public void testCreate() throws ConflictException {
         // Set up
-        Mockito.when(doctorClinicService.getDoctorClinicFromDoctorAndClinic(Mockito.eq(doc), Mockito.eq(clinic)))
+        Mockito.when(doctorClinicService.getDoctorClinic(Mockito.eq(doc.getLicense()),
+                        Mockito.eq(clinic.getId())))
                 .thenReturn(dc);
         Mockito.when(doctorService.getDoctorByEmail(Mockito.eq(doc.getEmail())))
                 .thenReturn(doc);
-        Mockito.when(clinicService.getClinicById(Mockito.eq(clinic.getId())))
-                .thenReturn(clinic);
         Mockito.when(scheduleDao.doctorHasSchedule(Mockito.eq(doc), Mockito.eq(day), Mockito.eq(time)))
                 .thenReturn(false);
         Mockito.when(scheduleDao.createSchedule(Mockito.eq(day), Mockito.eq(time), Mockito.eq(dc)))
@@ -68,12 +67,11 @@ public class ScheduleServiceImplTest {
     @Test(expected = ConflictException.class)
     public void testCreateExists() throws ConflictException {
         // Set up
-        Mockito.when(doctorClinicService.getDoctorClinicFromDoctorAndClinic(Mockito.eq(doc), Mockito.eq(clinic)))
+        Mockito.when(doctorClinicService.getDoctorClinic(Mockito.eq(doc.getLicense()),
+                        Mockito.eq(clinic.getId())))
                 .thenReturn(dc);
         Mockito.when(doctorService.getDoctorByEmail(Mockito.eq(doc.getEmail())))
                 .thenReturn(doc);
-        Mockito.when(clinicService.getClinicById(Mockito.eq(clinic.getId())))
-                .thenReturn(clinic);
         Mockito.when(scheduleDao.doctorHasSchedule(Mockito.eq(doc), Mockito.eq(day), Mockito.eq(time)))
                 .thenReturn(true);
 

@@ -20,46 +20,23 @@ public class DoctorClinicDaoImpl implements DoctorClinicDao {
     private static final int MAX_DOCTORS_CLINICS_PER_PAGE = 6;
 
     @Override
-    public DoctorClinic createDoctorClinic(Doctor doctor, Clinic clinic, int consultPrice){
-        DoctorClinic doctorClinic = new DoctorClinic(doctor,clinic,consultPrice);
+    public DoctorClinic createDoctorClinic(Doctor doctor, Clinic clinic, int consultPrice) {
+        DoctorClinic doctorClinic = new DoctorClinic(doctor, clinic, consultPrice);
         entityManager.persist(doctorClinic);
         return doctorClinic;
     }
 
     @Override
-    public List<DoctorClinic> getDoctorClinics(){
-        TypedQuery<DoctorClinic> query = entityManager.createQuery("from DoctorClinic as dc",DoctorClinic.class);
-        List<DoctorClinic> list = query.getResultList();
-        return list;
-    }
-
-    @Override
-    public List<DoctorClinic> getDoctorClinicsForDoctor(Doctor doctor) {
+    public List<DoctorClinic> getDoctorsSubscribedClinics(Doctor doctor) {
         TypedQuery<DoctorClinic> query = entityManager.createQuery("from DoctorClinic as dc "  +
-                                         " where dc.doctor.license = :doctorLicense",DoctorClinic.class);
-        query.setParameter("doctorLicense",doctor.getLicense());
-        List<DoctorClinic> list = query.getResultList();
-        return list;
+                                         " where dc.doctor.license = :doctorLicense", DoctorClinic.class);
+        query.setParameter("doctorLicense", doctor.getLicense());
+        return query.getResultList();
     }
 
     @Override
-    public List<DoctorClinic> getDoctorsInClinic(int clinic){
-        TypedQuery<DoctorClinic> query = entityManager.createQuery("from DoctorClinic as dc"  +
-                " where dc.clinic.id = :id", DoctorClinic.class);
-        query.setParameter("id",clinic);
-        List<DoctorClinic> list = query.getResultList();
-        return list;
-    }
-
-    @Override
-    public DoctorClinic getDoctorInClinic(String license, int clinic){
+    public DoctorClinic getDoctorClinic(String license, int clinic){
         return entityManager.find(DoctorClinic.class, new DoctorClinicKey(license,clinic));
-    }
-
-    @Override
-    public List<DoctorClinic> getClinicsWithDoctor(String doctor){
-        Doctor d = entityManager.find(Doctor.class,doctor);
-        return getDoctorClinicsForDoctor(d);
     }
 
     @Override
@@ -67,34 +44,35 @@ public class DoctorClinicDaoImpl implements DoctorClinicDao {
                                                  final String firstName, final String lastName, final Prepaid prepaid,
                                                  final int consultPrice){
         DoctorQueryBuilder builder = new DoctorQueryBuilder();
-        builder.buildQuery(location.getLocationName(), specialty.getSpecialtyName(), firstName, lastName, prepaid.getName(), consultPrice);
-        TypedQuery<DoctorClinic> query = entityManager.createQuery(builder.getQuery(),DoctorClinic.class);
-        if(!location.getLocationName().equals("")){
-            query.setParameter("location",location.getLocationName());
+        builder.buildQuery(location.getLocationName(), specialty.getSpecialtyName(), firstName, lastName,
+                prepaid.getName(), consultPrice);
+        TypedQuery<DoctorClinic> query = entityManager.createQuery(builder.getQuery(), DoctorClinic.class);
+        if(!location.getLocationName().equals("")) {
+            query.setParameter("location", location.getLocationName());
         }
-        if(!specialty.getSpecialtyName().equals("")){
-            query.setParameter("specialty",specialty.getSpecialtyName());
+        if(!specialty.getSpecialtyName().equals("")) {
+            query.setParameter("specialty", specialty.getSpecialtyName());
         }
-        if(!firstName.equals("")){
-            query.setParameter("firstName",firstName);
+        if(!firstName.equals("")) {
+            query.setParameter("firstName", firstName);
         }
-        if(!lastName.equals("")){
-            query.setParameter("lastName",lastName);
+        if(!lastName.equals("")) {
+            query.setParameter("lastName", lastName);
         }
-        if(!prepaid.getName().equals("")){
-            query.setParameter("prepaid",prepaid.getName());
+        if(!prepaid.getName().equals("")) {
+            query.setParameter("prepaid", prepaid.getName());
         }
-        else if( consultPrice > 0){
+        else if( consultPrice > 0) {
             query.setParameter("consultPrice",consultPrice);
         }
-        List<DoctorClinic> list = query.getResultList();
-        return list;
+        return query.getResultList();
     }
 
     @Override
     public List<DoctorClinic> getDoctorClinicPaginatedByList(Doctor doctor, int page) {
         TypedQuery<DoctorClinic> query = entityManager.createQuery("from DoctorClinic as dc "  +
-                " where dc.doctor.license = :doctorLicense",DoctorClinic.class);
+                " where dc.doctor.license = :doctorLicense ORDER BY dc.doctor.user.lastName, dc.doctor.user.firstName",
+                DoctorClinic.class);
         query.setParameter("doctorLicense", doctor.getLicense());
         return query
                 .setFirstResult(page * MAX_DOCTORS_CLINICS_PER_PAGE)
@@ -119,8 +97,8 @@ public class DoctorClinicDaoImpl implements DoctorClinicDao {
 
     @Override
    public long deleteDoctorClinic(String license, int clinicid) {
-        Query query = entityManager.createQuery("delete from DoctorClinic as docCli where docCli.doctor.license = :license" +
-                " and docCli.clinic.id = :id");
+        Query query = entityManager.createQuery("delete from DoctorClinic as docCli where " +
+                "docCli.doctor.license = :license and docCli.clinic.id = :id");
         query.setParameter("license",license);
         query.setParameter("id",clinicid);
         return query.executeUpdate();

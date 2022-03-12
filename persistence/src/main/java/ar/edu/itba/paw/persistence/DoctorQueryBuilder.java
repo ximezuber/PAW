@@ -4,7 +4,7 @@ public class DoctorQueryBuilder {
 
     private String query;
 
-    public void buildQuery(String location, String specialty, String firstName, String lastName, String prepaid, int consultPrice){
+    public void buildQuery(String location, String specialty, String firstName, String lastName, String prepaid, int consultPrice) {
         StringBuilder query = new StringBuilder("select doctorCli from DoctorClinic as doctorCli inner join doctorCli.clinic.prepaids as p where ");
         if(!(location.equals(""))){
             query.append("doctorCli.clinic.location.name = :location and ");
