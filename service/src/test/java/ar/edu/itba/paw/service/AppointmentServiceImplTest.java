@@ -182,8 +182,7 @@ public class AppointmentServiceImplTest {
     public void testCancelAppPatient() throws EntityNotFoundException, RequestEntityNotFoundException {
         // Set up
         Appointment app = new Appointment(date, dc, user2);
-
-        Mockito.when(appointmentService.hasAppointment(Mockito.any(DoctorClinic.class), Mockito.any()))
+        Mockito.when(appointmentDao.hasAppointment(Mockito.any(DoctorClinic.class), Mockito.any()))
                 .thenReturn(app);
 
         // Execute
@@ -195,7 +194,7 @@ public class AppointmentServiceImplTest {
         // Set up
         Appointment app = new Appointment(date, dc, user2);
 
-        Mockito.when(appointmentService.hasAppointment(Mockito.any(DoctorClinic.class), Mockito.any()))
+        Mockito.when(appointmentDao.hasAppointment(Mockito.any(DoctorClinic.class), Mockito.any()))
                 .thenReturn(app);
 
         // Execute
@@ -207,7 +206,7 @@ public class AppointmentServiceImplTest {
         // Set up
         Appointment app = new Appointment(date, dc, user2);
 
-        Mockito.when(appointmentService.hasAppointment(Mockito.any(DoctorClinic.class), Mockito.any()))
+        Mockito.when(appointmentDao.hasAppointment(Mockito.any(DoctorClinic.class), Mockito.any()))
                 .thenReturn(null);
         Mockito.when(userService.isDoctor(email1)).thenReturn(true);
 
@@ -222,13 +221,11 @@ public class AppointmentServiceImplTest {
         Appointment app = new Appointment(date, dc, user2);
         appList.add(app);
 
-        Mockito.when(appointmentDao.getAllDoctorsAppointments(doc))
+        Mockito.when(appointmentDao.getDoctorsAppointments(dc))
                 .thenReturn(appList);
-        Mockito.when(doctorService.getDoctorByEmail(email1))
-                .thenReturn(doc);
 
         // Execute
-        List<Appointment> result = appointmentService.getUserAppointments(user);
+        List<Appointment> result = appointmentService.getDoctorsAppointments(dc);
 
         //Assert
         List<Appointment> filtered = result.stream()
@@ -248,7 +245,7 @@ public class AppointmentServiceImplTest {
                 .thenReturn(appList);
 
         // Execute
-        List<Appointment> result = appointmentService.getUserAppointments(user2);
+        List<Appointment> result = appointmentService.getPatientsAppointments(user2);
 
         //Assert
         List<Appointment> filtered = result.stream()

@@ -74,7 +74,8 @@ public class ScheduleServiceImpl implements ScheduleService {
             if(doctorHasSchedule(doctorClinic.getDoctor(), day, hour)) {
                 if(doctorHasScheduleInClinic(doctorClinic, day, hour)) {
                     scheduleDao.deleteSchedule(hour, day, doctorClinic);
-                    appointmentService.cancelAllAppointmentsOnSchedule(doctorClinic, day, hour);
+                    // Todo: Handle DB not being able to delete appointments?
+                    int result = appointmentService.cancelAllAppointmentsOnSchedule(doctorClinic, day, hour);
                 } else {
                     throw new EntityNotFoundException("schedule-clinic");
                 }

@@ -14,7 +14,7 @@ public class AdminDaoImpl implements AdminDao {
 
     @Override
     public Admin getAdmin(String email){
-        return entityManager.find(Admin.class,email);
+        return entityManager.find(Admin.class, email);
     }
 
     @Override

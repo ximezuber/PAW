@@ -16,23 +16,9 @@ public interface AppointmentDao {
 
     List<Appointment> getPatientsAppointments(User patient, int clinicId);
 
-    void cancelAppointment(DoctorClinic doctorClinic, User patient, LocalDateTime date);
-
-    Appointment hasAppointment(DoctorClinic doctorClinic, LocalDateTime date);
-
     List<Appointment> getAllDoctorsAppointments(Doctor doctor);
 
-    boolean hasAppointment(String doctorLicense,String patientEmail, LocalDateTime date);
-
-    boolean hasAppointment(Doctor doctor, LocalDateTime date);
-
-    boolean hasAppointment(User patient, LocalDateTime date);
-
-    List<Appointment> getAllDocAppointmentsOnSchedule(DoctorClinic doctor, int day, int hour);
-
     List<Appointment> getDoctorAppointmentsWithinWeek(Doctor doctor, LocalDate beginning, LocalDate end);
-
-    void cancelAllAppointmentsOnSchedule(DoctorClinic doctorClinic, int day, int hour);
 
     List<Appointment> getPaginatedAppointments(int page, Doctor doctor);
 
@@ -41,5 +27,17 @@ public interface AppointmentDao {
     int getMaxAvailablePage(Patient patient);
 
     int getMaxAvailablePage(Doctor doctor);
+
+    int cancelAppointment(DoctorClinic doctorClinic, User patient, LocalDateTime date);
+
+    int cancelAllAppointmentsOnSchedule(DoctorClinic doctorClinic, int day, int hour);
+
+    Appointment hasAppointment(DoctorClinic doctorClinic, LocalDateTime date);
+
+    boolean hasAppointment(String doctorLicense,String patientEmail, LocalDateTime date);
+
+    boolean hasAppointment(Doctor doctor, LocalDateTime date);
+
+    boolean hasAppointment(User patient, LocalDateTime date);
 
 }
