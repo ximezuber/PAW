@@ -55,15 +55,6 @@ public class ClinicDaoImplTest {
 //    }
 
     @Test
-    public void testGetClinicByName(){
-        final Clinic clinic = clinicDao.getClinicByName(name);
-
-        assertNotNull(clinic);
-        assertEquals(name, clinic.getName());
-
-    }
-
-    @Test
     public void testGetClinicById(){
         final Clinic clinic = clinicDao.getClinicById(id);
 

@@ -8,8 +8,6 @@ import java.util.List;
 public interface ClinicDao extends PaginationDao<Clinic> {
     Clinic createClinic(String name, String address, Location location);
 
-    Clinic getClinicByName(String clinicName);
-
     List<Clinic> getClinics();
 
     Clinic getClinicById(int id);

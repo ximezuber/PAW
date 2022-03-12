@@ -31,15 +31,6 @@ public class ClinicDaoImpl implements ClinicDao {
     }
 
     @Override
-    public Clinic getClinicByName(String clinicName) {
-        TypedQuery<Clinic> query = entityManager.createQuery("from Clinic as clinic where clinic.name = :name",
-                Clinic.class);
-        query.setParameter("name", clinicName);
-        List<Clinic> list = query.getResultList();
-        return list.isEmpty() ? null : list.get(0);
-    }
-
-    @Override
     public List<Clinic> getClinics() {
         TypedQuery<Clinic> query = entityManager.createQuery("from Clinic as clinic ORDER BY " +
                         "clinic.name, clinic.location.name, clinic.address", Clinic.class);
