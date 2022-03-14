@@ -97,7 +97,8 @@ public class DoctorClinicServiceImpl implements DoctorClinicService {
     @Override
     public int maxAvailableFilteredDoctorClinicPage(Location location, Specialty specialty, String firstName,
                                                     String lastName, Prepaid prepaid, int consultPrice) {
-        return 0;
+        return doctorClinicDao.maxAvailableFilteredDoctorClinicPage(location, specialty, firstName, lastName,
+                prepaid, consultPrice);
     }
 
     @Override
