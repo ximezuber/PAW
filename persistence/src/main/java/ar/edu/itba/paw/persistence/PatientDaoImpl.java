@@ -20,7 +20,6 @@ public class PatientDaoImpl implements PatientDao {
 
     @Override
     public Patient create(String id, String prepaid, String prepaidNumber, User user) {
-
         Patient patient = new Patient(id, prepaid, prepaidNumber, user);
         entityManager.persist(patient);
         return patient;
@@ -33,6 +32,7 @@ public class PatientDaoImpl implements PatientDao {
 
     @Override
     public void updatePatient(String email, Map<String, String> args) {
+        // TODO: should this be done in one query?
         Query query;
         if (args.containsKey("prepaid")) {
             query = entityManager.createQuery("update Patient as patient set patient.prepaid = :prepaid where patient.user.email = :email");
@@ -50,20 +50,20 @@ public class PatientDaoImpl implements PatientDao {
 
     @Override
     public List<Patient> getPatientsByPrepaid(String prepaid) {
-        final TypedQuery<Patient> query = entityManager.createQuery("from Patient as pat where pat.prepaid= :prepaid",Patient.class);
+        final TypedQuery<Patient> query = entityManager.createQuery("from Patient as pat where pat.prepaid= :prepaid",
+                Patient.class);
 
-        query.setParameter("prepaid",prepaid);
-        final List<Patient> list = query.getResultList();
-        return list;
+        query.setParameter("prepaid", prepaid);
+        return query.getResultList();
     }
 
     @Override
     public List<Patient> getPatientsById(String id) {
-        final TypedQuery<Patient> query = entityManager.createQuery("from Patient as pat where pat.id= :id",Patient.class);
+        final TypedQuery<Patient> query = entityManager.createQuery("from Patient as pat where pat.id= :id",
+                Patient.class);
 
-        query.setParameter("id",id);
-        final List<Patient> list = query.getResultList();
-        return list;
+        query.setParameter("id", id);
+        return query.getResultList();
     }
 
 }

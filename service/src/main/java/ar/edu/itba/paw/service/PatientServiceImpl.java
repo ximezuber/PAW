@@ -54,54 +54,21 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    public List<Doctor> getPatientFavoriteDoctors(Patient patient) {
-        List<Favorite> list = favoriteService.getPatientsFavorite(patient);
-        List<Doctor> doctors = new ArrayList<>();
-        for(Favorite fav : list){
-            doctors.add(fav.getDoctor());
-        }
-        return doctors;
+    public List<Patient> getPatientsById(String id){
+        return patientDao.getPatientsById(id);
     }
 
     @Override
-    public void addFavorite(String patientEmail, String license) throws FavouriteExistsException,
-            EntityNotFoundException {
-        Doctor doctor = doctorService.getDoctorByLicense(license);
-        Patient patient = getPatientByEmail(patientEmail);
-        if (doctor == null) throw new EntityNotFoundException("doctor");
-        if (patient == null) throw new EntityNotFoundException("patient");
-        if (!favoriteService.isFavorite(doctor, patient)){
-            favoriteService.create(doctor,patient);
-        } else {
-            throw new FavouriteExistsException();
-        }
+    public List<Patient> getPatientsByPrepaid(String prepaid) {
+        return patientDao.getPatientsByPrepaid(prepaid);
     }
 
-    @Override
-    public void setAppointments(Patient patient) {
-        User user = userService.findUserByEmail(patient.getEmail());
-        List<Appointment> appointments = appointmentService.getPatientsAppointments(user);
-        patient.setAppointments(appointments);
-    }
-
-    @Override
-    public void deleteFavorite(String patientEmail, String license) throws EntityNotFoundException {
-        Doctor doctor = doctorService.getDoctorByLicense(license);
-        Patient patient = getPatientByEmail(patientEmail);
-        if (doctor == null) throw new EntityNotFoundException("doctor");
-        if (patient == null) throw new EntityNotFoundException("patient");
-
-        if(favoriteService.isFavorite(doctor, patient)){
-            favoriteService.deleteFavorite(doctor,patient);
-        } else {
-            throw new EntityNotFoundException("favorite");
-        }
-    }
-
-    @Override
     @Transactional
-    public void deletePatient(String email) {
-        userService.deleteUser(email);
+    @Override
+    public void updatePatientProfile(String email, String newPassword, String firstName,
+                                     String lastName, String prepaid, String prepaidNumber) {
+        userService.updateUser(email, newPassword, firstName, lastName);
+        updatePatient(email, prepaid, prepaidNumber);
     }
 
     @Transactional
@@ -122,21 +89,38 @@ public class PatientServiceImpl implements PatientService {
         patientDao.updatePatient(email,args);
     }
 
+    @Override
     @Transactional
+    public void deletePatient(String email) {
+        userService.deleteUser(email);
+    }
+
+
     @Override
-    public void updatePatientProfile(String email, String newPassword, String firstName, String lastName, String prepaid, String prepaidNumber) {
-        userService.updateUser(email, newPassword, firstName, lastName);
-        updatePatient(email, prepaid, prepaidNumber);
+    public void addFavorite(String patientEmail, String license) throws FavouriteExistsException,
+            EntityNotFoundException {
+        Doctor doctor = doctorService.getDoctorByLicense(license);
+        Patient patient = getPatientByEmail(patientEmail);
+        if (doctor == null) throw new EntityNotFoundException("doctor");
+        if (patient == null) throw new EntityNotFoundException("patient");
+        if (!favoriteService.isFavorite(doctor, patient)){
+            favoriteService.create(doctor,patient);
+        } else {
+            throw new FavouriteExistsException();
+        }
     }
 
     @Override
-    public List<Patient> getPatientsByPrepaid(String prepaid) {
-        return patientDao.getPatientsByPrepaid(prepaid);
-    }
+    public void deleteFavorite(String patientEmail, String license) throws EntityNotFoundException {
+        Doctor doctor = doctorService.getDoctorByLicense(license);
+        Patient patient = getPatientByEmail(patientEmail);
+        if (doctor == null) throw new EntityNotFoundException("doctor");
+        if (patient == null) throw new EntityNotFoundException("patient");
 
-    @Override
-    public List<Patient> getPatientsById(String id){
-        return patientDao.getPatientsById(id);
+        if(favoriteService.isFavorite(doctor, patient)){
+            favoriteService.deleteFavorite(doctor,patient);
+        } else {
+            throw new EntityNotFoundException("favorite");
+        }
     }
-
 }
