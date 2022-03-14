@@ -14,7 +14,5 @@ public interface LocationService extends PaginationService<Location> {
 
     Location getLocationByName(String locationName);
 
-    void updateLocation(String oldName, String name);
-
     long deleteLocation(String name) throws EntityNotFoundException, EntityDependencyException;
 }

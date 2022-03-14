@@ -58,13 +58,4 @@ public class LocationDaoImpl implements LocationDao {
         query.setParameter("name",name);
         return query.executeUpdate();
     }
-
-    @Override
-    public void updateLocation(String oldName, String name) {
-        final Query query = entityManager.createQuery("update Location as loc set loc.name = :newName where loc.name = :oldName");
-        query.setParameter("newName",name);
-        query.setParameter("oldName", oldName);
-        query.executeUpdate();
-
-    }
 }

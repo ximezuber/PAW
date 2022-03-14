@@ -55,12 +55,6 @@ public class LocationServiceImpl implements LocationService {
 
     @Transactional
     @Override
-    public void updateLocation(String oldName, String name) {
-        locationDao.updateLocation(oldName, name);
-    }
-
-    @Transactional
-    @Override
     public long deleteLocation(String name) throws EntityNotFoundException, EntityDependencyException {
         Location location = getLocationByName(name);
         if (location == null) throw new EntityNotFoundException("location");
