@@ -33,8 +33,7 @@ public class FavoriteDaoImpl implements FavoriteDao {
                 "where fav.favoriteKey.patient = :email", Favorite.class);
         query.setParameter("email", patient.getEmail());
 
-        final List<Favorite> list = query.getResultList();
-        return list;
+        return query.getResultList();
     }
 
     @Override
@@ -56,16 +55,6 @@ public class FavoriteDaoImpl implements FavoriteDao {
 
         query.setParameter("license", doctor.getLicense());
         query.setParameter("email", patient.getEmail());
-        query.executeUpdate();
-    }
-
-    @Override
-    public void deleteFavorite(String doctorLicense, String patientEmail) {
-        final Query query = entityManager.createQuery("delete from Favorite as fav " +
-                "where fav.favoriteKey.doctor = :license and fav.favoriteKey.patient = :email");
-
-        query.setParameter("license", doctorLicense);
-        query.setParameter("email", patientEmail);
         query.executeUpdate();
     }
 

@@ -40,12 +40,6 @@ public class FavoriteServiceImpl implements FavoriteService {
         favoriteDao.deleteFavorite(doctor, patient);
     }
 
-    @Transactional
-    @Override
-    public void deleteFavorite(String doctor, String patient) {
-        favoriteDao.deleteFavorite(doctor, patient);
-    }
-
     @Override
     public List getPaginatedObjects(int page, Patient patient) {
         if(page < 0) {
