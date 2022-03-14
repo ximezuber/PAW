@@ -28,12 +28,13 @@ public class PrepaidDaoImpl implements PrepaidDao {
 
     @Override
     public Prepaid getPrepaidByName(String prepaidName){
-        return entityManager.find(Prepaid.class,prepaidName);
+        return entityManager.find(Prepaid.class, prepaidName);
     }
 
     @Override
     public List<Prepaid> getPrepaids(){
-        TypedQuery<Prepaid> query = entityManager.createQuery("from Prepaid as prepaid order by prepaid.name",Prepaid.class);
+        TypedQuery<Prepaid> query = entityManager.createQuery("from Prepaid as prepaid order by prepaid.name",
+                Prepaid.class);
         List<Prepaid> list = query.getResultList();
         return list;
     }
@@ -41,21 +42,12 @@ public class PrepaidDaoImpl implements PrepaidDao {
     @Override
     public List<Prepaid> getPaginatedObjects(int page){
 
-        Query nativeQuery = entityManager.createNativeQuery("SELECT name FROM prepaids ORDER BY name");
-        @SuppressWarnings("unchecked")
-        List<String> ids = nativeQuery.setFirstResult(page * MAX_PREPAIDS_PER_PAGE)
+        TypedQuery<Prepaid> query = entityManager.createQuery("from Prepaid as prepaid " +
+                "ORDER BY prepaid.name", Prepaid.class);
+
+        return query.setFirstResult(page * MAX_PREPAIDS_PER_PAGE)
                 .setMaxResults(MAX_PREPAIDS_PER_PAGE)
                 .getResultList();
-
-        if(ids.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        TypedQuery<Prepaid> query = entityManager.createQuery("from Prepaid as prepaid WHERE prepaid.name " +
-                "IN (:filteredPrepaids) ORDER BY prepaid.name", Prepaid.class);
-        query.setParameter("filteredPrepaids", ids);
-
-        return query.getResultList();
     }
 
     @Override
@@ -68,13 +60,5 @@ public class PrepaidDaoImpl implements PrepaidDao {
         Query query = entityManager.createQuery("delete from Prepaid as prepaid where prepaid.name = :name");
         query.setParameter("name",name);
         return query.executeUpdate();
-    }
-
-    @Override
-    public void updatePrepaid(String oldName, String name) {
-        final Query query = entityManager.createQuery("update Prepaid as prepaid set prepaid.name = :newName where prepaid.name = :oldName");
-        query.setParameter("newName",name);
-        query.setParameter("oldName", oldName);
-        query.executeUpdate();
     }
 }

@@ -12,8 +12,6 @@ public interface PrepaidDao extends PaginationDao<Prepaid> {
 
     List<Prepaid> getPrepaids();
 
-    void updatePrepaid(String oldName, String name);
-
     long deletePrepaid(String name);
 
 }

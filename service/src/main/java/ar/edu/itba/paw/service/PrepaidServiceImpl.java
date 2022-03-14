@@ -42,12 +42,6 @@ public class PrepaidServiceImpl implements PrepaidService {
 
     @Transactional
     @Override
-    public void updatePrepaid(String oldName, String name) {
-        prepaidDao.updatePrepaid(oldName, name);
-    }
-
-    @Transactional
-    @Override
     public long deletePrepaid(String name) throws EntityNotFoundException {
         Prepaid prepaid = getPrepaidByName(name);
         if (prepaid == null) throw new EntityNotFoundException("prepaid");

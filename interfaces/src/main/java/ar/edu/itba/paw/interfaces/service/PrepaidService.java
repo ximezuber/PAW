@@ -13,7 +13,5 @@ public interface PrepaidService extends PaginationService<Prepaid> {
 
     Prepaid createPrepaid(String name) throws DuplicateEntityException;
 
-    void updatePrepaid(String oldName, String name);
-
     long deletePrepaid(String name) throws EntityNotFoundException;
 }
