@@ -29,55 +29,38 @@ public class PrepaidToClinicDaoImpl implements PrepaidToClinicDao {
         TypedQuery<PrepaidToClinic> query = entityManager.createQuery("from PrepaidToClinic as p ORDER BY " +
                         "p.prepaid.name, p.clinic.name, clinic.location.name",
                 PrepaidToClinic.class);
-        List<PrepaidToClinic> list = query.getResultList();
-        return list;
+        return query.getResultList();
     }
 
     @Override
     public List<Prepaid> getPrepaidsForClinic(int clinic, int page) {
-        Query nativeQuery = entityManager
-                .createNativeQuery("SELECT prepaid FROM clinicPrepaids where clinicid = ?1");
-        nativeQuery.setParameter(1, clinic);
-        @SuppressWarnings("unchecked")
-        List<String> ids = nativeQuery.setFirstResult(page * MAX_PREPAID_TO_CLINICS_PER_PAGE)
+        TypedQuery<PrepaidToClinic> query = entityManager
+                .createQuery("from clinicPrepaids as cp where cp.clinicid = ?1", PrepaidToClinic.class);
+        query.setParameter(1, clinic);
+        return query.setFirstResult(page * MAX_PREPAID_TO_CLINICS_PER_PAGE)
                 .setMaxResults(MAX_PREPAID_TO_CLINICS_PER_PAGE)
-                .getResultList();
-
-        return ids.stream().map(Prepaid::new).collect(Collectors.toList());
+                .getResultList()
+                .stream().map(PrepaidToClinic::getPrepaid).collect(Collectors.toList());
     }
 
     @Override
     public List<Prepaid> getPrepaidsForClinic(int clinic) {
-        Query nativeQuery = entityManager
-                .createNativeQuery("SELECT prepaid FROM clinicPrepaids where clinicid = ?1");
-        nativeQuery.setParameter(1, clinic);
-        @SuppressWarnings("unchecked")
-        List<String> ids = nativeQuery
-                .getResultList();
-
-        return ids.stream().map(Prepaid::new).collect(Collectors.toList());
+        TypedQuery<PrepaidToClinic> query = entityManager
+                .createQuery("from clinicPrepaids as cp where cp.clinicid = ?1", PrepaidToClinic.class);
+        query.setParameter(1, clinic);
+        return query.getResultList()
+                .stream().map(PrepaidToClinic::getPrepaid).collect(Collectors.toList());
     }
 
     @Override
     public List<PrepaidToClinic> getPaginatedObjects(int page){
-
-        TypedQuery<PrepaidToClinicKey> idsQuery = entityManager
-                .createQuery("select cp.prepaidToClinicKey from PrepaidToClinic as cp", PrepaidToClinicKey.class);
-
-        List<PrepaidToClinicKey> ids = idsQuery.setFirstResult(page * MAX_PREPAID_TO_CLINICS_PER_PAGE)
+        TypedQuery<PrepaidToClinic> query = entityManager.createQuery("from PrepaidToClinic as p " +
+                        "ORDER BY p.prepaid.name, p.clinic.name, clinic.location.name",
+                PrepaidToClinic.class);
+        return query
+                .setFirstResult(page * MAX_PREPAID_TO_CLINICS_PER_PAGE)
                 .setMaxResults(MAX_PREPAID_TO_CLINICS_PER_PAGE)
                 .getResultList();
-
-        if(ids.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        TypedQuery<PrepaidToClinic> query = entityManager.createQuery("from PrepaidToClinic as p where " +
-                        "p.prepaidToClinicKey IN (:filteredPrepaidToClinic) ORDER BY " +
-                        "p.prepaid.name, p.clinic.name, clinic.location.name",
-                PrepaidToClinic.class);
-        query.setParameter("filteredPrepaidToClinic", ids);
-        return query.getResultList();
     }
 
     @Override

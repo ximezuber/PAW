@@ -27,11 +27,6 @@ public class PrepaidToClinicServiceImpl implements PrepaidToClinicService {
     @Autowired
     private ClinicService clinicService;
 
-    @Override
-    public List<PrepaidToClinic> getPrepaidToClinics() {
-        return prepaidToClinicDao.getPrepaidToClinics();
-    }
-
     @Transactional
     @Override
     public PrepaidToClinic addPrepaidToClinic(String prepaidName, int clinicId) throws EntityNotFoundException {

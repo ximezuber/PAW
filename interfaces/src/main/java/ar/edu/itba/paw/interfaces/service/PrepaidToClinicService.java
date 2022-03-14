@@ -7,7 +7,6 @@ import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 import java.util.List;
 
 public interface PrepaidToClinicService extends PaginationService<PrepaidToClinic> {
-    List<PrepaidToClinic> getPrepaidToClinics();
 
     PrepaidToClinic addPrepaidToClinic(String prepaid, int clinic) throws EntityNotFoundException;
 
