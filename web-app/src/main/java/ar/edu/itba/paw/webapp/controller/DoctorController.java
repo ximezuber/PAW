@@ -83,7 +83,6 @@ public class DoctorController {
      * @param firstName
      * @param lastName
      * @param consultPrice
-     * @param includeUnavailable
      * @param prepaid
      * @return list of Doctors
      */
@@ -96,17 +95,24 @@ public class DoctorController {
             @QueryParam("firstName") @DefaultValue("") final String firstName,
             @QueryParam("lastName") @DefaultValue("") final String lastName,
             @QueryParam("consultPrice") @DefaultValue("0") final Integer consultPrice,
-            @QueryParam("includeUnavailables") @DefaultValue("false") final Boolean includeUnavailable,
             @QueryParam("prepaid") @DefaultValue("") final String prepaid,
             @Context Request request) {
 
         page = (page < 0) ? 0 : page;
 
-        List<String> licenses = doctorService.getFilteredLicenses(new Location(location), new Specialty(specialty),
-                firstName, lastName, new Prepaid(prepaid), consultPrice, includeUnavailable);
-        int maxAvailablePage = doctorService.getMaxAvailableDoctorsPage(licenses);
+        List<Doctor> docs = doctorClinicService.getPaginatedFilteredDoctorClinics(new Location(location),
+                new Specialty(specialty), firstName, lastName, new Prepaid(prepaid), consultPrice, page);
+        int maxAvailablePage = doctorClinicService.maxAvailableFilteredDoctorClinicPage(new Location(location),
+                new Specialty(specialty), firstName, lastName, new Prepaid(prepaid), consultPrice);
 
-        return getPaginatedDoctorsResponse(licenses, page, request, maxAvailablePage);
+        List<DoctorDto> doctors = docs
+                .stream().map(d -> DoctorDto.fromDoctor(d, uriInfo)).collect(Collectors.toList());
+
+        return CacheHelper.handleResponse(doctors, doctorCaching, new GenericEntity<List<DoctorDto>>(doctors) {},
+                        "doctors", request)
+                .header("Access-Control-Expose-Headers", "X-max-page")
+                .header("X-max-page", maxAvailablePage)
+                .build();
     }
 
     /**
@@ -331,7 +337,7 @@ public class DoctorController {
         final List<DoctorClinicDto> doctorClinics = doctorClinicService.getPaginatedDoctorsClinics(doctor, page)
                 .stream().map(dc -> DoctorClinicDto.fromDoctorClinic(dc, uriInfo))
                 .collect(Collectors.toList());
-        int max = doctorClinicService.maxAvailablePage();
+        int max = doctorClinicService.maxAvailablePage(doctor);
         return CacheHelper.handleResponse(doctorClinics, doctorClinicCaching,
                 new GenericEntity<List<DoctorClinicDto>>(doctorClinics) {},
                 "doctorsClinics", request)

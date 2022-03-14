@@ -70,17 +70,6 @@ public class DoctorDaoImplTest {
     }
 
     @Test
-    public void testGetDoctorByName(){
-        List<Doctor> doctors = doctorDao.getDoctorByName(docUser2.getFirstName(), docUser2.getLastName());
-
-        assertNotNull(doctors);
-        assertEquals(1, doctors.size());
-        assertEquals(docUser2.getFirstName(), doctors.get(0).getFirstName());
-        assertEquals(docUser2.getLastName(), doctors.get(0).getLastName());
-
-    }
-
-    @Test
     public void testGetDoctorByLicense(){
         Doctor doctor = doctorDao.getDoctorByLicense(license2);
 

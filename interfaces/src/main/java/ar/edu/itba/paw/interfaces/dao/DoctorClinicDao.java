@@ -13,12 +13,23 @@ public interface DoctorClinicDao {
 
         DoctorClinic getDoctorClinic(String doctor, int clinic);
 
-        List<DoctorClinic> getFilteredDoctors(Location location, Specialty specialty,
-                                              String firstName,String lastName,Prepaid prepaid,int consultPrice);
+        List<Doctor> getFilteredDoctorClinics(Location location, Specialty specialty,
+                                                    String firstName, String lastName, Prepaid prepaid,
+                                                    int consultPrice);
+
+        List<Doctor> getFilteredDoctorClinicsPaginated(Location location, Specialty specialty,
+                                                    String firstName, String lastName, Prepaid prepaid,
+                                                    int consultPrice, int page);
+
+
 
         List<DoctorClinic> getDoctorClinicPaginatedByList(Doctor doctor, int page);
 
-        int maxPageAvailable();
+        int maxAvailableFilteredDoctorClinicPage(Location location, Specialty specialty,
+                                                 String firstName, String lastName, Prepaid prepaid,
+                                                 int consultPrice);
+
+        int maxPageAvailable(Doctor doctor);
 
         void editPrice(DoctorClinic dc, int price);
 }

@@ -17,13 +17,18 @@ public interface DoctorClinicService {
 
     DoctorClinic getDoctorClinicWithSchedule(String doctor, int clinic);
 
-    List<DoctorClinic> getFilteredDoctorClinics(Location location, Specialty specialty,
-                    String firstName, String lastName, Prepaid prepaid, int consultPrice);
+    List<Doctor> getPaginatedFilteredDoctorClinics(Location location, Specialty specialty,
+                                                         String firstName, String lastName, Prepaid prepaid,
+                                                         int consultPrice, int page);
 
     List<DoctorClinic> getPaginatedDoctorsClinics(Doctor doctor, int page);
 
     void editPrice(String license, int clinicId, int price) throws EntityNotFoundException;
 
-    int maxAvailablePage();
+    int maxAvailableFilteredDoctorClinicPage(Location location, Specialty specialty,
+                                             String firstName, String lastName, Prepaid prepaid,
+                                             int consultPrice);
+
+    int maxAvailablePage(Doctor doctor);
 
 }

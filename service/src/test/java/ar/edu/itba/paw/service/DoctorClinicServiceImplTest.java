@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 
+import javax.print.Doc;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -141,22 +142,24 @@ public class DoctorClinicServiceImplTest {
     @Test
     public void testGetDoctorByWithConsultPrice(){
         //Set Up
-        List<DoctorClinic> doctors = new ArrayList<>();
-        doctors.add(doctorClinic);
-        Mockito.when(mockDao.getFilteredDoctors(Mockito.eq(location),
+        List<Doctor> doctors = new ArrayList<>();
+        doctors.add(doc);
+        Mockito.when(mockDao.getFilteredDoctorClinicsPaginated(Mockito.eq(location),
                 Mockito.eq(specialty), Mockito.eq(doc.getFirstName()),
-                Mockito.eq(doc.getLastName()), Mockito.eq(prepaid), Mockito.eq(consultPrice)))
+                Mockito.eq(doc.getLastName()), Mockito.eq(prepaid), Mockito.eq(consultPrice),
+                Mockito.eq(0)))
                 .thenReturn(doctors);
 
         //Execute
-        List<DoctorClinic> docs = doctorClinicService.getFilteredDoctorClinics(location,specialty, doc.getFirstName(), doc.getLastName(), prepaid, consultPrice);
+        List<Doctor> docs = doctorClinicService.getPaginatedFilteredDoctorClinics(location,specialty, doc.getFirstName(),
+                doc.getLastName(), prepaid, consultPrice, 0);
 
         //Assert
         Assert.assertNotNull(docs);
         Assert.assertEquals(1, docs.size());
-        Assert.assertEquals(doc.getFirstName(), doctors.get(0).getDoctor().getFirstName());
-        Assert.assertEquals(doc.getLastName(), docs.get(0).getDoctor().getLastName());
-        Assert.assertEquals(doc.getSpecialty().getSpecialtyName(), docs.get(0).getDoctor().getSpecialty().getSpecialtyName());
+        Assert.assertEquals(doc.getFirstName(), doctors.get(0).getFirstName());
+        Assert.assertEquals(doc.getLastName(), docs.get(0).getLastName());
+        Assert.assertEquals(doc.getSpecialty().getSpecialtyName(), docs.get(0).getSpecialty().getSpecialtyName());
 
 
     }
@@ -164,22 +167,24 @@ public class DoctorClinicServiceImplTest {
     @Test
     public void testGetDoctorByWithPrepaid(){
         //Set Up
-        List<DoctorClinic> doctors = new ArrayList<>();
-        doctors.add(doctorClinic);
-        Mockito.when(mockDao.getFilteredDoctors(Mockito.eq(location),
+        List<Doctor> doctors = new ArrayList<>();
+        doctors.add(doc);
+        Mockito.when(mockDao.getFilteredDoctorClinicsPaginated(Mockito.eq(location),
                 Mockito.eq(specialty), Mockito.eq(doc.getFirstName()),
-                Mockito.eq(doc.getLastName()), Mockito.eq(prepaid2), Mockito.eq(consultPrice)))
+                Mockito.eq(doc.getLastName()), Mockito.eq(prepaid2), Mockito.eq(consultPrice),
+                        Mockito.eq(0)))
                 .thenReturn(doctors);
 
         //Execute
-        List<DoctorClinic> docs = doctorClinicService.getFilteredDoctorClinics(location,specialty, doc.getFirstName(), doc.getLastName(), prepaid2, consultPrice);
+        List<Doctor> docs = doctorClinicService.getPaginatedFilteredDoctorClinics(location,specialty, doc.getFirstName(),
+                doc.getLastName(), prepaid2, consultPrice, 0);
 
         //Assert
         Assert.assertNotNull(docs);
         Assert.assertEquals(1, docs.size());
-        Assert.assertEquals(doc.getFirstName(), doctors.get(0).getDoctor().getFirstName());
-        Assert.assertEquals(doc.getLastName(), docs.get(0).getDoctor().getLastName());
-        Assert.assertEquals(doc.getSpecialty().getSpecialtyName(), docs.get(0).getDoctor().getSpecialty().getSpecialtyName());
+        Assert.assertEquals(doc.getFirstName(), doctors.get(0).getFirstName());
+        Assert.assertEquals(doc.getLastName(), docs.get(0).getLastName());
+        Assert.assertEquals(doc.getSpecialty().getSpecialtyName(), docs.get(0).getSpecialty().getSpecialtyName());
     }
 
     @Test

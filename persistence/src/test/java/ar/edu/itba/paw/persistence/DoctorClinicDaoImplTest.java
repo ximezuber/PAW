@@ -9,6 +9,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.print.Doc;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -25,7 +26,7 @@ public class DoctorClinicDaoImplTest {
 
     private  static  final User user3 = new User("docFirstName", "docLastName", "password", "doctor@mail.com");
 
-    private static final Doctor doc = new Doctor( specialty, "1", "1234567890",user3);
+    private static final Doctor doc = new Doctor( specialty, "1", "1234567890", user3);
 
     private static final Clinic clinic = new Clinic(1,"clinic", "address", location);
 
@@ -66,51 +67,53 @@ public class DoctorClinicDaoImplTest {
 
     @Test
     public void testGetFilteredDoctorsByLocation(){
-        List<DoctorClinic> doctorClinics = doctorClinicDao.getFilteredDoctors(location, new Specialty(""), "", "", new Prepaid(""), 0);
+        List<Doctor> doctorClinics = doctorClinicDao.getFilteredDoctorClinics(location, new Specialty(""),
+                "", "", new Prepaid(""), 0);
 
         assertNotNull(doctorClinics);
-        assertEquals(2, doctorClinics.size());
-        assertEquals(location.getLocationName(), doctorClinics.get(0).getClinic().getLocation().getLocationName());
-
+        assertEquals(1, doctorClinics.size());
     }
 
     @Test
     public void testGetFilteredDoctorsBySpecialty(){
-        List<DoctorClinic> doctorClinics = doctorClinicDao.getFilteredDoctors(new Location(""), specialty, "", "", new Prepaid(""), 0);
+        List<Doctor> doctors = doctorClinicDao.getFilteredDoctorClinics(new Location(""), specialty,
+                "", "", new Prepaid(""), 0);
 
-        assertNotNull(doctorClinics);
-        assertEquals(2, doctorClinics.size());
-        assertEquals(specialty.getSpecialtyName(), doctorClinics.get(0).getDoctor().getSpecialty().getSpecialtyName());
+        assertNotNull(doctors);
+        assertEquals(1, doctors.size());
+        assertEquals(specialty.getSpecialtyName(), doctors.get(0).getSpecialty().getSpecialtyName());
 
     }
 
     @Test
     public void testGetFilteredDoctorsByFirstName(){
-        List<DoctorClinic> doctorClinics = doctorClinicDao.getFilteredDoctors(new Location(""), new Specialty(""), doc.getFirstName(), "", new Prepaid(""), 0);
+        List<Doctor> doctors = doctorClinicDao.getFilteredDoctorClinics(new Location(""), new Specialty(""),
+                doc.getFirstName(), "", new Prepaid(""), 0);
 
-        assertNotNull(doctorClinics);
-        assertEquals(1, doctorClinics.size());
-        assertEquals(doc.getFirstName(), doctorClinics.get(0).getDoctor().getFirstName());
+        assertNotNull(doctors);
+        assertEquals(1, doctors.size());
+        assertEquals(doc.getFirstName(), doctors.get(0).getFirstName());
 
     }
 
     @Test
     public void testGetFilteredDoctorsByLastName(){
-        List<DoctorClinic> doctorClinics = doctorClinicDao.getFilteredDoctors(new Location(""), new Specialty(""), "", doc.getLastName(), new Prepaid(""), 0);
+        List<Doctor> doctors = doctorClinicDao.getFilteredDoctorClinics(new Location(""), new Specialty(""),
+                "", doc.getLastName(), new Prepaid(""), 0);
 
-        assertNotNull(doctorClinics);
-        assertEquals(1, doctorClinics.size());
-        assertEquals(doc.getLastName(), doctorClinics.get(0).getDoctor().getLastName());
+        assertNotNull(doctors);
+        assertEquals(1, doctors.size());
+        assertEquals(doc.getLastName(), doctors.get(0).getLastName());
 
     }
 
     @Test
     public void testGetFilteredDoctorsByConsultPrice(){
-        List<DoctorClinic> doctorClinics = doctorClinicDao.getFilteredDoctors(new Location(""), new Specialty(""), "", "", new Prepaid(""), consultPrice);
+        List<Doctor> doctors = doctorClinicDao.getFilteredDoctorClinics(new Location(""), new Specialty(""),
+                "", "", new Prepaid(""), consultPrice);
 
-        assertNotNull(doctorClinics);
-        assertEquals(2, doctorClinics.size());
-        assertTrue(consultPrice >= doctorClinics.get(0).getConsultPrice());
+        assertNotNull(doctors);
+        assertEquals(1, doctors.size());
 
     }
 

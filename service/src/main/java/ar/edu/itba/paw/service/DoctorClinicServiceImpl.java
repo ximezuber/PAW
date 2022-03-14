@@ -73,14 +73,12 @@ public class DoctorClinicServiceImpl implements DoctorClinicService {
     }
 
     @Override
-    public List<DoctorClinic> getFilteredDoctorClinics(Location location, Specialty specialty,
-                                   String firstName, String lastName,
-                                   Prepaid prepaid, int consultPrice) {
+    public List<Doctor> getPaginatedFilteredDoctorClinics(Location location, Specialty specialty,
+                                                                String firstName, String lastName,
+                                                                Prepaid prepaid, int consultPrice, int page) {
 
-        List<DoctorClinic> doctorClinics = doctorClinicDao.getFilteredDoctors(location, specialty, firstName,
-                lastName, prepaid, consultPrice);
-        setSchedule(doctorClinics);
-        return doctorClinics;
+        return doctorClinicDao.getFilteredDoctorClinicsPaginated(location, specialty, firstName,
+                lastName, prepaid, consultPrice, page);
     }
 
     @Override
@@ -97,8 +95,14 @@ public class DoctorClinicServiceImpl implements DoctorClinicService {
     }
 
     @Override
-    public int maxAvailablePage() {
-        return doctorClinicDao.maxPageAvailable();
+    public int maxAvailableFilteredDoctorClinicPage(Location location, Specialty specialty, String firstName,
+                                                    String lastName, Prepaid prepaid, int consultPrice) {
+        return 0;
+    }
+
+    @Override
+    public int maxAvailablePage(Doctor doctor) {
+        return doctorClinicDao.maxPageAvailable(doctor);
     }
 
     private void setSchedule(List<DoctorClinic> list) {

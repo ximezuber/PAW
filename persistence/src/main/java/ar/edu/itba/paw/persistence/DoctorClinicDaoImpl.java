@@ -18,6 +18,7 @@ public class DoctorClinicDaoImpl implements DoctorClinicDao {
     private EntityManager entityManager;
 
     private static final int MAX_DOCTORS_CLINICS_PER_PAGE = 6;
+    private static final int MAX_FILTERED_DOCTORS_CLINICS_PER_PAGE = 9;
 
     @Override
     public DoctorClinic createDoctorClinic(Doctor doctor, Clinic clinic, int consultPrice) {
@@ -40,13 +41,75 @@ public class DoctorClinicDaoImpl implements DoctorClinicDao {
     }
 
     @Override
-    public List<DoctorClinic> getFilteredDoctors(final Location location, final Specialty specialty,
+    public List<Doctor> getFilteredDoctorClinics(Location location, Specialty specialty, String firstName,
+                                                       String lastName, Prepaid prepaid, int consultPrice) {
+        return createQuery(location, specialty, firstName, lastName, prepaid, consultPrice)
+                .getResultList();
+    }
+
+    @Override
+    public List<Doctor> getFilteredDoctorClinicsPaginated(final Location location, final Specialty specialty,
                                                  final String firstName, final String lastName, final Prepaid prepaid,
-                                                 final int consultPrice){
+                                                 final int consultPrice, final int page) {
+        return createQuery(location, specialty, firstName, lastName, prepaid, consultPrice)
+                .setFirstResult(page * MAX_FILTERED_DOCTORS_CLINICS_PER_PAGE)
+                .setMaxResults(MAX_FILTERED_DOCTORS_CLINICS_PER_PAGE)
+                .getResultList();
+    }
+
+    @Override
+    public List<DoctorClinic> getDoctorClinicPaginatedByList(Doctor doctor, int page) {
+        TypedQuery<DoctorClinic> query = entityManager.createQuery("from DoctorClinic as dc "  +
+                " where dc.doctor.license = :doctorLicense ORDER BY dc.doctor.user.lastName, dc.doctor.user.firstName",
+                DoctorClinic.class);
+        query.setParameter("doctorLicense", doctor.getLicense());
+        return query
+                .setFirstResult(page * MAX_DOCTORS_CLINICS_PER_PAGE)
+                .setMaxResults(MAX_DOCTORS_CLINICS_PER_PAGE)
+                .getResultList();
+    }
+
+    @Override
+    public int maxAvailableFilteredDoctorClinicPage(Location location, Specialty specialty,
+                                                    String firstName, String lastName, Prepaid prepaid,
+                                                    int consultPrice) {
+        return (int) (Math.ceil(( ((double) getFilteredDoctorClinics(location, specialty,
+                firstName, lastName, prepaid, consultPrice).size()) /
+                (double) MAX_FILTERED_DOCTORS_CLINICS_PER_PAGE)));
+    }
+
+    @Override
+    public int maxPageAvailable(Doctor doctor) {
+        return (int) (Math.ceil(( ((double) getDoctorsSubscribedClinics(doctor).size()) /
+                (double) MAX_DOCTORS_CLINICS_PER_PAGE)));
+    }
+
+    @Override
+    public void editPrice(DoctorClinic dc, int price) {
+        Query query = entityManager.createQuery("update DoctorClinic dc set dc.consultPrice = :newPrice " +
+                "where dc.clinic.id = :id and dc.doctor.license = :license");
+        query.setParameter("newPrice", price);
+        query.setParameter("id", dc.getClinic().getId());
+        query.setParameter("license", dc.getDoctor().getLicense());
+        query.executeUpdate();
+    }
+
+    @Override
+   public long deleteDoctorClinic(String license, int clinicid) {
+        Query query = entityManager.createQuery("delete from DoctorClinic as docCli where " +
+                "docCli.doctor.license = :license and docCli.clinic.id = :id");
+        query.setParameter("license", license);
+        query.setParameter("id", clinicid);
+        return query.executeUpdate();
+    }
+
+    private TypedQuery<Doctor> createQuery(final Location location, final Specialty specialty,
+                                                 final String firstName, final String lastName, final Prepaid prepaid,
+                                                 final int consultPrice) {
         DoctorQueryBuilder builder = new DoctorQueryBuilder();
         builder.buildQuery(location.getLocationName(), specialty.getSpecialtyName(), firstName, lastName,
                 prepaid.getName(), consultPrice);
-        TypedQuery<DoctorClinic> query = entityManager.createQuery(builder.getQuery(), DoctorClinic.class);
+        TypedQuery<Doctor> query = entityManager.createQuery(builder.getQuery(), Doctor.class);
         if(!location.getLocationName().equals("")) {
             query.setParameter("location", location.getLocationName());
         }
@@ -65,43 +128,7 @@ public class DoctorClinicDaoImpl implements DoctorClinicDao {
         else if( consultPrice > 0) {
             query.setParameter("consultPrice",consultPrice);
         }
-        return query.getResultList();
-    }
-
-    @Override
-    public List<DoctorClinic> getDoctorClinicPaginatedByList(Doctor doctor, int page) {
-        TypedQuery<DoctorClinic> query = entityManager.createQuery("from DoctorClinic as dc "  +
-                " where dc.doctor.license = :doctorLicense ORDER BY dc.doctor.user.lastName, dc.doctor.user.firstName",
-                DoctorClinic.class);
-        query.setParameter("doctorLicense", doctor.getLicense());
-        return query
-                .setFirstResult(page * MAX_DOCTORS_CLINICS_PER_PAGE)
-                .setMaxResults(MAX_DOCTORS_CLINICS_PER_PAGE)
-                .getResultList();
-    }
-
-    @Override
-    public int maxPageAvailable() {
-        return MAX_DOCTORS_CLINICS_PER_PAGE;
-    }
-
-    @Override
-    public void editPrice(DoctorClinic dc, int price) {
-        Query query = entityManager.createQuery("update DoctorClinic dc set dc.consultPrice = :newPrice " +
-                "where dc.clinic.id = :id and dc.doctor.license = :license");
-        query.setParameter("newPrice", price);
-        query.setParameter("id", dc.getClinic().getId());
-        query.setParameter("license", dc.getDoctor().getLicense());
-        query.executeUpdate();
-    }
-
-    @Override
-   public long deleteDoctorClinic(String license, int clinicid) {
-        Query query = entityManager.createQuery("delete from DoctorClinic as docCli where " +
-                "docCli.doctor.license = :license and docCli.clinic.id = :id");
-        query.setParameter("license",license);
-        query.setParameter("id",clinicid);
-        return query.executeUpdate();
+        return query;
     }
 
 }

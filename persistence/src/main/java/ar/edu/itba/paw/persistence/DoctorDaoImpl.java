@@ -24,58 +24,39 @@ public class DoctorDaoImpl implements DoctorDao {
     private static final int MAX_DOCTORS_PER_PAGE_USER = 9;
 
     @Override
-    public Doctor createDoctor(final Specialty specialty, final String license, final String phoneNumber, User user){
+    public Doctor createDoctor(final Specialty specialty, final String license, final String phoneNumber, User user) {
         final Doctor doctor = new Doctor(specialty,license,phoneNumber,user);
         entityManager.persist(doctor);
         return doctor;
     }
 
     @Override
-    public List<Doctor> getDoctors(){
+    public List<Doctor> getDoctors() {
         final TypedQuery<Doctor> query = entityManager.createQuery("from Doctor as doctor order by " +
-                "doctor.user.firstName, doctor.user.lastName, doctor.license",Doctor.class);
+                "doctor.user.firstName, doctor.user.lastName, doctor.license", Doctor.class);
         return query.getResultList();
     }
 
     @Override
-    public List<Doctor> getPaginatedObjects(int page){
+    public List<Doctor> getPaginatedObjects(int page) {
+        final TypedQuery<Doctor> query = entityManager.createQuery("from Doctor as doctor" +
+                "order by " +
+                "doctor.user.firstName, doctor.user.lastName, doctor.license",Doctor.class);
 
-        Query nativeQuery = entityManager.createNativeQuery("SELECT license FROM doctors");
-        @SuppressWarnings("unchecked")
-        List<String> ids = nativeQuery.setFirstResult(page * MAX_DOCTORS_PER_PAGE_ADMIN)
+        return query.setFirstResult(page * MAX_DOCTORS_PER_PAGE_ADMIN)
                 .setMaxResults(MAX_DOCTORS_PER_PAGE_ADMIN)
                 .getResultList();
 
-        if(ids.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        final TypedQuery<Doctor> query = entityManager.createQuery("from Doctor as doctor where doctor.license " +
-                "IN (:filteredLicenses) order by " +
-                "doctor.user.firstName, doctor.user.lastName, doctor.license",Doctor.class);
-        query.setParameter("filteredLicenses", ids);
-
-        return query.getResultList();
     }
 
     @Override
     public int maxAvailablePage() {
-        return (int) (Math.ceil(( ((double)getDoctors().size()) / (double)MAX_DOCTORS_PER_PAGE_ADMIN)));
+        return (int) (Math.ceil((((double)getDoctors().size()) / (double)MAX_DOCTORS_PER_PAGE_ADMIN)));
     }
 
     @Override
     public Doctor getDoctorByLicense(String license) {
         return entityManager.find(Doctor.class, license);
-    }
-
-    @Override
-    public List<Doctor> getDoctorByName(String firstName, String lastName) {
-        final TypedQuery<Doctor> query = entityManager.createQuery("from Doctor as doctor " +
-                "where doctor.user.firstName = :firstName and doctor.user.lastName = :lastName",Doctor.class);
-
-        query.setParameter("firstName",firstName);
-        query.setParameter("lastName", lastName);
-        return query.getResultList();
     }
 
     @Override

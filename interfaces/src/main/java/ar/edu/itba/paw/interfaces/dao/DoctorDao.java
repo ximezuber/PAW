@@ -10,8 +10,6 @@ public interface DoctorDao extends PaginationDao<Doctor> {
 
     List<Doctor> getDoctors();
 
-    List<Doctor> getDoctorByName(String fistName,String lastName);
-
     List<Doctor> getDoctorBySpecialty(Specialty specialty);
 
     Doctor getDoctorByLicense(String license);
