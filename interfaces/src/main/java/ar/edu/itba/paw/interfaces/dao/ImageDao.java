@@ -7,8 +7,6 @@ public interface ImageDao {
 
     void createProfileImage(byte[] image, Doctor doctor);
 
-    long updateProfileImage(byte [] image, Doctor doctor);
-
     void deleteProfileImage(Image profileImage);
 
     Image getProfileImage(String doctor);

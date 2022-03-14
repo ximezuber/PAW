@@ -36,13 +36,4 @@ public class ImageDaoImpl implements ImageDao {
         List<Image> list = query.getResultList();
         return list.isEmpty() ? null : list.get(0);
     }
-
-    @Override
-    public long updateProfileImage(byte[] image, Doctor doctor){
-        Query query = entityManager.createQuery("update Image as im set im.image = :image where im.doctor.license = :doctor");
-        query.setParameter("image",image);
-        query.setParameter("doctor",doctor.getLicense());
-        return query.executeUpdate();
-    }
-
 }
