@@ -522,10 +522,10 @@ public class DoctorController {
     public Response createSchedule(@PathParam("license") final String license,
                                    @PathParam("clinic") final Integer clinic,
                                    ScheduleForm form) throws EntityNotFoundException, ConflictException {
-        DoctorClinic dc = doctorClinicService.getDoctorClinic(license,clinic);
+        DoctorClinic dc = doctorClinicService.getDoctorClinic(license, clinic);
         if(dc == null) throw new EntityNotFoundException("doctor-clinic");
 
-        scheduleService.createSchedule(form.getHour(), form.getDay(), dc.getDoctor().getEmail(),
+        scheduleService.createSchedule(form.getHour(), form.getDay(), dc.getDoctor().getLicense(),
                 dc.getClinic().getId());
         return Response.created(uriInfo.getAbsolutePath()).build();
 

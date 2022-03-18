@@ -34,12 +34,9 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Transactional
     @Override
-    public Schedule createSchedule(int hour, int day, String email, int clinicId) throws ConflictException {
+    public Schedule createSchedule(int hour, int day, String license, int clinicId) throws ConflictException {
 
-        DoctorClinic doctorClinic = doctorClinicService.getDoctorClinic(
-                //Todo: change this to receive license instead of email
-                doctorService.getDoctorByEmail(email).getLicense(),
-                clinicId);
+        DoctorClinic doctorClinic = doctorClinicService.getDoctorClinic(license, clinicId);
 
         if(!doctorHasSchedule(doctorClinic.getDoctor(), day, hour)) {
             return scheduleDao.createSchedule(day, hour, doctorClinic);
@@ -60,7 +57,12 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public boolean doctorHasScheduleInClinic(DoctorClinic doctorClinic, int day, int hour) {
-        return scheduleDao.doctorHasScheduleInClinic(doctorClinic, day, hour);
+        List<Schedule> schedules = this.getDoctorClinicSchedule(doctorClinic);
+        if(schedules != null) {
+            return schedules.contains(new Schedule(day, hour, doctorClinic));
+        }else{
+            return false;
+        }
     }
 
     @Transactional
@@ -75,8 +77,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             if(doctorHasSchedule(doctorClinic.getDoctor(), day, hour)) {
                 if(doctorHasScheduleInClinic(doctorClinic, day, hour)) {
                     scheduleDao.deleteSchedule(hour, day, doctorClinic);
-                    // Todo: Handle DB not being able to delete appointments?
-                    int result = appointmentService.cancelAllAppointmentsOnSchedule(doctorClinic, day, hour);
+                    appointmentService.cancelAllAppointmentsOnSchedule(doctorClinic, day, hour);
                 } else {
                     throw new EntityNotFoundException("schedule-clinic");
                 }
@@ -90,8 +91,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     }
 
-    @Override
-    public boolean doctorHasSchedule(Doctor doctor, int day, int hour) {
+    private boolean doctorHasSchedule(Doctor doctor, int day, int hour) {
         return scheduleDao.doctorHasSchedule(doctor,day,hour);
     }
 }

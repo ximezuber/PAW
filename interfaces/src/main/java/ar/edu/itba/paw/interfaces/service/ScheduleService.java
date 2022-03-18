@@ -10,7 +10,7 @@ import ar.edu.itba.paw.model.exceptions.OutOfRangeException;
 import java.util.List;
 
 public interface ScheduleService {
-    Schedule createSchedule(int hour, int day, String email, int clinicId) throws ConflictException;
+    Schedule createSchedule(int hour, int day, String license, int clinicId) throws ConflictException;
 
     List<Schedule> getDoctorClinicSchedule(DoctorClinic doctorClinic);
 
@@ -19,6 +19,4 @@ public interface ScheduleService {
     boolean doctorHasScheduleInClinic(DoctorClinic doctorClinic, int day, int hour);
 
     void deleteSchedule(int hour, int day, String license, int clinicId) throws OutOfRangeException, EntityNotFoundException;
-
-    boolean doctorHasSchedule(Doctor doctor, int day, int hour);
 }

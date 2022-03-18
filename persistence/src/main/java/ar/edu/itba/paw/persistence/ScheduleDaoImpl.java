@@ -20,7 +20,7 @@ public class ScheduleDaoImpl implements ScheduleDao {
 
     @Override
     public Schedule createSchedule(int day, int hour, DoctorClinic doctorClinic){
-        Schedule schedule = new Schedule(day,hour,doctorClinic);
+        Schedule schedule = new Schedule(day, hour, doctorClinic);
         entityManager.persist(schedule);
         return schedule;
     }
@@ -35,8 +35,7 @@ public class ScheduleDaoImpl implements ScheduleDao {
         query.setParameter("doctor",doctorClinic.getDoctor().getLicense());
         query.setParameter("clinic",doctorClinic.getClinic().getId());
 
-        final List<Schedule> list = query.getResultList();
-        return list;
+        return query.getResultList();
     }
 
     @Override
@@ -48,41 +47,31 @@ public class ScheduleDaoImpl implements ScheduleDao {
 
         query.setParameter("doctor", doctor.getLicense());
 
-        final List<Schedule> list = query.getResultList();
-        return list;
-    }
-
-    @Override
-    public boolean doctorHasScheduleInClinic(DoctorClinic doctorClinic, int day, int hour){
-        List<Schedule> schedules = this.getDoctorClinicSchedule(doctorClinic);
-        if(schedules != null) {
-            return schedules.contains(new Schedule(day, hour, doctorClinic));
-        }else{
-            return false;
-        }
+        return query.getResultList();
     }
 
     @Override
     public boolean doctorHasSchedule(Doctor doctor, int day, int hour) {
         final TypedQuery<Schedule> query = entityManager.createQuery("from Schedule as schedule " +
-                "where schedule.doctorClinic.doctor.license = :doctor and schedule.scheduleKey.day = :day and schedule.scheduleKey.hour = :hour",Schedule.class);
+                "where schedule.doctorClinic.doctor.license = :doctor and schedule.scheduleKey.day = :day" +
+                " and schedule.scheduleKey.hour = :hour", Schedule.class);
 
-        query.setParameter("doctor",doctor.getLicense());
-        query.setParameter("day",day);
-        query.setParameter("hour",hour);
+        query.setParameter("doctor", doctor.getLicense());
+        query.setParameter("day", day);
+        query.setParameter("hour", hour);
         List<Schedule> schedules = query.getResultList();
         return !schedules.isEmpty();
     }
 
     @Override
-    public void deleteSchedule(int hour, int day, DoctorClinic doctorClinic){
+    public int deleteSchedule(int hour, int day, DoctorClinic doctorClinic){
         final Query query = entityManager.createQuery("delete from Schedule as schedule " +
                 "where schedule.scheduleKey.day = :day and schedule.scheduleKey.hour = :hour " +
                 "and schedule.scheduleKey.doctor = :doctor and schedule.clinic = :clinic");
-        query.setParameter("day",day);
-        query.setParameter("hour",hour);
-        query.setParameter("doctor",doctorClinic.getDoctor().getLicense());
-        query.setParameter("clinic",doctorClinic.getClinic().getId());
-        query.executeUpdate();
+        query.setParameter("day", day);
+        query.setParameter("hour", hour);
+        query.setParameter("doctor", doctorClinic.getDoctor().getLicense());
+        query.setParameter("clinic", doctorClinic.getClinic().getId());
+        return query.executeUpdate();
     }
 }

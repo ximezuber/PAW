@@ -35,27 +35,19 @@ public class ScheduleServiceImplTest {
     @Mock
     private DoctorClinicService doctorClinicService;
 
-    @Mock
-    private DoctorService doctorService;
-
-    @Mock
-    private ClinicService clinicService;
-
     @Test
     public void testCreate() throws ConflictException {
         // Set up
         Mockito.when(doctorClinicService.getDoctorClinic(Mockito.eq(doc.getLicense()),
                         Mockito.eq(clinic.getId())))
                 .thenReturn(dc);
-        Mockito.when(doctorService.getDoctorByEmail(Mockito.eq(doc.getEmail())))
-                .thenReturn(doc);
         Mockito.when(scheduleDao.doctorHasSchedule(Mockito.eq(doc), Mockito.eq(day), Mockito.eq(time)))
                 .thenReturn(false);
         Mockito.when(scheduleDao.createSchedule(Mockito.eq(day), Mockito.eq(time), Mockito.eq(dc)))
                 .thenReturn(new Schedule(day, time, dc));
 
         // Execute
-        Schedule schedule = scheduleService.createSchedule(time, day, doc.getEmail(), clinic.getId());
+        Schedule schedule = scheduleService.createSchedule(time, day, doc.getLicense(), clinic.getId());
 
         // Assert
         Assert.assertEquals(doc.getLicense(), schedule.getDoctorClinic().getDoctor().getLicense());
@@ -70,12 +62,10 @@ public class ScheduleServiceImplTest {
         Mockito.when(doctorClinicService.getDoctorClinic(Mockito.eq(doc.getLicense()),
                         Mockito.eq(clinic.getId())))
                 .thenReturn(dc);
-        Mockito.when(doctorService.getDoctorByEmail(Mockito.eq(doc.getEmail())))
-                .thenReturn(doc);
         Mockito.when(scheduleDao.doctorHasSchedule(Mockito.eq(doc), Mockito.eq(day), Mockito.eq(time)))
                 .thenReturn(true);
 
         // Execute
-        scheduleService.createSchedule(time, day, doc.getEmail(), clinic.getId());
+        scheduleService.createSchedule(time, day, doc.getLicense(), clinic.getId());
     }
 }
