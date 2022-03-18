@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User createUser(String firstName,String lastName, String password, String email) {
-        return userDao.createUser(firstName,lastName,password,email);
+        return userDao.createUser(firstName, lastName, password, email);
     }
 
     @Override
@@ -61,15 +61,15 @@ public class UserServiceImpl implements UserService {
     public void updateUser(String email, String newPassword, String firstName, String lastName) {
         Map<String,String> args = new HashMap<>();
         if(newPassword != null){
-            args.put("password",newPassword);
+            args.put("password", newPassword);
         }
         if(!firstName.equals("")){
-            args.put("firstName",firstName);
+            args.put("firstName", firstName);
         }
         if(!lastName.equals("")){
-            args.put("lastName",lastName);
+            args.put("lastName", lastName);
         }
-        userDao.updateUser(email,args);
+        userDao.updateUser(email, args);
     }
 
 }

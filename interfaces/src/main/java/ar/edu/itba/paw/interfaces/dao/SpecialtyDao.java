@@ -11,7 +11,5 @@ public interface SpecialtyDao extends PaginationDao<Specialty> {
 
     List<Specialty> getSpecialties();
 
-    void updateSpecialty(String oldName, String name);
-
     long deleteSpecialty(String name);
 }

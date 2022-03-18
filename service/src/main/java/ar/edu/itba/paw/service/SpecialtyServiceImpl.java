@@ -57,12 +57,6 @@ public class SpecialtyServiceImpl implements SpecialtyService {
 
     @Transactional
     @Override
-    public void updateSpecialty(String oldName, String name) {
-        specialtyDao.updateSpecialty(oldName, name);
-    }
-
-    @Transactional
-    @Override
     public long deleteSpecialty(String name) throws EntityNotFoundException, EntityDependencyException {
         Specialty specialty = getSpecialtyByName(name);
         if (specialty == null) throw new EntityNotFoundException("specialty");

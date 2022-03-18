@@ -15,7 +15,5 @@ public interface SpecialtyService extends PaginationService<Specialty> {
 
     Specialty getSpecialtyByName(String SpecialtyName);
 
-    void updateSpecialty(String oldName, String name);
-
     long deleteSpecialty(String name) throws EntityNotFoundException, EntityDependencyException;
 }
