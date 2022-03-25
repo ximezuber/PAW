@@ -1,5 +1,5 @@
 export const PAGE_QUERY = 'page=';
-export const UNAVAILABLE_QUERY = 'includeUnavailables='
+export const USER_QUERY = 'user='
 export const PRICE_QUERY = 'price='
 export const HOUR_QUERY = 'hour='
 export const DAY_QUERY = 'day='

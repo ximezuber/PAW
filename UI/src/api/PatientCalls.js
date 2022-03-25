@@ -10,7 +10,7 @@ const deleteFavoriteDoctor = async (id, license) => api.delete(
     PATIENT_PATH + "/" + id + FAVORITE_PATH + "?" + LICENSE_QUERY + license,
     {},
     {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}})
-const isFavorite = async (id, license) => api.get(PATIENT_PATH + "/" + id + FAVORITE_PATH + "/" + license,
+const isFavorite = async (id, license) => api.get(PATIENT_PATH + "/" + id + FAVORITE_PATH + "?" + cons.LICENSE_QUERY + license,
     {},
     {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}}
     )

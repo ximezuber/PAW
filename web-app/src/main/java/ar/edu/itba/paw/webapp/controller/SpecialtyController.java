@@ -9,6 +9,7 @@ import ar.edu.itba.paw.webapp.caching.SpecialtyCaching;
 import ar.edu.itba.paw.webapp.dto.SpecialtyDto;
 import ar.edu.itba.paw.webapp.form.SpecialtyForm;
 import ar.edu.itba.paw.webapp.helpers.CacheHelper;
+import ar.edu.itba.paw.webapp.helpers.PaginationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
@@ -47,11 +48,17 @@ public class SpecialtyController {
                 .map(SpecialtyDto::fromSpecialty).collect(Collectors.toList());
         int maxPage = specialtyService.maxAvailablePage() - 1;
 
-        return CacheHelper.handleResponse(specialties, specialtyCaching,
-                new GenericEntity<List<SpecialtyDto>>(specialties) {}, "specialties", request)
-                .header("Access-Control-Expose-Headers", "X-max-page")
-                .header("X-max-page", maxPage)
-                .build();
+        String basePath = "/api/specialties?";
+        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage, false);
+
+        Response.ResponseBuilder response =  CacheHelper.handleResponse(specialties, specialtyCaching,
+                new GenericEntity<List<SpecialtyDto>>(specialties) {}, "specialties", request);
+
+        if (!linkValue.isEmpty()) {
+            response.header("Link", linkValue);
+        }
+
+        return response.build();
     }
 
     /**

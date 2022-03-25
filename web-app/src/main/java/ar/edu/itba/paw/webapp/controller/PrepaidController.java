@@ -8,6 +8,7 @@ import ar.edu.itba.paw.webapp.caching.PrepaidCaching;
 import ar.edu.itba.paw.webapp.dto.PrepaidDto;
 import ar.edu.itba.paw.webapp.form.PrepaidForm;
 import ar.edu.itba.paw.webapp.helpers.CacheHelper;
+import ar.edu.itba.paw.webapp.helpers.PaginationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,10 +45,17 @@ public class PrepaidController {
                 .map(PrepaidDto::fromPrepaid).collect(Collectors.toList());
         int maxPage = prepaidService.maxAvailablePage();
 
-        return CacheHelper.handleResponse(prepaids, prepaidCaching, new GenericEntity<List<PrepaidDto>>(prepaids) {}, "prepaids", request)
-                .header("Access-Control-Expose-Headers", "X-max-page")
-                .header("X-max-page", maxPage)
-                .build();
+        String basePath = "/api/prepaids?";
+
+        Response.ResponseBuilder response = CacheHelper.handleResponse(prepaids, prepaidCaching,
+                new GenericEntity<List<PrepaidDto>>(prepaids) {},
+                        "prepaids", request);
+
+        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage, false);
+        if(!linkValue.isEmpty()) {
+            response.header("Link", linkValue);
+        }
+        return response.build();
     }
 
     /**

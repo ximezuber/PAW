@@ -6,9 +6,10 @@ import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
 import ar.edu.itba.paw.model.exceptions.EntityDependencyException;
 import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 import ar.edu.itba.paw.webapp.caching.LocationCaching;
-import ar.edu.itba.paw.webapp.dto.LocationDto;;
+import ar.edu.itba.paw.webapp.dto.LocationDto;
 import ar.edu.itba.paw.webapp.form.LocationForm;
 import ar.edu.itba.paw.webapp.helpers.CacheHelper;
+import ar.edu.itba.paw.webapp.helpers.PaginationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
@@ -52,11 +53,16 @@ public class LocationController {
                 .map(LocationDto::fromLocation).collect(Collectors.toList());
         int maxPage = locationService.maxAvailablePage() - 1;
 
-        Response.ResponseBuilder ret = CacheHelper.handleResponse(locations, locationCaching,
-                new GenericEntity<List<LocationDto>>(locations) {}, "locations", request)
-                .header("Access-Control-Expose-Headers", "X-max-page")
-                .header("X-max-page", maxPage);
-        return ret.build();
+        String basePath = "/api/locations?";
+        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage, false);
+
+        Response.ResponseBuilder response = CacheHelper.handleResponse(locations, locationCaching,
+                new GenericEntity<List<LocationDto>>(locations) {}, "locations", request);
+
+        if (!linkValue.isEmpty()) {
+            response.header("Link", linkValue);
+        }
+        return response.build();
     }
 
     /**

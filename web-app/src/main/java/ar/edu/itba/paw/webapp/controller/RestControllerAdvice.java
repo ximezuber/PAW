@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Locale;
 
+//Todo: works?
 @ControllerAdvice(basePackages = {"ar.edu.itba.paw.webapp.controller"})
 public class RestControllerAdvice {
 

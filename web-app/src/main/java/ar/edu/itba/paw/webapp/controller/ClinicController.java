@@ -13,6 +13,7 @@ import ar.edu.itba.paw.webapp.dto.ClinicDto;
 import ar.edu.itba.paw.webapp.dto.PrepaidDto;
 import ar.edu.itba.paw.webapp.form.ClinicForm;
 import ar.edu.itba.paw.webapp.helpers.CacheHelper;
+import ar.edu.itba.paw.webapp.helpers.PaginationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +47,6 @@ public class ClinicController {
 
     /**
      * Returns paginated list of clinics for ADMIN user to manage.
-     * "X-max-page" header: last page of doctors
      * @param page
      * @return list of Clinics
      */
@@ -59,10 +59,16 @@ public class ClinicController {
         List<ClinicDto> clinics = clinicService.getPaginatedObjects(page).stream()
                 .map(c -> ClinicDto.fromClinic(c, uriInfo)).collect(Collectors.toList());
         int maxPage = clinicService.maxAvailablePage() - 1;
-        return CacheHelper.handleResponse(clinics, clinicCaching,
-                new GenericEntity<List<ClinicDto>>(clinics) {}, "clinics", request)
-                .header("Access-Control-Expose-Headers", "X-max-page")
-                .header("X-max-page", maxPage).build();
+
+        String basePath = "/api/clinics?";
+        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage, false);
+        Response.ResponseBuilder response = CacheHelper.handleResponse(clinics, clinicCaching,
+                new GenericEntity<List<ClinicDto>>(clinics) {}, "clinics", request);
+        if (!linkValue.isEmpty()) {
+            response.header("Link", linkValue);
+        }
+
+        return response.build();
 
     }
 
@@ -172,10 +178,16 @@ public class ClinicController {
         List<PrepaidDto> prepaids = prepaidToClinicService.getPrepaidsForClinic(clinicId, page)
                 .stream().map(PrepaidDto::fromPrepaid).collect(Collectors.toList());
         int maxPage = prepaidToClinicService.maxAvailablePagePerClinic(clinicId);
-        return CacheHelper.handleResponse(prepaids, prepaidCaching, new GenericEntity<List<PrepaidDto>>(prepaids) {},
-                "prepaids", request)
-                .header("Access-Control-Expose-Headers", "X-max-page")
-                .header("X-max-page", maxPage).build();
+        String basePath = "/api/clinics/" + clinicId + "/prepaids?";
+        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage, false);
+        Response.ResponseBuilder response = CacheHelper.handleResponse(prepaids, prepaidCaching, new GenericEntity<List<PrepaidDto>>(prepaids) {},
+                "prepaids", request);
+
+        if (!linkValue.isEmpty()) {
+            response.header("Link", linkValue);
+        }
+
+        return response.build();
 
     }
 
