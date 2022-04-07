@@ -15,8 +15,7 @@ public class PatientCaching implements Caching<PatientDto> {
         if(element == null) {
             return 0;
         }
-        UserDto userData = element.getUserData();
         return Objects.hash(element.getId(), element.getPrepaid(), element.getPrepaidNumber(),
-                userData.getEmail(), userData.getFirstName(), userData.getLastName());
+                element.getEmail(), element.getFirstName(), element.getLastName());
     }
 }

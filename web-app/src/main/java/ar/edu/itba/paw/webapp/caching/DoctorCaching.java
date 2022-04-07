@@ -13,9 +13,8 @@ public class DoctorCaching implements Caching<DoctorDto> {
     public int calculateHash(DoctorDto doctor) {
         if(doctor == null)
             return 0;
-        UserDto userData = doctor.getUser();
         return Objects.hash(doctor.getLicense(), doctor.getPhoneNumber(),
-                doctor.getLicense(), userData.getEmail(), userData.getFirstName(),
-                userData.getLastName());
+                doctor.getLicense(), doctor.getEmail(), doctor.getFirstName(),
+                doctor.getLastName());
     }
 }

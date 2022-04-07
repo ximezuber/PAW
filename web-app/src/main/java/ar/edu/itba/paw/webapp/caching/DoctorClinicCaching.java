@@ -7,6 +7,7 @@ import ar.edu.itba.paw.webapp.dto.DoctorDto;
 import ar.edu.itba.paw.webapp.dto.UserDto;
 import org.springframework.stereotype.Component;
 
+import java.net.URI;
 import java.util.Objects;
 
 @Component
@@ -17,12 +18,9 @@ public class DoctorClinicCaching implements Caching<DoctorClinicDto> {
             return 0;
         }
 
-        DoctorDto doctor = dc.getDoctor();
-        UserDto userData = doctor.getUser();
-        ClinicDto clinic = dc.getClinic();
+        URI doctor = dc.getDoctor();
+        URI clinic = dc.getClinic();
 
-        return Objects.hash(doctor.getLicense(),doctor.getPhoneNumber(), doctor.getSpecialty(),
-                userData.getEmail(), userData.getFirstName(), userData.getLastName(),
-                clinic.getName(), clinic.getLocation(), clinic.getAddress());
+        return Objects.hash(doctor, clinic, dc.getConsultPrice());
     }
 }

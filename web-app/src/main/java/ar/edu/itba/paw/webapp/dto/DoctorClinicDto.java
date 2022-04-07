@@ -3,36 +3,40 @@ package ar.edu.itba.paw.webapp.dto;
 import ar.edu.itba.paw.model.DoctorClinic;
 
 import javax.ws.rs.core.UriInfo;
+import java.net.URI;
 
 
 public class DoctorClinicDto {
 
-    private DoctorDto doctor;
-    private ClinicDto clinic;
+    // TODO: see how to transform this into a better thing
+    private URI doctor;
+    private URI clinic;
     private int consultPrice;
 
 
     public static DoctorClinicDto fromDoctorClinic(DoctorClinic doctorClinic, UriInfo uriInfo) {
         DoctorClinicDto doctorClinicDto = new DoctorClinicDto();
-        doctorClinicDto.doctor = DoctorDto.fromDoctor(doctorClinic.getDoctor(), uriInfo);
-        doctorClinicDto.clinic = ClinicDto.fromClinic(doctorClinic.getClinic(), uriInfo);
+        doctorClinicDto.doctor = uriInfo.getBaseUriBuilder().path("doctors")
+                .path(doctorClinic.getDoctor().getLicense()).build();
+        doctorClinicDto.clinic = uriInfo.getBaseUriBuilder().path("clinics")
+                .path(String.valueOf(doctorClinic.getClinic().getId())).build();
         doctorClinicDto.consultPrice = doctorClinic.getConsultPrice();
         return doctorClinicDto;
     }
 
-    public DoctorDto getDoctor() {
+    public URI getDoctor() {
         return doctor;
     }
 
-    public void setDoctor(DoctorDto doctorDto) {
-        this.doctor = doctorDto;
+    public void setDoctor(URI doctor) {
+        this.doctor = doctor;
     }
 
-    public ClinicDto getClinic() {
+    public URI getClinic() {
         return clinic;
     }
 
-    public void setClinic(ClinicDto clinic) {
+    public void setClinic(URI clinic) {
         this.clinic = clinic;
     }
 

@@ -8,27 +8,58 @@ import java.net.URI;
 public class DoctorDto {
 
     private String specialty;
-    private UserDto userData;
+    private String firstName;
+    private String lastName;
+    private String email;
     private String license;
     private String phoneNumber;
     private URI profileImage;
+    private URI appointments;
 
     public static DoctorDto fromDoctor(Doctor doctor, UriInfo uriInfo) {
         DoctorDto doctorDto = new DoctorDto();
         doctorDto.license = doctor.getLicense();
         doctorDto.specialty = doctor.getSpecialty().getSpecialtyName();
         doctorDto.phoneNumber = doctor.getPhoneNumber();
-        doctorDto.userData = UserDto.fromUser(doctor.getUser());
-        doctorDto.profileImage = uriInfo.getBaseUriBuilder().path("doctors").path(doctor.getLicense()).path("ProfileImage").build();
+        doctorDto.firstName = doctor.getFirstName();
+        doctorDto.lastName = doctor.getLastName();
+        doctorDto.email = doctor.getEmail();
+        doctorDto.profileImage = uriInfo.getBaseUriBuilder().path("doctors").path(doctor.getLicense()).path("image").build();
+        doctorDto.appointments = uriInfo.getBaseUriBuilder().path("appointments")
+                .path(doctor.getEmail()).build();
         return doctorDto;
     }
 
-    public UserDto getUserData() {
-        return userData;
+    public URI getAppointments() {
+        return appointments;
     }
 
-    public void setUserData(UserDto userData) {
-        this.userData = userData;
+    public void setAppointments(URI appointments) {
+        this.appointments = appointments;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public URI getProfileImage() {
@@ -45,14 +76,6 @@ public class DoctorDto {
 
     public void setSpecialty(String specialty) {
         this.specialty = specialty;
-    }
-
-    public UserDto getUser() {
-        return userData;
-    }
-
-    public void setUser(UserDto user) {
-        this.userData = user;
     }
 
     public String getLicense() {

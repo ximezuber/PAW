@@ -39,7 +39,7 @@ public class ClinicDaoImpl implements ClinicDao {
 
     @Override
     public List<Clinic> getPaginatedObjects(int page) {
-        TypedQuery<Clinic> query = entityManager.createQuery("from Clinic as clinic" +
+        TypedQuery<Clinic> query = entityManager.createQuery("FROM Clinic as clinic " +
                 "ORDER BY clinic.name, clinic.location.name, clinic.address", Clinic.class);
         return query.setFirstResult(page * MAX_CLINICS_PER_PAGE)
                 .setMaxResults(MAX_CLINICS_PER_PAGE)

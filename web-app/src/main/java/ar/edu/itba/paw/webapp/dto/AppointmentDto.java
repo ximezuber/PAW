@@ -3,54 +3,33 @@ package ar.edu.itba.paw.webapp.dto;
 import ar.edu.itba.paw.model.Appointment;
 
 import javax.ws.rs.core.UriInfo;
-import java.time.LocalDateTime;
+import java.net.URI;
 
 public class AppointmentDto {
 
-    private UserDto patient;
-    private LocalDateTime date;
     private int year;
     private int month;
     private int day;
     private int hour;
-    private int dayWeek;
-    private DoctorClinicDto doctorClinic;
+    private int dayOfWeek;
+    private URI patient;
+    private URI doctor;
+    private URI clinic;
 
     public static AppointmentDto fromAppointment(Appointment appointment, UriInfo uriInfo) {
         AppointmentDto appointmentDto = new AppointmentDto();
-        appointmentDto.patient = appointment.getPatientUser() == null ? null : UserDto.fromUser(appointment.getPatientUser());
-        appointmentDto.date = appointment.getAppointmentKey().getDate();
         appointmentDto.year = appointment.getAppointmentKey().getDate().getYear();
         appointmentDto.month = appointment.getAppointmentKey().getDate().getMonthValue();
         appointmentDto.day = appointment.getAppointmentKey().getDate().getDayOfMonth();
         appointmentDto.hour = appointment.getAppointmentKey().getDate().getHour();
-        appointmentDto.dayWeek = appointment.getAppointmentKey().getDate().getDayOfWeek().getValue();
-        appointmentDto.doctorClinic = DoctorClinicDto.fromDoctorClinic(appointment.getDoctorClinic(), uriInfo);
+        appointmentDto.dayOfWeek = appointment.getAppointmentKey().getDate().getDayOfWeek().getValue();
+        appointmentDto.patient = uriInfo.getBaseUriBuilder().path("patients")
+                .path(appointment.getPatientUser().getEmail()).build();
+        appointmentDto.doctor = uriInfo.getBaseUriBuilder().path("doctors")
+                .path(appointment.getDoctorClinic().getDoctor().getLicense()).build();
+        appointmentDto.clinic = uriInfo.getBaseUriBuilder().path("clinics")
+                .path(String.valueOf(appointment.getDoctorClinic().getClinic().getId())).build();
         return appointmentDto;
-    }
-
-    public UserDto getPatient() {
-        return patient;
-    }
-
-    public void setPatient(UserDto patient) {
-        this.patient = patient;
-    }
-
-    public LocalDateTime getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDateTime date) {
-        this.date = date;
-    }
-
-    public DoctorClinicDto getDoctorClinic() {
-        return doctorClinic;
-    }
-
-    public void setDoctorClinic(DoctorClinicDto doctorClinic) {
-        this.doctorClinic = doctorClinic;
     }
 
     public int getMonth() {
@@ -77,12 +56,12 @@ public class AppointmentDto {
         this.hour = hour;
     }
 
-    public int getDayWeek() {
-        return dayWeek;
+    public int getDayOfWeek() {
+        return dayOfWeek;
     }
 
-    public void setDayWeek(int dayWeek) {
-        this.dayWeek = dayWeek;
+    public void setDayOfWeek(int dayOfWeek) {
+        this.dayOfWeek = dayOfWeek;
     }
 
     public int getYear() {
@@ -91,5 +70,29 @@ public class AppointmentDto {
 
     public void setYear(int year) {
         this.year = year;
+    }
+
+    public URI getPatient() {
+        return patient;
+    }
+
+    public void setPatient(URI patient) {
+        this.patient = patient;
+    }
+
+    public URI getDoctor() {
+        return doctor;
+    }
+
+    public void setDoctor(URI doctor) {
+        this.doctor = doctor;
+    }
+
+    public URI getClinic() {
+        return clinic;
+    }
+
+    public void setClinic(URI clinic) {
+        this.clinic = clinic;
     }
 }

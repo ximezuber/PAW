@@ -166,9 +166,9 @@ public class ClinicController {
      * @throws EntityNotFoundException
      */
     @GET
-    @Path("{clinicId}/prepaids")
+    @Path("{clinicId}/prepaid")
     @Produces(value = { MediaType.APPLICATION_JSON })
-    public Response getClinicPrepaids(@PathParam("clinicId") final Integer clinicId,
+    public Response getClinicPrepaid(@PathParam("clinicId") final Integer clinicId,
                                       @QueryParam("page") @DefaultValue("0") Integer page,
                                       @Context Request request) throws EntityNotFoundException {
         page = (page < 0) ? 0 : page;
@@ -198,9 +198,9 @@ public class ClinicController {
      * @throws EntityNotFoundException
      */
     @GET
-    @Path("{clinicId}/prepaids/all")
+    @Path("{clinicId}/prepaid/all")
     @Produces(value = { MediaType.APPLICATION_JSON })
-    public Response getAllClinicPrepaids(@PathParam("clinicId") final Integer clinicId,
+    public Response getAllClinicPrepaid(@PathParam("clinicId") final Integer clinicId,
                                       @Context Request request) throws EntityNotFoundException {
 
         Clinic clinic = clinicService.getClinicById(clinicId);

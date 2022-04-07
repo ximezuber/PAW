@@ -35,8 +35,8 @@ public class PrepaidToClinicDaoImpl implements PrepaidToClinicDao {
     @Override
     public List<Prepaid> getPrepaidsForClinic(int clinic, int page) {
         TypedQuery<PrepaidToClinic> query = entityManager
-                .createQuery("from clinicPrepaids as cp where cp.clinicid = ?1", PrepaidToClinic.class);
-        query.setParameter(1, clinic);
+                .createQuery("from PrepaidToClinic as cp where cp.clinic.id = :id", PrepaidToClinic.class);
+        query.setParameter("id", clinic);
         return query.setFirstResult(page * MAX_PREPAID_TO_CLINICS_PER_PAGE)
                 .setMaxResults(MAX_PREPAID_TO_CLINICS_PER_PAGE)
                 .getResultList()
@@ -46,7 +46,7 @@ public class PrepaidToClinicDaoImpl implements PrepaidToClinicDao {
     @Override
     public List<Prepaid> getPrepaidsForClinic(int clinic) {
         TypedQuery<PrepaidToClinic> query = entityManager
-                .createQuery("from clinicPrepaids as cp where cp.clinicid = ?1", PrepaidToClinic.class);
+                .createQuery("from PrepaidToClinic as cp where cp.clinic.id = ?1", PrepaidToClinic.class);
         query.setParameter(1, clinic);
         return query.getResultList()
                 .stream().map(PrepaidToClinic::getPrepaid).collect(Collectors.toList());

@@ -7,11 +7,12 @@ public class PaginationHelper {
         String path = hasQueryParam? basePath + "&page=": basePath + "page=";
         if(currentPage > 0) {
             path+= (currentPage - 1);
-            linkValue += ",<" + path + ">;rel=previous";
+            linkValue += "<" + path + ">;rel=previous";
         }
         if(currentPage < maxPage){
             path+= (currentPage + 1);
-            linkValue += ",<" + path + ">;rel=next";
+            if (!linkValue.equals("")) linkValue += ",";
+            linkValue += "<" + path + ">;rel=next";
         }
 
         return linkValue;

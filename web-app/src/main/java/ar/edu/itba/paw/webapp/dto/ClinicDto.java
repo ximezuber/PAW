@@ -11,7 +11,7 @@ public class ClinicDto {
     private String address;
     private String Location;
     private String name;
-    private URI clinicPrepaids;
+    private URI prepaid;
 
     public static ClinicDto fromClinic(Clinic clinic, UriInfo uriInfo) {
         ClinicDto clinicDto = new ClinicDto();
@@ -19,17 +19,17 @@ public class ClinicDto {
         clinicDto.id = clinic.getId();
         clinicDto.Location = clinic.getLocation().getLocationName();
         clinicDto.name = clinic.getName();
-        clinicDto.clinicPrepaids = uriInfo.getBaseUriBuilder().path("clinics")
-                .path(String.valueOf(clinic.getId())).path("clinicPrepaids").build();
+        clinicDto.prepaid = uriInfo.getBaseUriBuilder().path("clinics")
+                .path(String.valueOf(clinic.getId())).path("prepaid").path("all").build();
         return clinicDto;
     }
 
-    public URI getClinicPrepaids() {
-        return clinicPrepaids;
+    public URI getPrepaid() {
+        return prepaid;
     }
 
-    public void setClinicPrepaids(URI clinicPrepaids) {
-        this.clinicPrepaids = clinicPrepaids;
+    public void setPrepaid(URI prepaid) {
+        this.prepaid = prepaid;
     }
 
     public int getId() {
