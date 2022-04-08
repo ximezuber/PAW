@@ -29,19 +29,50 @@ public interface AppointmentService {
     Appointment createAppointment(String license, int clinicId, String patientEmail, int year, int month, int day, int time)
             throws DateInPastException, AppointmentAlreadyScheduledException, OutOfScheduleException, HasAppointmentException;
 
-    List<Appointment> getDoctorsAppointments(DoctorClinic doctorClinic);
-
-    List<Appointment> getPatientsAppointments(User patient);
-
+    /**
+     * Returns a list of available appointments from the moment the consult is done to 9 weeks in time.
+     * @param doctor
+     * @return list of available Appointment
+     */
     List<Appointment> getDoctorsAvailableAppointments(Doctor doctor);
 
     // TODO: See what to do with Pagination service interface
+
+    /**
+     * Returns list of paginated Appointment for a certain user
+     * @param user doctor's or patient's user. The user making the query.
+     * @param page
+     * @return list of Appointments
+     */
     List<Appointment> getPaginatedAppointments(User user, int page);
 
-    Optional<Appointment> getAppointment(String license, int year, int month, int day, int time) throws EntityNotFoundException;
+    /**
+     * Returns a specific Appointment
+     * @param license
+     * @param year
+     * @param month
+     * @param day
+     * @param time
+     * @return Optional of Appointment
+     * @throws EntityNotFoundException
+     */
+    Optional<Appointment> getAppointment(String license, int year, int month, int day, int time)
+            throws EntityNotFoundException;
 
+    /**
+     * Returns the maximum available page for paginated appointments
+     * @param user
+     * @return maximum number of pages
+     */
     int getMaxAvailablePage(User user);
 
+    /**
+     * Validate if appointment exists
+     * @param doctorLicense
+     * @param patientEmail
+     * @param date
+     * @return
+     */
     boolean isAppointment(String doctorLicense, String patientEmail, LocalDateTime date);
 
     /**
@@ -57,5 +88,12 @@ public interface AppointmentService {
     void cancelUserAppointment(String userEmail, String license, int year, int month, int day, int time)
             throws EntityNotFoundException;
 
+    /**
+     * Cancels all Appointments that fall in a certain schedule
+     * @param doctorClinic
+     * @param day
+     * @param hour
+     * @return
+     */
     int cancelAllAppointmentsOnSchedule(DoctorClinic doctorClinic, int day, int hour);
 }

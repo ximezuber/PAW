@@ -9,7 +9,7 @@ public class PaginationHelper {
             path+= (currentPage - 1);
             linkValue += "<" + path + ">;rel=previous";
         }
-        if(currentPage < maxPage){
+        if(currentPage < maxPage - 1) {
             path+= (currentPage + 1);
             if (!linkValue.equals("")) linkValue += ",";
             linkValue += "<" + path + ">;rel=next";

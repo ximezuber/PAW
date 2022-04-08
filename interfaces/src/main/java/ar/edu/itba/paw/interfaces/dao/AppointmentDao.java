@@ -8,13 +8,7 @@ import java.util.Optional;
 
 public interface AppointmentDao {
 
-    Appointment createAppointment(DoctorClinic doctorClinic, User patient, LocalDateTime date);
-
-    List<Appointment> getDoctorsAppointments(DoctorClinic doctorClinic);
-
-    List<Appointment> getPatientsAppointments(User patient);
-
-    List<Appointment> getPatientsAppointments(User patient, int clinicId);
+    Appointment createAppointment(DoctorClinic doctorClinic, User patient, LocalDateTime date);;
 
     List<Appointment> getAllDoctorsAppointments(Doctor doctor);
 
@@ -32,9 +26,7 @@ public interface AppointmentDao {
 
     int cancelAllAppointmentsOnSchedule(DoctorClinic doctorClinic, int day, int hour);
 
-    Appointment hasAppointment(DoctorClinic doctorClinic, LocalDateTime date);
-
-    boolean hasAppointment(String doctorLicense,String patientEmail, LocalDateTime date);
+    boolean hasAppointment(String doctorLicense, String patientEmail, LocalDateTime date);
 
     boolean hasAppointment(Doctor doctor, LocalDateTime date);
 

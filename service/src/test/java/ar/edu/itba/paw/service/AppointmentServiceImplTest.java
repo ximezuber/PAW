@@ -211,45 +211,5 @@ public class AppointmentServiceImplTest {
         appointmentService.cancelUserAppointment(email1, license1, year, month, day, time);
     }
 
-    @Test
-    public void getDocApp() {
-        // Set up
-        List<Appointment> appList = new ArrayList<>();
-        Appointment app = new Appointment(date, dc, user2);
-        appList.add(app);
-
-        Mockito.when(appointmentDao.getDoctorsAppointments(dc))
-                .thenReturn(appList);
-
-        // Execute
-        List<Appointment> result = appointmentService.getDoctorsAppointments(dc);
-
-        //Assert
-        List<Appointment> filtered = result.stream()
-                .filter(ap -> ap.getDoctorClinic().getDoctor().equals(doc)).collect(Collectors.toList());
-        Assert.assertEquals(appList.size(), result.size());
-        Assert.assertEquals(result.size(), filtered.size());
-    }
-
-    @Test
-    public void getPatientApp() {
-        // Set up
-        List<Appointment> appList = new ArrayList<>();
-        Appointment app = new Appointment(date, dc, user2);
-        appList.add(app);
-
-        Mockito.when(appointmentDao.getPatientsAppointments(user2))
-                .thenReturn(appList);
-
-        // Execute
-        List<Appointment> result = appointmentService.getPatientsAppointments(user2);
-
-        //Assert
-        List<Appointment> filtered = result.stream()
-                .filter(ap -> ap.getPatientUser().equals(user2)).collect(Collectors.toList());
-        Assert.assertEquals(appList.size(), result.size());
-        Assert.assertEquals(result.size(), filtered.size());
-    }
-
 
 }

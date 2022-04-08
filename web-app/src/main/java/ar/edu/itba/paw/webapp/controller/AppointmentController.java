@@ -77,7 +77,6 @@ public class AppointmentController {
     /**
      * For doctor or user to cancel an appointment
      * @param email
-     * @param clinic
      * @param license
      * @param year
      * @param month

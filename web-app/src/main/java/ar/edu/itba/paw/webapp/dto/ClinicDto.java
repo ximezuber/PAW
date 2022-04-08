@@ -9,7 +9,7 @@ public class ClinicDto {
 
     private int id;
     private String address;
-    private String Location;
+    private URI location;
     private String name;
     private URI prepaid;
 
@@ -17,7 +17,8 @@ public class ClinicDto {
         ClinicDto clinicDto = new ClinicDto();
         clinicDto.address = clinic.getAddress();
         clinicDto.id = clinic.getId();
-        clinicDto.Location = clinic.getLocation().getLocationName();
+        clinicDto.location = uriInfo.getBaseUriBuilder().path("locations")
+                .path(clinic.getLocation().getLocationName()).build();
         clinicDto.name = clinic.getName();
         clinicDto.prepaid = uriInfo.getBaseUriBuilder().path("clinics")
                 .path(String.valueOf(clinic.getId())).path("prepaid").path("all").build();
@@ -48,12 +49,12 @@ public class ClinicDto {
         this.address = address;
     }
 
-    public String getLocation() {
-        return Location;
+    public URI getLocation() {
+        return location;
     }
 
-    public void setLocation(String location) {
-        Location = location;
+    public void setLocation(URI location) {
+        this.location = location;
     }
 
     public String getName() {

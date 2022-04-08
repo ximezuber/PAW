@@ -34,65 +34,34 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
 
     @Override
-    public List<Appointment> getDoctorsAppointments(DoctorClinic doctorClinic) {
-        TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap" +
-                " where ap.doctorClinic.doctor.license = :doctor and ap.doctorClinic.clinic.id = :clinic",
-                Appointment.class);
-        query.setParameter("doctor", doctorClinic.getDoctor().getLicense());
-        query.setParameter("clinic", doctorClinic.getClinic().getId());
-        return query.getResultList();
-    }
-
-    @Override
-    public List<Appointment> getPatientsAppointments(User patient) {
-        TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap " +
-                "where ap.patient = :email", Appointment.class);
-        query.setParameter("email", patient.getEmail());
-        return query.getResultList();
-    }
-
-    @Override
-    public List<Appointment> getPatientsAppointments(User patient, int clinicId) {
-        TypedQuery<Appointment> query = entityManager.createQuery("select ap from Appointment as ap " +
-                "where ap.clinic = :clinic and ap.patient = :email", Appointment.class);
-        query.setParameter("email", patient.getEmail());
-        query.setParameter("clinic", clinicId);
-        return query.getResultList();
-    }
-
-    @Override
     public List<Appointment> getAllDoctorsAppointments(Doctor doctor) {
-        TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap" +
-                " where ap.doctorClinic.doctor.license = :doctor",Appointment.class);
-        query.setParameter("doctor",doctor.getLicense());
-        List<Appointment> list = query.getResultList();
-        return list;
+        TypedQuery<Appointment> query = entityManager.createQuery("FROM Appointment AS ap" +
+                " WHERE ap.doctorClinic.doctor.license = :doctor", Appointment.class);
+        query.setParameter("doctor", doctor.getLicense());
+        return query.getResultList();
     }
 
     @Override
     public List<Appointment> getPaginatedAppointments(int page, Doctor doctor) {
-        TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap" +
-                " where ap.doctorClinic.doctor.license = :doctor ORDER BY ap.appointmentKey.date, " +
-                "ap.patient", Appointment.class);
-        query.setParameter("doctor",doctor.getLicense());
-        List<Appointment> list = query
+        TypedQuery<Appointment> query = entityManager.createQuery("FROM Appointment AS ap" +
+                " WEHRE ap.doctorClinic.doctor.license = :doctor ORDER BY ap.appointmentKey.date", Appointment.class);
+        query.setParameter("doctor", doctor.getLicense());
+        return query
                 .setFirstResult(page * MAX_APPOINTMENTS_PER_PAGE)
                 .setMaxResults(MAX_APPOINTMENTS_PER_PAGE)
                 .getResultList();
-        return list;
     }
 
     @Override
     public List<Appointment> getPaginatedAppointments(int page, Patient patient) {
-        TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap " +
-                "where ap.patient = :email ORDER BY ap.appointmentKey.date, ap.doctorClinic.doctor.license",
+        TypedQuery<Appointment> query = entityManager.createQuery("FROM Appointment AS ap " +
+                "WHERE ap.patient = :email ORDER BY ap.appointmentKey.date",
                 Appointment.class);
-        query.setParameter("email",patient.getEmail());
-        List<Appointment> list = query
+        query.setParameter("email", patient.getEmail());
+        return query
                 .setFirstResult(page * MAX_APPOINTMENTS_PER_PAGE)
                 .setMaxResults(MAX_APPOINTMENTS_PER_PAGE)
                 .getResultList();
-        return list;
     }
 
     @Override
@@ -110,6 +79,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
     public int getMaxAvailablePage(Doctor doctor) {
         return (int) (Math.ceil(( ((double)getAllDoctorsAppointments(doctor).size()) / (double)MAX_APPOINTMENTS_PER_PAGE)));
     }
+
     @Transactional
     @Override
     public void cancelAppointment(Appointment appointment) {
@@ -118,60 +88,51 @@ public class AppointmentDaoImpl implements AppointmentDao {
 
     @Override
     public int cancelAllAppointmentsOnSchedule(DoctorClinic doctorClinic, int day, int hour) {
-        final Query query = entityManager.createQuery("delete from Appointment as ap where " +
-                "ap.appointmentKey.doctor = :doctor and ap.clinic = :clinic and " +
-                "DAY(ap.appointmentKey.date) = :day and HOUR(ap.appointmentKey.date) = :hour");
-        query.setParameter("doctor",doctorClinic.getDoctor().getLicense());
-        query.setParameter("clinic",doctorClinic.getClinic().getId());
-        query.setParameter("day",day-1);
-        query.setParameter("hour",hour);
+        final Query query = entityManager.createQuery("DELETE FROM Appointment AS ap WHERE " +
+                "ap.appointmentKey.doctor = :doctor AND ap.clinic = :clinic AND " +
+                "DAY(ap.appointmentKey.date) = :day AND HOUR(ap.appointmentKey.date) = :hour");
+        query.setParameter("doctor", doctorClinic.getDoctor().getLicense());
+        query.setParameter("clinic", doctorClinic.getClinic().getId());
+        query.setParameter("day", day - 1);
+        query.setParameter("hour", hour);
         return query.executeUpdate();
     }
 
     @Override
-    public Appointment hasAppointment(DoctorClinic doctorClinic, LocalDateTime date) {
-        TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap" +
-                " where ap.doctorClinic.doctor.license = :doctor and ap.clinic = :clinic " +
-                "and ap.appointmentKey.date = :date", Appointment.class);
-        query.setParameter("doctor", doctorClinic.getDoctor().getLicense());
-        query.setParameter("clinic", doctorClinic.getClinic().getId());
-        query.setParameter("date", date);
-        List<Appointment> list = query.getResultList();
-        return list.isEmpty() ? null : list.get(0);
-    }
-
-    @Override
     public boolean hasAppointment(String doctorLicense, String patientEmail, LocalDateTime date) {
-        TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap" +
-                " where ap.doctorClinic.doctor.license = :doctor and ap.patient = :email " +
-                "and ap.appointmentKey.date = :date",Appointment.class);
-        query.setParameter("doctor",doctorLicense);
-        query.setParameter("email",patientEmail);
-        query.setParameter("date",date);
-        List<Appointment> list = query.getResultList();
-        return !list.isEmpty();
+        TypedQuery<Appointment> query = entityManager.createQuery("FROM Appointment AS ap" +
+                " WHERE ap.doctorClinic.doctor.license = :doctor AND ap.patient = :email " +
+                "AND ap.appointmentKey.date = :date", Appointment.class);
+        query.setParameter("doctor", doctorLicense);
+        query.setParameter("email", patientEmail);
+        query.setParameter("date", date);
+        return !query.getResultList().isEmpty();
     }
 
     @Override
     public boolean hasAppointment(Doctor doctor, LocalDateTime date) {
-        TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap" +
-                " where ap.doctorClinic.doctor.license = :doctor " +
-                "and ap.appointmentKey.date = :date",Appointment.class);
-        query.setParameter("doctor",doctor.getLicense());
-        query.setParameter("date",date);
-        List<Appointment> list = query.getResultList();
-        return !list.isEmpty();
+        TypedQuery<Appointment> query = entityManager.createQuery("FROM Appointment AS ap" +
+                " WHERE ap.doctorClinic.doctor.license = :doctor " +
+                "AND ap.appointmentKey.date = :date", Appointment.class);
+        query.setParameter("doctor", doctor.getLicense());
+        query.setParameter("date", date);
+        return !query.getResultList().isEmpty();
     }
 
     @Override
     public boolean hasAppointment(User patient, LocalDateTime date) {
-        TypedQuery<Appointment> query = entityManager.createQuery("from Appointment as ap" +
-                " where ap.patient = :email " +
-                "and ap.appointmentKey.date = :date",Appointment.class);
+        TypedQuery<Appointment> query = entityManager.createQuery("FROM Appointment AS ap" +
+                " WHERE ap.patient = :email " +
+                "AND ap.appointmentKey.date = :date", Appointment.class);
         query.setParameter("email", patient.getEmail());
-        query.setParameter("date",date);
-        List<Appointment> list = query.getResultList();
-        return !list.isEmpty();
+        query.setParameter("date", date);
+        return !query.getResultList().isEmpty();
     }
 
+    private List<Appointment> getPatientsAppointments(User patient) {
+        TypedQuery<Appointment> query = entityManager.createQuery("FROM Appointment AS ap " +
+                "WHERE ap.patient = :email", Appointment.class);
+        query.setParameter("email", patient.getEmail());
+        return query.getResultList();
+    }
 }

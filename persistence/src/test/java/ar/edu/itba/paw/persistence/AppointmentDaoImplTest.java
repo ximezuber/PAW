@@ -59,29 +59,8 @@ public class AppointmentDaoImplTest {
     }
 
     @Test
-    public void testHasAppointment(){
-
-        final Appointment appointment = appointmentDao.hasAppointment(doctorClinic, cal);
-
-        assertNotNull(appointment);
-        assertEquals(doctorClinic.getDoctor().getLicense(), appointment.getDoctorClinic().getDoctor().getLicense());
-        assertEquals(doctorClinic.getClinic().getId(), appointment.getDoctorClinic().getClinic().getId());
-        assertEquals(cal, appointment.getAppointmentKey().getDate());
-
-    }
-
-    @Test
     public void testGetAllDoctorsAppointments(){
         final List<Appointment> apps = appointmentDao.getAllDoctorsAppointments(doc);
-        assertNotNull(apps);
-        Assert.assertTrue(!apps.isEmpty());
-        assertEquals(doc.getLicense(), apps.get(0).getDoctorClinic().getDoctor().getLicense());
-
-    }
-
-    @Test
-    public void testGetAllPatientsAppointments(){
-        final List<Appointment> apps = appointmentDao.getPatientsAppointments(user);
         assertNotNull(apps);
         Assert.assertTrue(!apps.isEmpty());
         assertEquals(doc.getLicense(), apps.get(0).getDoctorClinic().getDoctor().getLicense());

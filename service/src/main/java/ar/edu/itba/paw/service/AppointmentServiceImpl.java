@@ -78,27 +78,18 @@ public class AppointmentServiceImpl implements AppointmentService {
             if (date.getDayOfWeek().getValue() == schedule.getDay() && date.getHour() == schedule.getHour()) {
                 Locale locale = LocaleContextHolder.getLocale();
                 final String language = locale.getLanguage();
-                locale = Arrays.stream(Locale.getAvailableLocales()).filter(loc -> language.equals(loc.getLanguage())).findFirst().orElse(Locale.ENGLISH);
+                locale = Arrays.stream(Locale.getAvailableLocales())
+                        .filter(loc -> language.equals(loc.getLanguage())).findFirst().orElse(Locale.ENGLISH);
 
                 emailService.sendSimpleMail(
                         userEmail,
                         messageSource.getMessage("appointment.created.subject", null, locale),
-                        messageSource.getMessage("appointment.created.text", null, locale) + " " + dateString(date));
+                        messageSource.getMessage("appointment.created.text", null, locale)
+                                + " " + dateString(date));
                 return appointmentDao.createAppointment(doctorClinic, user, date);
             }
         }
         throw new OutOfScheduleException();
-    }
-
-
-    @Override
-    public List<Appointment> getDoctorsAppointments(DoctorClinic doctorClinic) {
-        return appointmentDao.getDoctorsAppointments(doctorClinic);
-    }
-
-    @Override
-    public List<Appointment> getPatientsAppointments(User patient) {
-        return appointmentDao.getPatientsAppointments(patient);
     }
 
     @Override
@@ -114,7 +105,8 @@ public class AppointmentServiceImpl implements AppointmentService {
             if (day < s.getDay()) {
                 LocalDateTime date = today.plusDays(s.getDay()-day);
                 Appointment appointment = new Appointment(LocalDateTime.of(date.getYear(),
-                        date.getMonthValue(), date.getDayOfMonth(), s.getHour(), 0), s.getDoctorClinic(), null);
+                        date.getMonthValue(), date.getDayOfMonth(), s.getHour(), 0),
+                        s.getDoctorClinic(), null);
                 available.add(appointment);
             }
         }
@@ -203,10 +195,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentDao.getAllDoctorsAppointments(doctor);
     }
 
-    private List<Appointment> getPatientsAppointments(User patient, int clinicId) {
-        return appointmentDao.getPatientsAppointments(patient, clinicId);
-    }
-
     private void cancelAppointment(Doctor doctor, int year, int month, int day, int time, boolean cancelledByDoctor)
             throws EntityNotFoundException {
 
@@ -215,7 +203,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         Locale locale = LocaleContextHolder.getLocale();
 
         final String language = locale.getLanguage();
-        locale = Arrays.stream(Locale.getAvailableLocales()).filter(loc -> language.equals(loc.getLanguage())).findFirst().orElse(Locale.ENGLISH);
+        locale = Arrays.stream(Locale.getAvailableLocales())
+                .filter(loc -> language.equals(loc.getLanguage())).findFirst().orElse(Locale.ENGLISH);
 
         Optional<Appointment> appointment = appointmentDao.getAppointment(doctor, date);
 

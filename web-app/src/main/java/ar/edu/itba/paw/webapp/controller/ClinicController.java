@@ -119,7 +119,7 @@ public class ClinicController {
     public Response updateClinic(@PathParam("clinicId") final Integer clinicId, final ClinicForm clinicForm)
             throws EntityNotFoundException {
         Clinic clinic = clinicService.getClinicById(clinicId);
-        if(clinic == null) throw new EntityNotFoundException("clinic");
+        if(clinic == null) throw new EntityNotFoundException("clinics");
         clinicService.updateClinic(clinicId, clinicForm.getName(), clinicForm.getAddress(), clinicForm.getLocation());
         return Response.noContent().build();
     }
