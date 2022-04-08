@@ -3,7 +3,6 @@ package ar.edu.itba.paw.webapp.controller;
 import ar.edu.itba.paw.interfaces.service.AppointmentService;
 import ar.edu.itba.paw.interfaces.service.UserService;
 import ar.edu.itba.paw.model.Appointment;
-import ar.edu.itba.paw.model.Doctor;
 import ar.edu.itba.paw.model.User;
 import ar.edu.itba.paw.model.exceptions.*;
 import ar.edu.itba.paw.webapp.caching.AppointmentCaching;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Component;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -62,8 +62,9 @@ public class AppointmentController {
 
         int maxPage = appointmentService.getMaxAvailablePage(user);
 
-        String basePath = "/api/appointments?user=" + email;
-        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage, true);
+        URI basePath = uriInfo.getAbsolutePathBuilder().queryParam("user", email).build();
+
+        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage);
         Response.ResponseBuilder response = CacheHelper.handleResponse(appointments, appointmentCaching,
                 new GenericEntity<List<AppointmentDto>>(appointments) {}, "appointments",
                 request);

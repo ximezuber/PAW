@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.net.URI;
 import java.util.List;
 
 import java.util.stream.Collectors;
@@ -58,10 +59,10 @@ public class ClinicController {
 
         List<ClinicDto> clinics = clinicService.getPaginatedObjects(page).stream()
                 .map(c -> ClinicDto.fromClinic(c, uriInfo)).collect(Collectors.toList());
-        int maxPage = clinicService.maxAvailablePage() - 1;
+        int maxPage = clinicService.maxAvailablePage();
 
-        String basePath = "/api/clinics?";
-        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage, false);
+        URI basePath = uriInfo.getAbsolutePathBuilder().build();
+        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage);
         Response.ResponseBuilder response = CacheHelper.handleResponse(clinics, clinicCaching,
                 new GenericEntity<List<ClinicDto>>(clinics) {}, "clinics", request);
         if (!linkValue.isEmpty()) {
@@ -73,7 +74,7 @@ public class ClinicController {
     }
 
     /**
-     *Returns full list of clinics for DOCTOR to choose from
+     * Returns full list of clinics for DOCTOR to choose from
      * @return list of Clinics
      */
     @GET
@@ -97,6 +98,7 @@ public class ClinicController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response createClinic(final ClinicForm clinicForm) throws EntityNotFoundException, DuplicateEntityException {
+        // TODO Change when Location is optional
         Location location = locationService.getLocationByName(clinicForm.getLocation());
         if (location == null) throw new EntityNotFoundException("location");
         Clinic clinic = clinicService.createClinic(clinicForm.getName(), clinicForm.getAddress(), location);
@@ -118,9 +120,13 @@ public class ClinicController {
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response updateClinic(@PathParam("clinicId") final Integer clinicId, final ClinicForm clinicForm)
             throws EntityNotFoundException {
-        Clinic clinic = clinicService.getClinicById(clinicId);
-        if(clinic == null) throw new EntityNotFoundException("clinics");
-        clinicService.updateClinic(clinicId, clinicForm.getName(), clinicForm.getAddress(), clinicForm.getLocation());
+
+        Clinic clinic = clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
+        // TODO add location check when location as option is added
+        Location location = clinicForm.getLocation() == null || clinicForm.getLocation().equals("")  ?
+                null : locationService.getLocationByName(clinicForm.getLocation());
+
+        clinicService.updateClinic(clinic, clinicForm.getName(), clinicForm.getAddress(), location);
         return Response.noContent().build();
     }
 
@@ -133,14 +139,11 @@ public class ClinicController {
     @Path("{clinicId}")
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response getClinic(@PathParam("clinicId") final Integer clinicId,
-                              @Context Request request) {
-        Clinic clinic = clinicService.getClinicById(clinicId);
-        if(clinic != null) {
-            ClinicDto dto = ClinicDto.fromClinic(clinic, uriInfo);
-            Response.ResponseBuilder r = CacheHelper.handleResponse(dto, clinicCaching, "clinic", request);
-            return r.build();
-        }
-        return Response.status(Response.Status.NOT_FOUND.getStatusCode()).build();
+                              @Context Request request) throws EntityNotFoundException {
+        Clinic clinic = clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
+
+        ClinicDto dto = ClinicDto.fromClinic(clinic, uriInfo);
+        return CacheHelper.handleResponse(dto, clinicCaching, "clinic", request).build();
     }
 
     /**
@@ -153,16 +156,17 @@ public class ClinicController {
     @Path("{clinicId}")
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response deleteClinic(@PathParam("clinicId") final Integer clinicId) throws EntityNotFoundException {
-        clinicService.deleteClinic(clinicId);
+        Clinic clinic = clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
+        clinicService.deleteClinic(clinic);
         return Response.noContent().build();
     }
 
     /**
-     * Returns paginated list of a specific clinic's prepaids
-     * "X-max-page" header: last page of prepaids
+     * Returns paginated list of a specific clinic's prepaid
+     * "X-max-page" header: last page of prepaid
      * @param clinicId
      * @param page
-     * @return list of Prepaids
+     * @return list of Prepaid
      * @throws EntityNotFoundException
      */
     @GET
@@ -173,15 +177,16 @@ public class ClinicController {
                                       @Context Request request) throws EntityNotFoundException {
         page = (page < 0) ? 0 : page;
 
-        Clinic clinic = clinicService.getClinicById(clinicId);
-        if(clinic == null) throw new EntityNotFoundException("clinic");
-        List<PrepaidDto> prepaids = prepaidToClinicService.getPrepaidsForClinic(clinicId, page)
+       clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
+
+        List<PrepaidDto> prepaid = prepaidToClinicService.getPrepaidsForClinic(clinicId, page)
                 .stream().map(PrepaidDto::fromPrepaid).collect(Collectors.toList());
         int maxPage = prepaidToClinicService.maxAvailablePagePerClinic(clinicId);
-        String basePath = "/api/clinics/" + clinicId + "/prepaids?";
-        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage, false);
-        Response.ResponseBuilder response = CacheHelper.handleResponse(prepaids, prepaidCaching, new GenericEntity<List<PrepaidDto>>(prepaids) {},
-                "prepaids", request);
+        URI basePath = uriInfo.getAbsolutePathBuilder().build();
+        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage);
+        Response.ResponseBuilder response = CacheHelper.handleResponse(prepaid, prepaidCaching,
+                new GenericEntity<List<PrepaidDto>>(prepaid) {},
+                "prepaid", request);
 
         if (!linkValue.isEmpty()) {
             response.header("Link", linkValue);
@@ -194,7 +199,7 @@ public class ClinicController {
     /**
      * Returns list of all prepaid of a specific clinic
      * @param clinicId
-     * @return list of Prepaids
+     * @return list of Prepaid
      * @throws EntityNotFoundException
      */
     @GET
@@ -203,12 +208,12 @@ public class ClinicController {
     public Response getAllClinicPrepaid(@PathParam("clinicId") final Integer clinicId,
                                       @Context Request request) throws EntityNotFoundException {
 
-        Clinic clinic = clinicService.getClinicById(clinicId);
-        if(clinic == null) throw new EntityNotFoundException("clinic");
-        List<PrepaidDto> prepaids = prepaidToClinicService.getPrepaidsForClinic(clinicId)
+        clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
+
+        List<PrepaidDto> prepaid = prepaidToClinicService.getPrepaidsForClinic(clinicId)
                 .stream().map(PrepaidDto::fromPrepaid).collect(Collectors.toList());
-        return CacheHelper.handleResponse(prepaids, prepaidCaching, new GenericEntity<List<PrepaidDto>>(prepaids) {},
-                "prepaids", request).build();
+        return CacheHelper.handleResponse(prepaid, prepaidCaching, new GenericEntity<List<PrepaidDto>>(prepaid) {},
+                "prepaid", request).build();
 
     }
 
@@ -219,8 +224,8 @@ public class ClinicController {
      * @return
      * @throws EntityNotFoundException
      */
-    @POST
-    @Path("{clinicId}/prepaids/{prepaidId}")
+    @PUT
+    @Path("{clinicId}/prepaid/{prepaidId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response addPrepaidToClinic(@PathParam("clinicId") final Integer clinicId,
@@ -228,7 +233,7 @@ public class ClinicController {
             throws EntityNotFoundException {
 
         prepaidToClinicService.addPrepaidToClinic(prepaidId, clinicId);
-        return Response.created(uriInfo.getAbsolutePath()).build();
+        return Response.noContent().build();
 
     }
 
@@ -240,13 +245,13 @@ public class ClinicController {
      * @throws EntityNotFoundException
      */
     @DELETE
-    @Path("{clinicId}/prepaids/{prepaidId}")
+    @Path("{clinicId}/prepaid/{prepaidId}")
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response removePrepaidFromClinic(@PathParam("clinicId") final Integer clinicId,
                                             @PathParam("prepaidId") final String prepaid)
             throws EntityNotFoundException {
         prepaidToClinicService.deletePrepaidFromClinic(prepaid, clinicId);
-        return Response.noContent().build();
+        return Response.ok().build();
 
     }
 

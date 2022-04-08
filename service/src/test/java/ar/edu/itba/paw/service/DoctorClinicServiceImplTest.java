@@ -16,11 +16,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-
-import javax.print.Doc;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DoctorClinicServiceImplTest {
@@ -67,16 +66,13 @@ public class DoctorClinicServiceImplTest {
     @Mock
     private ClinicService clinicService;
 
-    @Mock
-    private AppointmentService appointmentService;
-
     @Test
     public void testCreate() throws EntityNotFoundException, DuplicateEntityException {
         //Set Up
         Mockito.when(doctorService.getDoctorByEmail(Mockito.eq(doc.getEmail())))
                         .thenReturn(doc);
         Mockito.when(clinicService.getClinicById(Mockito.eq(clinic.getId())))
-                        .thenReturn(clinic);
+                        .thenReturn(Optional.of(clinic));
         Mockito.when(mockDao.createDoctorClinic(Mockito.eq(doc), Mockito.eq(clinic), Mockito.eq(consultPrice)))
                 .thenReturn(new DoctorClinic(doc, clinic, consultPrice));
 
@@ -96,7 +92,7 @@ public class DoctorClinicServiceImplTest {
         Mockito.when(doctorService.getDoctorByEmail(Mockito.eq(doc.getEmail())))
                 .thenReturn(null);
         Mockito.when(clinicService.getClinicById(Mockito.eq(clinic.getId())))
-                .thenReturn(clinic);
+                .thenReturn(Optional.of(clinic));
 
         //Execute
        doctorClinicService.createDoctorClinic(doc.getEmail(), clinic.getId(),consultPrice);
@@ -108,7 +104,7 @@ public class DoctorClinicServiceImplTest {
         Mockito.when(doctorService.getDoctorByEmail(Mockito.eq(doc.getEmail())))
                 .thenReturn(doc);
         Mockito.when(clinicService.getClinicById(Mockito.eq(clinic.getId())))
-                .thenReturn(null);
+                .thenReturn(Optional.empty());
 
         //Execute
         doctorClinicService.createDoctorClinic(doc.getEmail(), clinic.getId(),consultPrice);
@@ -193,7 +189,7 @@ public class DoctorClinicServiceImplTest {
         Mockito.when(doctorService.getDoctorByLicense(Mockito.eq(doc.getLicense())))
                 .thenReturn(doc);
         Mockito.when(clinicService.getClinicById(Mockito.eq(clinic.getId())))
-                .thenReturn(clinic);
+                .thenReturn(Optional.of(clinic));
         //Execute
         doctorClinicService.deleteDoctorClinic(doc.getLicense(), clinic.getId());
     }
@@ -213,7 +209,7 @@ public class DoctorClinicServiceImplTest {
         Mockito.when(doctorService.getDoctorByLicense(Mockito.eq(doc.getLicense())))
                 .thenReturn(doc);
         Mockito.when(clinicService.getClinicById(Mockito.eq(clinic.getId())))
-                .thenReturn(null);
+                .thenReturn(Optional.empty());
         //Execute
         doctorClinicService.deleteDoctorClinic(doc.getLicense(), clinic.getId());
     }

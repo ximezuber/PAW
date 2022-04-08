@@ -15,11 +15,12 @@ import org.springframework.stereotype.Component;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-@Path("prepaids")
+@Path("prepaid")
 public class PrepaidController {
 
     @Context
@@ -32,26 +33,26 @@ public class PrepaidController {
     private PrepaidCaching prepaidCaching;
 
     /**
-     * Returns paginated list of prepaids for ADMIN to manage
+     * Returns paginated list of prepaid for ADMIN to manage
      * @param page
-     * @return list of Prepaids
+     * @return list of Prepaid
      */
     @GET
     @Produces(value = { MediaType.APPLICATION_JSON })
-    public Response getPrepaids(@QueryParam("page") @DefaultValue("0") Integer page,
+    public Response getPrepaid(@QueryParam("page") @DefaultValue("0") Integer page,
                                 @Context Request request) {
         page = (page < 0) ? 0 : page;
-        List<PrepaidDto> prepaids = prepaidService.getPaginatedObjects(page).stream()
+        List<PrepaidDto> prepaid = prepaidService.getPaginatedObjects(page).stream()
                 .map(PrepaidDto::fromPrepaid).collect(Collectors.toList());
         int maxPage = prepaidService.maxAvailablePage();
 
-        String basePath = "/api/prepaids?";
+        URI basePath = uriInfo.getAbsolutePathBuilder().build();
 
-        Response.ResponseBuilder response = CacheHelper.handleResponse(prepaids, prepaidCaching,
-                new GenericEntity<List<PrepaidDto>>(prepaids) {},
-                        "prepaids", request);
+        Response.ResponseBuilder response = CacheHelper.handleResponse(prepaid, prepaidCaching,
+                new GenericEntity<List<PrepaidDto>>(prepaid) {},
+                        "prepaid", request);
 
-        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage, false);
+        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage);
         if(!linkValue.isEmpty()) {
             response.header("Link", linkValue);
         }
@@ -59,17 +60,17 @@ public class PrepaidController {
     }
 
     /**
-     * Return list of all prepaids for ADMIN to edit/add clinic.
-     * @return list of Prepaids
+     * Return list of all prepaid for ADMIN to edit/add clinic.
+     * @return list of Prepaid
      */
     @GET
     @Path("/all")
     @Produces(value = { MediaType.APPLICATION_JSON })
-    public Response getAllPrepaids(@Context Request request) {
-        List<PrepaidDto> prepaids = prepaidService.getPrepaids().stream()
+    public Response getAllPrepaid(@Context Request request) {
+        List<PrepaidDto> prepaid = prepaidService.getPrepaids().stream()
                 .map(PrepaidDto::fromPrepaid).collect(Collectors.toList());
 
-        return CacheHelper.handleResponse(prepaids, prepaidCaching, new GenericEntity<List<PrepaidDto>>(prepaids) {}, "prepaids", request)
+        return CacheHelper.handleResponse(prepaid, prepaidCaching, new GenericEntity<List<PrepaidDto>>(prepaid) {}, "prepaid", request)
                 .build();
     }
 

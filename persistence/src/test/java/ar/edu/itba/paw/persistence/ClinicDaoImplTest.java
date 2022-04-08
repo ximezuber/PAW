@@ -42,21 +42,20 @@ public class ClinicDaoImplTest {
     @Autowired
     private ClinicDaoImpl clinicDao;
 
-    /* NO funciona por el serial/indentity */
-//    @Test
-//    public void testCreate(){
-//        final Clinic clinic = clinicDao.createClinic(name2, address2, location);
-//
-//        assertNotNull(clinic);
-//        assertEquals(name2, clinic.getName());
-//        assertEquals(address2, clinic.getAddress());
-//        assertEquals(location.getLocationName(), clinic.getLocation().getLocationName());
-//
-//    }
+    @Test
+    public void testCreate(){
+        final Clinic clinic = clinicDao.createClinic(name2, address2, location);
+
+        assertNotNull(clinic);
+        assertEquals(name2, clinic.getName());
+        assertEquals(address2, clinic.getAddress());
+        assertEquals(location.getLocationName(), clinic.getLocation().getLocationName());
+
+    }
 
     @Test
-    public void testGetClinicById(){
-        final Clinic clinic = clinicDao.getClinicById(id);
+    public void testGetClinicById() throws Exception {
+        final Clinic clinic = clinicDao.getClinicById(id).orElseThrow(Exception::new);
 
         assertNotNull(clinic);
         assertEquals(id, clinic.getId());
@@ -64,15 +63,15 @@ public class ClinicDaoImplTest {
     }
 
     @Test
-    public void testGetClinics(){
+    public void testGetClinics() {
         List<Clinic> clinics = clinicDao.getClinics();
 
         assertNotNull(clinics);
-        assertEquals(2,clinics.size());
+        assertEquals(2, clinics.size());
     }
 
     @Test
-    public void testGetClinicByLocation(){
+    public void testGetClinicByLocation() {
         List<Clinic> clinics = clinicDao.getClinicsByLocation(location);
 
         assertNotNull(clinics);
@@ -80,12 +79,12 @@ public class ClinicDaoImplTest {
     }
 
     @Test
-    public void testClinicExists(){
+    public void testClinicExists() {
         boolean bool = clinicDao.clinicExists(name, address, location);
         boolean bool2 = clinicDao.clinicExists(name2, address2, location);
 
         Assert.assertTrue(bool);
-        Assert.assertTrue(!bool2);
+        Assert.assertFalse(bool2);
     }
 
 }

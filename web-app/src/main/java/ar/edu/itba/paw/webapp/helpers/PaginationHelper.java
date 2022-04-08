@@ -1,18 +1,20 @@
 package ar.edu.itba.paw.webapp.helpers;
 
 
+import javax.ws.rs.core.UriBuilder;
+import java.net.URI;
+
 public class PaginationHelper {
-    public static String linkHeaderValueBuilder(String basePath, int currentPage, int maxPage, boolean hasQueryParam) {
+    public static String linkHeaderValueBuilder(URI basePath, int currentPage, int maxPage) {
         String linkValue = "";
-        String path = hasQueryParam? basePath + "&page=": basePath + "page=";
         if(currentPage > 0) {
-            path+= (currentPage - 1);
-            linkValue += "<" + path + ">;rel=previous";
+            URI prevPath = UriBuilder.fromUri(basePath).queryParam("page", currentPage - 1).build();
+            linkValue += "<" + prevPath + ">;rel=previous";
         }
         if(currentPage < maxPage - 1) {
-            path+= (currentPage + 1);
+            URI nextPath = UriBuilder.fromUri(basePath).queryParam("page", currentPage + 1).build();
             if (!linkValue.equals("")) linkValue += ",";
-            linkValue += "<" + path + ">;rel=next";
+            linkValue += "<" + nextPath + ">;rel=next";
         }
 
         return linkValue;

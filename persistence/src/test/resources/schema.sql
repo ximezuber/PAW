@@ -1,3 +1,7 @@
+DROP SCHEMA PUBLIC CASCADE;
+
+CREATE SEQUENCE clinics_id_seq START WITH 1 INCREMENT BY 1;
+
 CREATE TABLE IF NOT EXISTS locations (
     name VARCHAR(30) PRIMARY KEY
 );
@@ -138,7 +142,7 @@ INSERT INTO doctors(license, specialty, email, phoneNumber)
     WHERE NOT EXISTS (SELECT * FROM doctors  WHERE license='3');
 
 
-/* Populates DB with prepaids */
+/* Populates DB with prepaid */
 
 INSERT INTO prepaids(name)
     SELECT * FROM (VALUES ('prepaid1'))
@@ -149,11 +153,11 @@ INSERT INTO prepaids(name)
 
 /* Populates DB with clinics */
 
-INSERT INTO clinics(id, name, location, address)
-    SELECT * FROM (VALUES (1, 'clinic', 'location', 'address'))
+INSERT INTO clinics(name, location, address)
+    SELECT * FROM (VALUES ('clinic', 'location', 'address'))
     WHERE NOT EXISTS (SELECT * FROM clinics  WHERE id=1);
-INSERT INTO clinics(id, name, location, address)
-    SELECT * FROM (VALUES (2, 'clinic2', 'location', 'address2'))
+INSERT INTO clinics(name, location, address)
+    SELECT * FROM (VALUES ('clinic2', 'location', 'address2'))
     WHERE NOT EXISTS (SELECT * FROM clinics  WHERE id=2);
 
 

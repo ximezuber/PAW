@@ -21,10 +21,10 @@ public class CacheHelper {
         map.put("appointments", 10);
         map.put("clinics", 10);
         map.put("clinic", 10);
-        map.put("clinicPrepaids", 10);
+        map.put("clinicPrepaid", 10);
         map.put("locations", 10);
         map.put("specialties", 10);
-        map.put("prepaids", 10);
+        map.put("prepaid", 10);
         map.put("patient", 10);
         map.put("favorites", 10);
 

@@ -13,7 +13,6 @@ import ar.edu.itba.paw.webapp.caching.DoctorCaching;
 import ar.edu.itba.paw.webapp.caching.PatientCaching;
 import ar.edu.itba.paw.webapp.dto.DoctorDto;
 import ar.edu.itba.paw.webapp.dto.PatientDto;
-import ar.edu.itba.paw.webapp.form.FavoriteForm;
 import ar.edu.itba.paw.webapp.form.PersonalInformationForm;
 import ar.edu.itba.paw.webapp.form.SignUpForm;
 import ar.edu.itba.paw.webapp.helpers.CacheHelper;
@@ -26,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -149,8 +149,8 @@ public class PatientController {
                 .stream().map(f -> DoctorDto.fromDoctor(f.getDoctor(), uriInfo)).collect(Collectors.toList());
         int maxPage = favoriteService.maxAvailablePage(patient);
 
-        String basePath = "/api/patients/" + patientEmail + "/favorites?";
-        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage, false);
+        URI basePath = uriInfo.getAbsolutePathBuilder().build();
+        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage);
         Response.ResponseBuilder response = CacheHelper.handleResponse(favorites, doctorCaching,
                 new GenericEntity<List<DoctorDto>>(favorites) {},
                 "favorites", request);

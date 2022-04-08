@@ -31,10 +31,9 @@ public class PrepaidToClinicServiceImpl implements PrepaidToClinicService {
     @Override
     public PrepaidToClinic addPrepaidToClinic(String prepaidName, int clinicId) throws EntityNotFoundException {
         Prepaid prepaid = prepaidService.getPrepaidByName(prepaidName);
-        Clinic clinic = clinicService.getClinicById(clinicId);
-        if (clinic == null) throw new EntityNotFoundException("clinic");
+        Clinic clinic = clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
         if (prepaid == null) throw new EntityNotFoundException("prepaid");
-        return prepaidToClinicDao.addPrepaidToClinic(prepaid,clinic);
+        return prepaidToClinicDao.addPrepaidToClinic(prepaid, clinic);
     }
 
     @Override
@@ -46,8 +45,7 @@ public class PrepaidToClinicServiceImpl implements PrepaidToClinicService {
     @Override
     public long deletePrepaidFromClinic(String prepaidName, int clinicId) throws EntityNotFoundException {
         Prepaid prepaid = prepaidService.getPrepaidByName(prepaidName);
-        Clinic clinic = clinicService.getClinicById(clinicId);
-        if (clinic == null) throw new EntityNotFoundException("clinic");
+        Clinic clinic = clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
         if (prepaid == null) throw new EntityNotFoundException("prepaid");
         if (!clinicHasPrepaid(prepaidName, clinicId)) throw new EntityNotFoundException("clinic-prepaid");
         return prepaidToClinicDao.deletePrepaidFromClinic(prepaidName, clinicId);

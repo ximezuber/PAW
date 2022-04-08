@@ -31,9 +31,8 @@ public class DoctorClinicServiceImpl implements DoctorClinicService {
     public DoctorClinic createDoctorClinic(String email, int clinicId, int consultPrice)
             throws EntityNotFoundException, DuplicateEntityException {
         Doctor doctor = doctorService.getDoctorByEmail(email);
-        Clinic clinic = clinicService.getClinicById(clinicId);
+        Clinic clinic = clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
         if (doctor == null) throw new EntityNotFoundException("doctor");
-        if (clinic == null) throw new EntityNotFoundException("clinic");
         DoctorClinic dc = getDoctorClinic(doctor.getLicense(), clinicId);
         if (dc != null) throw new DuplicateEntityException("doctor-clinic-exists");
 
@@ -45,8 +44,7 @@ public class DoctorClinicServiceImpl implements DoctorClinicService {
     public long deleteDoctorClinic(String license, int clinicid) throws EntityNotFoundException {
         Doctor doc = doctorService.getDoctorByLicense(license);
         if (doc == null) throw new EntityNotFoundException("doctor");
-        Clinic clinic = clinicService.getClinicById(clinicid);
-        if (clinic == null) throw new EntityNotFoundException("clinic");
+        Clinic clinic = clinicService.getClinicById(clinicid).orElseThrow(() -> new EntityNotFoundException("clinic"));
         return doctorClinicDao.deleteDoctorClinic(license, clinicid);
     }
 

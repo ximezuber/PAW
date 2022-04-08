@@ -22,6 +22,7 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -112,8 +113,14 @@ public class DoctorController {
         List<DoctorDto> doctors = docs
                 .stream().map(d -> DoctorDto.fromDoctor(d, uriInfo)).collect(Collectors.toList());
 
-        String basePath = paginatedDoctorsBasePath(location, specialty, firstName, lastName, consultPrice, prepaid);
-        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxAvailablePage, false);
+        URI basePath = uriInfo.getAbsolutePathBuilder()
+                .queryParam("location", location)
+                .queryParam("specialty", specialty)
+                .queryParam("firstName", firstName)
+                .queryParam("lastName", lastName)
+                .queryParam("consultPrice", consultPrice)
+                .queryParam("prepaid", prepaid).build();
+        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxAvailablePage);
         Response.ResponseBuilder response =  CacheHelper.handleResponse(doctors, doctorCaching, new GenericEntity<List<DoctorDto>>(doctors) {},
                         "doctors", request);
         if (!linkValue.isEmpty()) {
@@ -138,8 +145,8 @@ public class DoctorController {
         List<String> licenses = doctorService.getDoctors().stream().map(Doctor::getLicense).collect(Collectors.toList());
         int maxAvailablePage = doctorService.getMaxAvailableDoctorsPage(licenses);
 
-        String basePath = "/api/doctors/all?";
-        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxAvailablePage, false);
+        URI basePath = uriInfo.getAbsolutePathBuilder().build();
+        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxAvailablePage);
 
         List<DoctorDto> doctors = doctorService.getPaginatedDoctors(licenses, page)
                 .stream().map(d -> DoctorDto.fromDoctor(d, uriInfo)).collect(Collectors.toList());
@@ -356,8 +363,8 @@ public class DoctorController {
                 .collect(Collectors.toList());
         int max = doctorClinicService.maxAvailablePage(doctor);
 
-        String basePath = "/api/doctors/" + license + "/clinics?";
-        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, max, false);
+        URI basePath = uriInfo.getAbsolutePathBuilder().build();
+        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, max);
         Response.ResponseBuilder response = CacheHelper.handleResponse(doctorClinics, doctorClinicCaching,
                 new GenericEntity<List<DoctorClinicDto>>(doctorClinics) {},
                 "doctorsClinics", request);
@@ -575,32 +582,5 @@ public class DoctorController {
         return CacheHelper.handleResponse(appointments, appointmentCaching,
                 new GenericEntity<List<AppointmentDto>>(appointments) {}, "appointments",
                 request).build();
-    }
-
-    private String paginatedDoctorsBasePath(String location, String specialty, String firstName, String lastName,
-                                            int consultPrice, String prepaid) {
-        String basePath = "/api/doctors?";
-        if (!location.isEmpty()) {
-            basePath += "location=" + location + "&";
-        }
-        if (!specialty.isEmpty()) {
-            basePath += "specialty=" + specialty + "&";
-        }
-        if (!firstName.isEmpty()) {
-            basePath += "firstName=" + firstName + "&";
-        }
-        if (!lastName.isEmpty()) {
-            basePath += "lastName=" + lastName + "&";
-        }
-        if (!firstName.isEmpty()) {
-            basePath += "firstName=" + firstName + "&";
-        }
-        if (consultPrice > 0) {
-            basePath += "consultPrice=" + consultPrice + "&";
-        }
-        if (!prepaid.isEmpty()) {
-            basePath += "prepaid=" + prepaid + "&";
-        }
-        return basePath;
     }
 }

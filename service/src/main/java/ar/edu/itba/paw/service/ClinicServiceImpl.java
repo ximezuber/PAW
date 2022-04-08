@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class ClinicServiceImpl implements ClinicService {
@@ -21,7 +22,8 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Transactional
     @Override
-    public Clinic createClinic(String name, String address, Location location) throws DuplicateEntityException {
+    public Clinic createClinic(String name, String address, Location location)
+            throws DuplicateEntityException {
         if (clinicExists(name, address, location.getLocationName())) throw new DuplicateEntityException("clinic-exists");
         return clinicDao.createClinic(name, address, location);
     }
@@ -32,7 +34,7 @@ public class ClinicServiceImpl implements ClinicService {
     }
 
     @Override
-    public Clinic getClinicById(int id) {
+    public Optional<Clinic> getClinicById(int id) {
         return clinicDao.getClinicById(id);
     }
 
@@ -48,29 +50,26 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Transactional
     @Override
-    public void updateClinic(int id, String name, String address, String location) {
-        if(name.equals("") && address.equals("") && location.equals(""))
+    public void updateClinic(Clinic clinic, String name, String address, Location location) {
+        if((name == null || name.equals("")) && (address == null || address.equals("")) && location == null)
             return;
-        Clinic clinic = getClinicById(id);
-        if(name.equals("")) {
+        if(name == null || name.equals("")) {
             name = clinic.getName();
         }
-        if(address.equals("")) {
+        if(address == null || address.equals("")) {
             address = clinic.getAddress();
         }
-        if(location.equals("")) {
-            location = clinic.getLocation().getLocationName();
+        if(location == null) {
+            location = clinic.getLocation();
         }
-        clinicDao.updateClinic(id, name, address, location);
+        clinicDao.updateClinic(clinic, name, address, location);
     }
 
 
     @Transactional
     @Override
-    public long deleteClinic(int id) throws EntityNotFoundException {
-        Clinic clinic = getClinicById(id);
-        if(clinic == null) throw new EntityNotFoundException("clinic");
-        return clinicDao.deleteClinic(id);
+    public void deleteClinic(Clinic clinic) {
+        clinicDao.deleteClinic(clinic);
     }
 
     @Override

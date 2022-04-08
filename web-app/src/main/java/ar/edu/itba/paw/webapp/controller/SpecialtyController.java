@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,8 +49,8 @@ public class SpecialtyController {
                 .map(SpecialtyDto::fromSpecialty).collect(Collectors.toList());
         int maxPage = specialtyService.maxAvailablePage() - 1;
 
-        String basePath = "/api/specialties?";
-        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage, false);
+        URI basePath = uriInfo.getAbsolutePathBuilder().build();
+        String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage);
 
         Response.ResponseBuilder response =  CacheHelper.handleResponse(specialties, specialtyCaching,
                 new GenericEntity<List<SpecialtyDto>>(specialties) {}, "specialties", request);
