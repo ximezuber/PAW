@@ -22,6 +22,8 @@ public class AppointmentCaching implements Caching<AppointmentDto> {
                 element.getDay(),
                 element.getHour(),
                 0);
-        return Objects.hash(date, doctor);
+        URI clinic = element.getClinic();
+        URI patient = element.getPatient();
+        return Objects.hash(date, doctor, clinic, patient);
     }
 }

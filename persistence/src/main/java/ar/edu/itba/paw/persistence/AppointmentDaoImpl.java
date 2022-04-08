@@ -9,7 +9,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -97,6 +96,12 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
 
     @Override
+    public Optional<Appointment> getAppointment(Doctor doctor, LocalDateTime date) {
+        Appointment appointment = entityManager.find(Appointment.class, new AppointmentKey(doctor.getLicense(), date));
+        return Optional.ofNullable(appointment);
+    }
+
+    @Override
     public int getMaxAvailablePage(Patient patient) {
         return (int) (Math.ceil(( ((double)getPatientsAppointments(patient.getUser()).size()) / (double)MAX_APPOINTMENTS_PER_PAGE)));
     }
@@ -107,16 +112,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
     @Transactional
     @Override
-    public int cancelAppointment(DoctorClinic doctorClinic, User patient, LocalDateTime date) {
-        final Query query = entityManager.createQuery(
-                "delete from Appointment as ap where ap.patient = :email and " +
-                        "ap.appointmentKey.doctor = :doctor and ap.clinic = :clinic " +
-                        "and ap.appointmentKey.date = :date");
-        query.setParameter("email", patient.getEmail());
-        query.setParameter("doctor", doctorClinic.getDoctor().getLicense());
-        query.setParameter("clinic", doctorClinic.getClinic().getId());
-        query.setParameter("date", date);
-        return query.executeUpdate();
+    public void cancelAppointment(Appointment appointment) {
+        entityManager.remove(appointment);
     }
 
     @Override

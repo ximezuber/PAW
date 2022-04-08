@@ -2,6 +2,8 @@ package ar.edu.itba.paw.webapp.controller;
 
 import ar.edu.itba.paw.interfaces.service.AppointmentService;
 import ar.edu.itba.paw.interfaces.service.UserService;
+import ar.edu.itba.paw.model.Appointment;
+import ar.edu.itba.paw.model.Doctor;
 import ar.edu.itba.paw.model.User;
 import ar.edu.itba.paw.model.exceptions.*;
 import ar.edu.itba.paw.webapp.caching.AppointmentCaching;
@@ -16,7 +18,8 @@ import org.springframework.stereotype.Component;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -35,9 +38,10 @@ public class AppointmentController {
     @Context
     private UriInfo uriInfo;
 
+    // TODO see if there is a way to move this to doctorController and patientController
     /**
      * Returns a paginated list of a users appointments (doctor or patient)
-     * @param email
+     * @param email doctor's or patient's email
      * @return List of Appointment
      * @throws EntityNotFoundException
      */
@@ -85,20 +89,16 @@ public class AppointmentController {
      */
     @DELETE
     @Produces(value = { MediaType.APPLICATION_JSON })
-    @PreAuthorize("hasPermission(#user, 'user')")
+    @PreAuthorize("hasPermission(#email, 'user')")
     public Response cancelAppointment(@QueryParam("user") final String email,
-                                      @QueryParam("clinic") final Integer clinic,
                                       @QueryParam("license") final String license,
                                       @QueryParam("year") final Integer year,
                                       @QueryParam("month") final Integer month,
                                       @QueryParam("day") final Integer day,
-                                      @QueryParam("time") final Integer time) throws EntityNotFoundException,
-            RequestEntityNotFoundException {
+                                      @QueryParam("time") final Integer time) throws EntityNotFoundException {
 
-        appointmentService.cancelUserAppointment(email, license, clinic, year, month, day, time);
+        appointmentService.cancelUserAppointment(email, license, year, month, day, time);
         return Response.noContent().build();
-
-
     }
 
     /**
@@ -112,10 +112,61 @@ public class AppointmentController {
     @PreAuthorize("hasPermission(#form.patient, 'user')")
     public Response createAppointment(final AppointmentForm form) throws
             DateInPastException, OutOfScheduleException, AppointmentAlreadyScheduledException, HasAppointmentException {
-        appointmentService.createAppointment(form.getLicense(), form.getClinic(),
+        Appointment appointment = appointmentService.createAppointment(form.getLicense(), form.getClinic(),
                 form.getPatient(), form.getYear(), form.getMonth(), form.getDay(),
                 form.getTime());
-        return Response.created(uriInfo.getAbsolutePathBuilder().path(form.getPatient())
-                .path(String.valueOf(form.getClinic())).build()).build();
+
+        // TODO correct the URI
+        String id = appointment.getDoctorClinic().getDoctor().getLicense()
+                + "-" + appointment.getAppointmentKey().getDate().getYear()
+                + "-" + appointment.getAppointmentKey().getDate().getMonthValue()
+                + "-" + appointment.getAppointmentKey().getDate().getDayOfMonth()
+                + "-" + appointment.getAppointmentKey().getDate().getHour();
+        String encodedId = Base64.getUrlEncoder().encodeToString(id.getBytes(StandardCharsets.UTF_8));
+
+        return Response.created(uriInfo.getBaseUriBuilder().path("appointments")
+                .path(encodedId).queryParam("user", form.getPatient()).build()).build();
     }
+
+    @GET
+    @Path("/{id}")
+    @Produces(value = { MediaType.APPLICATION_JSON })
+    @PreAuthorize("hasPermission(#email, 'user')")
+    public Response getUserAppointments(@PathParam("id") final String encodedId,
+                                        @NotNull @QueryParam("user") final String email,
+                                        @Context Request request) throws EntityNotFoundException, MalformedIdException {
+        String decodedId = new String(Base64.getDecoder().decode(encodedId));
+
+        Map<String, String> id = parseId(decodedId);
+
+        Optional<Appointment> appointment = appointmentService.getAppointment(
+                id.get("license"),
+                Integer.parseInt(id.get("year")),
+                Integer.parseInt(id.get("month")),
+                Integer.parseInt(id.get("day")),
+                Integer.parseInt(id.get("time"))
+        );
+
+        AppointmentDto dto = AppointmentDto.fromAppointment(
+                appointment.orElseThrow(() -> new EntityNotFoundException("appointment")), uriInfo);
+
+        Response.ResponseBuilder response = CacheHelper.handleResponse(dto, appointmentCaching,
+                 "appointments", request);
+
+        return response.build();
+    }
+
+    private Map<String, String> parseId(String decodedId) throws MalformedIdException {
+        Map<String, String> map = new HashMap<>();
+        String[] id = decodedId.split("-");
+        if (id.length < 5) throw new MalformedIdException("appointment");
+        map.put("license", id[0]);
+        map.put("year", id[1]);
+        map.put("month", id[2]);
+        map.put("day", id[3]);
+        map.put("time", id[4]);
+        return map;
+    }
+
+
 }

@@ -2,9 +2,9 @@ package ar.edu.itba.paw.interfaces.dao;
 
 import ar.edu.itba.paw.model.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface AppointmentDao {
 
@@ -22,11 +22,13 @@ public interface AppointmentDao {
 
     List<Appointment> getPaginatedAppointments(int page, Patient patient);
 
+    Optional<Appointment> getAppointment(Doctor doctor, LocalDateTime date);
+
     int getMaxAvailablePage(Patient patient);
 
     int getMaxAvailablePage(Doctor doctor);
 
-    int cancelAppointment(DoctorClinic doctorClinic, User patient, LocalDateTime date);
+    void cancelAppointment(Appointment appointment);
 
     int cancelAllAppointmentsOnSchedule(DoctorClinic doctorClinic, int day, int hour);
 

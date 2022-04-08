@@ -61,7 +61,7 @@ public class AppointmentValidator implements ConstraintValidator<ValidAppointmen
             df.setLenient(false);
             df.parse(date);
             LocalDateTime appointment = appointmentService.createAppointmentCalendar((int)scheduleYear, (int)scheduleMonth, (int)scheduleDay, (int)scheduleTime);
-            return appointmentService.hasAppointment(scheduleLicense.toString(), schedulePatient.toString(), appointment);
+            return appointmentService.isAppointment(scheduleLicense.toString(), schedulePatient.toString(), appointment);
         } catch (ParseException e) {
             return false;
         }

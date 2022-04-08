@@ -17,6 +17,7 @@ import org.springframework.context.MessageSource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -60,9 +61,6 @@ public class AppointmentServiceImplTest {
     DoctorService doctorService;
 
     @Mock
-    ClinicService clinicService;
-
-    @Mock
     DoctorClinicService doctorClinicService;
 
     @Mock
@@ -91,8 +89,6 @@ public class AppointmentServiceImplTest {
         Mockito.when(doctorClinicService.getDoctorClinicWithSchedule(Mockito.eq(doc.getLicense()),
                         Mockito.eq(clinic.getId())))
                 .thenReturn(dc);
-        Mockito.when(doctorClinicService.getDoctorClinic(license1, id1))
-                        .thenReturn(dc);
         Mockito.when(userService.findUserByEmail(Mockito.eq(email2)))
                 .thenReturn(user2);
         Mockito.when(messageSource.getMessage(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("message");
@@ -180,37 +176,39 @@ public class AppointmentServiceImplTest {
     @Test
     public void testCancelAppPatient() throws EntityNotFoundException, RequestEntityNotFoundException {
         // Set up
-        Appointment app = new Appointment(date, dc, user2);
-        Mockito.when(appointmentDao.hasAppointment(Mockito.any(DoctorClinic.class), Mockito.any()))
-                .thenReturn(app);
+        LocalDateTime appDate = LocalDateTime.of(year, month, day, time, 0);
+        Appointment app = new Appointment(appDate, dc, user2);
+        Mockito.when(appointmentDao.getAppointment(Mockito.eq(doc), Mockito.eq(appDate)))
+                .thenReturn(Optional.of(app));
 
         // Execute
-        appointmentService.cancelUserAppointment(email2, license1, id1, year, month, day, time);
+        appointmentService.cancelUserAppointment(email2, license1, year, month, day, time);
     }
 
     @Test
     public void testCancelAppDoc() throws EntityNotFoundException, RequestEntityNotFoundException {
         // Set up
-        Appointment app = new Appointment(date, dc, user2);
+        LocalDateTime appDate = LocalDateTime.of(year, month, day, time, 0);
+        Appointment app = new Appointment(appDate, dc, user2);
 
-        Mockito.when(appointmentDao.hasAppointment(Mockito.any(DoctorClinic.class), Mockito.any()))
-                .thenReturn(app);
+        Mockito.when(appointmentDao.getAppointment(Mockito.eq(doc), Mockito.eq(appDate)))
+                .thenReturn(Optional.of(app));
 
         // Execute
-        appointmentService.cancelUserAppointment(email1, license1, id1, year, month, day, time);
+        appointmentService.cancelUserAppointment(email1, license1, year, month, day, time);
     }
 
     @Test(expected = EntityNotFoundException.class)
     public void testCancelNoApp() throws EntityNotFoundException, RequestEntityNotFoundException {
         // Set up
-        Appointment app = new Appointment(date, dc, user2);
+        LocalDateTime appDate = LocalDateTime.of(year, month, day, time, 0);
 
-        Mockito.when(appointmentDao.hasAppointment(Mockito.any(DoctorClinic.class), Mockito.any()))
-                .thenReturn(null);
+        Mockito.when(appointmentDao.getAppointment(Mockito.eq(doc), Mockito.eq(appDate)))
+                .thenReturn(Optional.empty());
         Mockito.when(userService.isDoctor(email1)).thenReturn(true);
 
         // Execute
-        appointmentService.cancelUserAppointment(email1, license1, id1, year, month, day, time);
+        appointmentService.cancelUserAppointment(email1, license1, year, month, day, time);
     }
 
     @Test

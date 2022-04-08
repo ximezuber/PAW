@@ -26,7 +26,7 @@ public class DoctorDto {
         doctorDto.email = doctor.getEmail();
         doctorDto.profileImage = uriInfo.getBaseUriBuilder().path("doctors").path(doctor.getLicense()).path("image").build();
         doctorDto.appointments = uriInfo.getBaseUriBuilder().path("appointments")
-                .path(doctor.getEmail()).build();
+                .queryParam("user", doctor.getEmail()).build();
         return doctorDto;
     }
 

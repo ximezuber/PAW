@@ -12,7 +12,7 @@ public class ValidationHelper {
 
 
     public static boolean appointmentValidate(String doctorLicense, String patientEmail, LocalDateTime date, AppointmentService appointmentService){
-       return appointmentService.hasAppointment(doctorLicense,patientEmail,date);
+       return appointmentService.isAppointment(doctorLicense,patientEmail,date);
     }
 
     public static boolean photoValidate(MultipartFile photo){
