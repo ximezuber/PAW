@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class LocationServiceImpl implements LocationService {
@@ -27,8 +28,8 @@ public class LocationServiceImpl implements LocationService {
     @Transactional
     @Override
     public Location createLocation(String name) throws DuplicateEntityException {
-        Location location = getLocationByName(name);
-        if (location != null) throw new DuplicateEntityException("location-exists");
+        Optional<Location> exists = getLocationByName(name);
+        if (exists.isPresent()) throw new DuplicateEntityException("location");
         return locationDao.createLocation(name);
     }
 
@@ -49,17 +50,15 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public Location getLocationByName(String locationName) {
+    public Optional<Location> getLocationByName(String locationName) {
         return locationDao.getLocationByName(locationName);
     }
 
     @Transactional
     @Override
-    public long deleteLocation(String name) throws EntityNotFoundException, EntityDependencyException {
-        Location location = getLocationByName(name);
-        if (location == null) throw new EntityNotFoundException("location");
+    public void deleteLocation(Location location) throws EntityDependencyException {
         List<Clinic> clinicsInLocation = clinicService.getClinicsByLocation(location);
         if (!clinicsInLocation.isEmpty()) throw new EntityDependencyException("clinics");
-        return locationDao.deleteLocation(name);
+        locationDao.deleteLocation(location);
     }
 }

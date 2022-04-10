@@ -83,7 +83,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
     @Transactional
     @Override
     public void cancelAppointment(Appointment appointment) {
-        entityManager.remove(appointment);
+        Appointment contextApp = entityManager.merge(appointment);
+        entityManager.remove(contextApp);
     }
 
     @Override

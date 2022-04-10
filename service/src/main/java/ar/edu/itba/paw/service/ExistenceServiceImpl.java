@@ -38,7 +38,7 @@ public class ExistenceServiceImpl implements ExistenceService {
             case "specialty":
                 return specialtyService.getSpecialtyByName(input) == null;
             case "location":
-                return locationService.getLocationByName(input) == null;
+                return !locationService.getLocationByName(input).isPresent();
             case "patient":
                 return patientService.getPatientsById(input).isEmpty();
             default:

@@ -98,9 +98,8 @@ public class ClinicController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response createClinic(final ClinicForm clinicForm) throws EntityNotFoundException, DuplicateEntityException {
-        // TODO Change when Location is optional
-        Location location = locationService.getLocationByName(clinicForm.getLocation());
-        if (location == null) throw new EntityNotFoundException("location");
+        Location location = locationService.getLocationByName(clinicForm.getLocation())
+                .orElseThrow(() -> new EntityNotFoundException("location"));
         Clinic clinic = clinicService.createClinic(clinicForm.getName(), clinicForm.getAddress(), location);
 
         return Response.created(uriInfo.getAbsolutePathBuilder()
@@ -122,9 +121,9 @@ public class ClinicController {
             throws EntityNotFoundException {
 
         Clinic clinic = clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
-        // TODO add location check when location as option is added
         Location location = clinicForm.getLocation() == null || clinicForm.getLocation().equals("")  ?
-                null : locationService.getLocationByName(clinicForm.getLocation());
+                null : locationService.getLocationByName(clinicForm.getLocation())
+                .orElseThrow(() -> new EntityNotFoundException("location"));
 
         clinicService.updateClinic(clinic, clinicForm.getName(), clinicForm.getAddress(), location);
         return Response.noContent().build();

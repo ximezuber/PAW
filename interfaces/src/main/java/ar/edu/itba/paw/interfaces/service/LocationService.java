@@ -3,16 +3,16 @@ package ar.edu.itba.paw.interfaces.service;
 import ar.edu.itba.paw.model.Location;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
 import ar.edu.itba.paw.model.exceptions.EntityDependencyException;
-import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface LocationService extends PaginationService<Location> {
     Location createLocation(String name) throws DuplicateEntityException;
 
     List<Location> getLocations();
 
-    Location getLocationByName(String locationName);
+    Optional<Location> getLocationByName(String locationName);
 
-    long deleteLocation(String name) throws EntityNotFoundException, EntityDependencyException;
+    void deleteLocation(Location location) throws EntityDependencyException;
 }

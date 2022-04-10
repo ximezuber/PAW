@@ -6,9 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class LocationDaoImpl implements LocationDao {
@@ -19,8 +19,9 @@ public class LocationDaoImpl implements LocationDao {
     private final static int MAX_LOCATIONS_PER_PAGE = 12;
 
     @Override
-    public Location getLocationByName(String locationName){
-        return entityManager.find(Location.class,locationName);
+    public Optional<Location> getLocationByName(String locationName) {
+        Location location = entityManager.find(Location.class, locationName);
+        return Optional.ofNullable(location);
     }
 
     @Override
@@ -31,31 +32,30 @@ public class LocationDaoImpl implements LocationDao {
     }
 
     @Override
-    public List<Location> getLocations(){
-        TypedQuery<Location> query = entityManager.createQuery("from Location as location ORDER BY location.name",Location.class);
+    public List<Location> getLocations() {
+        TypedQuery<Location> query = entityManager.createQuery("FROM Location AS location ORDER BY location.name",
+                Location.class);
         return query.getResultList();
     }
 
     @Override
     public List<Location> getPaginatedObjects(int page){
-        TypedQuery<Location> query = entityManager.createQuery("from Location as location " +
+        TypedQuery<Location> query = entityManager.createQuery("FROM Location AS location " +
                 "ORDER BY location.name", Location.class);
 
-        List<Location> list = query.setFirstResult(page * MAX_LOCATIONS_PER_PAGE)
+        return query.setFirstResult(page * MAX_LOCATIONS_PER_PAGE)
                                    .setMaxResults(MAX_LOCATIONS_PER_PAGE)
-                                   .getResultList();;
-        return list;
+                                   .getResultList();
     }
 
     @Override
     public int maxAvailablePage() {
-        return (int) (Math.ceil(( ((double)getLocations().size()) / (double)MAX_LOCATIONS_PER_PAGE)));
+        return (int) (Math.ceil(( ((double) getLocations().size()) / (double) MAX_LOCATIONS_PER_PAGE)));
     }
 
     @Override
-    public long deleteLocation(String name){
-        Query query = entityManager.createQuery("delete from Location as location where location.name = :name");
-        query.setParameter("name",name);
-        return query.executeUpdate();
+    public void deleteLocation(Location location) {
+        Location contextLocation = entityManager.merge(location);
+        entityManager.remove(contextLocation);
     }
 }

@@ -17,6 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Optional;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocationServiceImplTest {
@@ -37,7 +38,7 @@ public class LocationServiceImplTest {
     public void testCreate() throws DuplicateEntityException {
         //Set Up
         Mockito.when(mockDao.getLocationByName(Mockito.eq(name)))
-                        .thenReturn(null);
+                        .thenReturn(Optional.empty());
         Mockito.when(mockDao.createLocation(Mockito.eq(name)))
                 .thenReturn(new Location(name));
 
@@ -53,7 +54,7 @@ public class LocationServiceImplTest {
     public void testCreateDuplicate() throws DuplicateEntityException {
         //Set Up
         Mockito.when(mockDao.getLocationByName(Mockito.eq(name)))
-                .thenReturn(new Location(name));
+                .thenReturn(Optional.of(new Location(name)));
 
         //Execute
         locationService.createLocation(name);
@@ -63,51 +64,37 @@ public class LocationServiceImplTest {
     public void testGetLocationByName(){
         //Set Up
         Mockito.when(mockDao.getLocationByName(Mockito.eq(name)))
-                .thenReturn(new Location(name));
+                .thenReturn(Optional.of(new Location(name)));
 
         //Execute
-        Location location = locationService.getLocationByName(name);
+        Optional<Location> location = locationService.getLocationByName(name);
 
         //Assert
-        Assert.assertNotNull(location);
-        Assert.assertEquals(name, location.getLocationName());
+        Assert.assertTrue(location.isPresent());
+        Assert.assertEquals(name, location.get().getLocationName());
     }
 
     @Test
-    public void testDelete() throws EntityDependencyException, EntityNotFoundException {
+    public void testDelete() throws EntityDependencyException {
         //Set Up
         Location location = new Location(name);
-        Mockito.when(mockDao.getLocationByName(Mockito.eq(name)))
-                .thenReturn(location);
         Mockito.when(clinicService.getClinicsByLocation(location))
                 .thenReturn(Collections.emptyList());
 
         // Execute
-        locationService.deleteLocation(name);
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void testDeleteNoLocation() throws EntityDependencyException, EntityNotFoundException {
-        //Set Up
-        Mockito.when(mockDao.getLocationByName(Mockito.eq(name)))
-                .thenReturn(null);
-
-        // Execute
-        locationService.deleteLocation(name);
+        locationService.deleteLocation(location);
     }
 
     @Test(expected = EntityDependencyException.class)
     public void testDeleteClinicsWithLocation() throws EntityDependencyException, EntityNotFoundException {
         //Set Up
         Location location = new Location(name);
-        Mockito.when(mockDao.getLocationByName(Mockito.eq(name)))
-                .thenReturn(location);
         Clinic clinic = new Clinic(0, "name", "address", location);
         Mockito.when(clinicService.getClinicsByLocation(location))
                 .thenReturn(Collections.singletonList(clinic));
 
         // Execute
-        locationService.deleteLocation(name);
+        locationService.deleteLocation(location);
     }
 
 }

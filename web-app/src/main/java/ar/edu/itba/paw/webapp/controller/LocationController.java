@@ -52,7 +52,7 @@ public class LocationController {
 
         List<LocationDto> locations = locationService.getPaginatedObjects(page).stream()
                 .map(LocationDto::fromLocation).collect(Collectors.toList());
-        int maxPage = locationService.maxAvailablePage() - 1;
+        int maxPage = locationService.maxAvailablePage();
 
         URI basePath = uriInfo.getAbsolutePathBuilder().build();
         String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage);
@@ -83,6 +83,23 @@ public class LocationController {
     }
 
     /**
+     * Returns a specific location
+     * @param request
+     * @return Location
+     */
+    @GET
+    @Path("/{name}")
+    @Produces(value = { MediaType.APPLICATION_JSON })
+    public Response getAllLocations(@PathParam("name") String name, @Context Request request)
+            throws EntityNotFoundException {
+        Location location = locationService.getLocationByName(name)
+                .orElseThrow(() -> new EntityNotFoundException("location"));
+        LocationDto dto = LocationDto.fromLocation(location);
+        return CacheHelper.handleResponse(dto, locationCaching, "locations", request).build();
+
+    }
+
+    /**
      * Lets ADMIN delete location. If a there is a clinic on the location to be deleted, it throws
      * EntityDependencyException.
      * @param name
@@ -94,8 +111,10 @@ public class LocationController {
     @Path("/{name}")
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response deleteLocation(@PathParam("name") final String name)
-            throws EntityNotFoundException, EntityDependencyException {
-        locationService.deleteLocation(name);
+            throws EntityDependencyException, EntityNotFoundException {
+        Location location = locationService.getLocationByName(name)
+                .orElseThrow(() -> new EntityNotFoundException("location"));
+        locationService.deleteLocation(location);
         return Response.noContent().build();
     }
 

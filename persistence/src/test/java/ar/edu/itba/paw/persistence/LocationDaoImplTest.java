@@ -17,9 +17,9 @@ import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 @Transactional
 @Sql("classpath:schema.sql")
@@ -48,10 +48,10 @@ public class LocationDaoImplTest {
 
     @Test
     public void testGetLocationByName(){
-        Location location = locationDao.getLocationByName(name);
+        Optional<Location> location = locationDao.getLocationByName(name);
 
-        assertNotNull(location);
-        assertEquals(name, location.getLocationName());
+        assertTrue(location.isPresent());
+        assertEquals(name, location.get().getLocationName());
 
     }
 
