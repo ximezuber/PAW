@@ -178,7 +178,7 @@ public class ClinicController {
 
        clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
 
-        List<PrepaidDto> prepaid = prepaidToClinicService.getPrepaidsForClinic(clinicId, page)
+        List<PrepaidDto> prepaid = prepaidToClinicService.getPrepaidForClinic(clinicId, page)
                 .stream().map(PrepaidDto::fromPrepaid).collect(Collectors.toList());
         int maxPage = prepaidToClinicService.maxAvailablePagePerClinic(clinicId);
         URI basePath = uriInfo.getAbsolutePathBuilder().build();
@@ -209,7 +209,7 @@ public class ClinicController {
 
         clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
 
-        List<PrepaidDto> prepaid = prepaidToClinicService.getPrepaidsForClinic(clinicId)
+        List<PrepaidDto> prepaid = prepaidToClinicService.getPrepaidForClinic(clinicId)
                 .stream().map(PrepaidDto::fromPrepaid).collect(Collectors.toList());
         return CacheHelper.handleResponse(prepaid, prepaidCaching, new GenericEntity<List<PrepaidDto>>(prepaid) {},
                 "prepaid", request).build();

@@ -5,13 +5,14 @@ import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
 import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PrepaidService extends PaginationService<Prepaid> {
-    List<Prepaid> getPrepaids();
+    List<Prepaid> getPrepaid();
 
-    Prepaid getPrepaidByName(String PrepaidName);
+    Optional<Prepaid> getPrepaidByName(String PrepaidName);
 
     Prepaid createPrepaid(String name) throws DuplicateEntityException;
 
-    long deletePrepaid(String name) throws EntityNotFoundException;
+    void deletePrepaid(Prepaid prepaid);
 }

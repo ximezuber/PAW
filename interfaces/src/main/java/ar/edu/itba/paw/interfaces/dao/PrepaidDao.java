@@ -3,15 +3,16 @@ package ar.edu.itba.paw.interfaces.dao;
 import ar.edu.itba.paw.model.Prepaid;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PrepaidDao extends PaginationDao<Prepaid> {
 
     Prepaid createPrepaid(String name);
 
-    Prepaid getPrepaidByName(String PrepaidName);
+    Optional<Prepaid> getPrepaidByName(String PrepaidName);
 
-    List<Prepaid> getPrepaids();
+    List<Prepaid> getPrepaid();
 
-    long deletePrepaid(String name);
+    void deletePrepaid(Prepaid prepaid);
 
 }

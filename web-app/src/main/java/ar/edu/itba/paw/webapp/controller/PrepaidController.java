@@ -42,6 +42,7 @@ public class PrepaidController {
     public Response getPrepaid(@QueryParam("page") @DefaultValue("0") Integer page,
                                 @Context Request request) {
         page = (page < 0) ? 0 : page;
+
         List<PrepaidDto> prepaid = prepaidService.getPaginatedObjects(page).stream()
                 .map(PrepaidDto::fromPrepaid).collect(Collectors.toList());
         int maxPage = prepaidService.maxAvailablePage();
@@ -67,11 +68,30 @@ public class PrepaidController {
     @Path("/all")
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response getAllPrepaid(@Context Request request) {
-        List<PrepaidDto> prepaid = prepaidService.getPrepaids().stream()
+        List<PrepaidDto> prepaid = prepaidService.getPrepaid().stream()
                 .map(PrepaidDto::fromPrepaid).collect(Collectors.toList());
 
-        return CacheHelper.handleResponse(prepaid, prepaidCaching, new GenericEntity<List<PrepaidDto>>(prepaid) {}, "prepaid", request)
-                .build();
+        return CacheHelper.handleResponse(prepaid, prepaidCaching,
+                        new GenericEntity<List<PrepaidDto>>(prepaid) {}, "prepaid", request).build();
+    }
+
+    /**
+     * Get a Prepaid by its name
+     * @param name
+     * @param request
+     * @return Prepaid
+     */
+    @GET
+    @Path("/{name}")
+    @Produces(value = { MediaType.APPLICATION_JSON })
+    public Response getPrepaid(@PathParam("name") final String name, @Context Request request)
+            throws EntityNotFoundException {
+        Prepaid prepaid = prepaidService.getPrepaidByName(name)
+                .orElseThrow(() -> new EntityNotFoundException("prepaid"));
+
+        PrepaidDto dto = PrepaidDto.fromPrepaid(prepaid);
+
+        return CacheHelper.handleResponse(dto, prepaidCaching, "prepaid", request).build();
     }
 
     /**
@@ -84,7 +104,9 @@ public class PrepaidController {
     @Path("/{name}")
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response deleteLocation(@PathParam("name") final String name) throws EntityNotFoundException {
-        prepaidService.deletePrepaid(name);
+        Prepaid prepaid = prepaidService.getPrepaidByName(name)
+                .orElseThrow(() -> new EntityNotFoundException("prepaid"));
+        prepaidService.deletePrepaid(prepaid);
         return Response.noContent().build();
     }
 

@@ -12,9 +12,9 @@ public interface PrepaidToClinicService extends PaginationService<PrepaidToClini
 
     boolean clinicHasPrepaid(String prepaid,int clinic);
 
-    List<Prepaid> getPrepaidsForClinic(int clinic, int page);
+    List<Prepaid> getPrepaidForClinic(int clinic, int page);
 
-    List<Prepaid> getPrepaidsForClinic(int clinic);
+    List<Prepaid> getPrepaidForClinic(int clinic);
 
     long deletePrepaidFromClinic(String prepaid, int clinic) throws EntityNotFoundException;
 

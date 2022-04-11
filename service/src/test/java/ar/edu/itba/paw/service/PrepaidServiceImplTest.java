@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Collections;
+import java.util.Optional;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PrepaidServiceImplTest {
@@ -32,7 +33,7 @@ public class PrepaidServiceImplTest {
     public void testCreate() throws DuplicateEntityException {
         // Set up
         Mockito.when(prepaidDao.getPrepaidByName(name))
-                .thenReturn(null);
+                .thenReturn(Optional.empty());
         Mockito.when(prepaidDao.createPrepaid(name))
                 .thenReturn(new Prepaid(name));
 
@@ -47,33 +48,21 @@ public class PrepaidServiceImplTest {
     public void testCreateDuplicate() throws DuplicateEntityException {
         // Set up
         Mockito.when(prepaidDao.getPrepaidByName(name))
-                .thenReturn(new Prepaid(name));
+                .thenReturn(Optional.of(new Prepaid(name)));
 
         // Execute
         prepaidService.createPrepaid(name);
     }
 
     @Test
-    public void testDelete() throws EntityNotFoundException {
+    public void testDelete() {
         // Set up
-        Mockito.when(prepaidDao.getPrepaidByName(name))
-                .thenReturn(new Prepaid(name));
+        Prepaid prepaid = new Prepaid(name);
         Mockito.when(patientService.getPatientsByPrepaid(name))
                 .thenReturn(Collections.emptyList());
 
         // Execute
-       prepaidService.deletePrepaid(name);
-
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void testDeleteNoPrepaid() throws EntityNotFoundException {
-        // Set up
-        Mockito.when(prepaidDao.getPrepaidByName(name))
-                .thenReturn(null);
-
-        // Execute
-        prepaidService.deletePrepaid(name);
+       prepaidService.deletePrepaid(prepaid);
 
     }
 }

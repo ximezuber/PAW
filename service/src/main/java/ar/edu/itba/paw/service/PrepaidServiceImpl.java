@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class PrepaidServiceImpl implements PrepaidService {
@@ -23,34 +24,31 @@ public class PrepaidServiceImpl implements PrepaidService {
     @Autowired
     private PatientService patientService;
 
-    public List<Prepaid> getPrepaids() {
-        return prepaidDao.getPrepaids();
+    public List<Prepaid> getPrepaid() {
+        return prepaidDao.getPrepaid();
     }
 
     @Override
-    public Prepaid getPrepaidByName(String prepaidName) {
+    public Optional<Prepaid> getPrepaidByName(String prepaidName) {
         return prepaidDao.getPrepaidByName(prepaidName);
     }
 
     @Transactional
     @Override
     public Prepaid createPrepaid(String name) throws DuplicateEntityException {
-        Prepaid prepaid = getPrepaidByName(name);
-        if (prepaid != null) throw new DuplicateEntityException("prepaid-exists");
+        Optional<Prepaid> exists = getPrepaidByName(name);
+        if (exists.isPresent()) throw new DuplicateEntityException("prepaid-exists");
         return prepaidDao.createPrepaid(name);
     }
 
     @Transactional
     @Override
-    public long deletePrepaid(String name) throws EntityNotFoundException {
-        Prepaid prepaid = getPrepaidByName(name);
-        if (prepaid == null) throw new EntityNotFoundException("prepaid");
-        List<Patient> patients = patientService.getPatientsByPrepaid(name);
-        long result = prepaidDao.deletePrepaid(name);
+    public void deletePrepaid(Prepaid prepaid) {
+        List<Patient> patients = patientService.getPatientsByPrepaid(prepaid.getName());
+        prepaidDao.deletePrepaid(prepaid);
         for(Patient patient : patients) {
             patientService.updatePatient(patient.getEmail(), null ,null);
         }
-        return result;
     }
 
     @Override

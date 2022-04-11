@@ -1,25 +1,18 @@
 package ar.edu.itba.paw.persistence;
 
 import ar.edu.itba.paw.model.Prepaid;
-import ar.edu.itba.paw.model.Specialty;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.sql.DataSource;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 @Transactional
 @Sql("classpath:schema.sql")
@@ -48,19 +41,19 @@ public class PrepaidDaoImplTest {
 
     @Test
     public void testGetSpecialtyByName(){
-        Prepaid prepaid = prepaidDao.getPrepaidByName(name);
+        Optional<Prepaid> prepaid = prepaidDao.getPrepaidByName(name);
 
-        assertNotNull(prepaid);
-        assertEquals(name, prepaid.getName());
+        assertTrue(prepaid.isPresent());
+        assertEquals(name, prepaid.get().getName());
 
     }
 
     @Test
     public void testGetSpecialties(){
-        List<Prepaid> prepaids = prepaidDao.getPrepaids();
+        List<Prepaid> prepaid = prepaidDao.getPrepaid();
 
-        assertNotNull(prepaids);
-        assertEquals(2, prepaids.size());
+        assertNotNull(prepaid);
+        assertEquals(2, prepaid.size());
 
     }
 

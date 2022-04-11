@@ -30,9 +30,9 @@ public class PrepaidToClinicServiceImpl implements PrepaidToClinicService {
     @Transactional
     @Override
     public PrepaidToClinic addPrepaidToClinic(String prepaidName, int clinicId) throws EntityNotFoundException {
-        Prepaid prepaid = prepaidService.getPrepaidByName(prepaidName);
+        Prepaid prepaid = prepaidService.getPrepaidByName(prepaidName)
+                .orElseThrow(() -> new EntityNotFoundException("prepaid"));
         Clinic clinic = clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
-        if (prepaid == null) throw new EntityNotFoundException("prepaid");
         return prepaidToClinicDao.addPrepaidToClinic(prepaid, clinic);
     }
 
@@ -44,9 +44,9 @@ public class PrepaidToClinicServiceImpl implements PrepaidToClinicService {
     @Transactional
     @Override
     public long deletePrepaidFromClinic(String prepaidName, int clinicId) throws EntityNotFoundException {
-        Prepaid prepaid = prepaidService.getPrepaidByName(prepaidName);
+        Prepaid prepaid = prepaidService.getPrepaidByName(prepaidName)
+                .orElseThrow(() -> new EntityNotFoundException("prepaid"));
         Clinic clinic = clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
-        if (prepaid == null) throw new EntityNotFoundException("prepaid");
         if (!clinicHasPrepaid(prepaidName, clinicId)) throw new EntityNotFoundException("clinic-prepaid");
         return prepaidToClinicDao.deletePrepaidFromClinic(prepaidName, clinicId);
     }
@@ -57,12 +57,12 @@ public class PrepaidToClinicServiceImpl implements PrepaidToClinicService {
     }
 
     @Override
-    public List<Prepaid> getPrepaidsForClinic(int clinic, int page) {
+    public List<Prepaid> getPrepaidForClinic(int clinic, int page) {
         return prepaidToClinicDao.getPrepaidsForClinic(clinic, page);
     }
 
     @Override
-    public List<Prepaid> getPrepaidsForClinic(int clinic) {
+    public List<Prepaid> getPrepaidForClinic(int clinic) {
         return prepaidToClinicDao.getPrepaidsForClinic(clinic);
     }
 
