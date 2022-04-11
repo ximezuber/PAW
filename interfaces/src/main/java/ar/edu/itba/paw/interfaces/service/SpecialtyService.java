@@ -6,6 +6,7 @@ import ar.edu.itba.paw.model.exceptions.EntityDependencyException;
 import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SpecialtyService extends PaginationService<Specialty> {
 
@@ -13,7 +14,7 @@ public interface SpecialtyService extends PaginationService<Specialty> {
 
     List<Specialty> getSpecialties();
 
-    Specialty getSpecialtyByName(String SpecialtyName);
+    Optional<Specialty> getSpecialtyByName(String SpecialtyName);
 
-    long deleteSpecialty(String name) throws EntityNotFoundException, EntityDependencyException;
+    void deleteSpecialty(Specialty specialty) throws EntityDependencyException;
 }

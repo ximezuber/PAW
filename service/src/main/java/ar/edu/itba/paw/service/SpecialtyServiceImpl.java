@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class SpecialtyServiceImpl implements SpecialtyService {
@@ -27,8 +28,8 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     @Transactional
     @Override
     public Specialty createSpecialty(String name) throws DuplicateEntityException {
-        Specialty specialty = getSpecialtyByName(name);
-        if (specialty != null) throw new DuplicateEntityException("specialty-exists");
+        Optional<Specialty> exists = getSpecialtyByName(name);
+        if (exists.isPresent()) throw new DuplicateEntityException("specialty-exists");
         return specialtyDao.createSpecialty(name);
     }
 
@@ -51,17 +52,15 @@ public class SpecialtyServiceImpl implements SpecialtyService {
     }
 
     @Override
-    public Specialty getSpecialtyByName(String specialtyName) {
+    public Optional<Specialty> getSpecialtyByName(String specialtyName) {
         return specialtyDao.getSpecialtyByName(specialtyName);
     }
 
     @Transactional
     @Override
-    public long deleteSpecialty(String name) throws EntityNotFoundException, EntityDependencyException {
-        Specialty specialty = getSpecialtyByName(name);
-        if (specialty == null) throw new EntityNotFoundException("specialty");
+    public void deleteSpecialty(Specialty specialty) throws EntityDependencyException {;
         List<Doctor> doctorsWithSpecialty = doctorService.getDoctorBySpecialty(specialty);
         if (!doctorsWithSpecialty.isEmpty()) throw new EntityDependencyException("doctors");
-        return specialtyDao.deleteSpecialty(name);
+        specialtyDao.deleteSpecialty(specialty);
     }
 }

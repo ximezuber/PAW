@@ -36,7 +36,7 @@ public class ExistenceServiceImpl implements ExistenceService {
             case "prepaid":
                 return prepaidService.getPrepaidByName(input) == null;
             case "specialty":
-                return specialtyService.getSpecialtyByName(input) == null;
+                return !specialtyService.getSpecialtyByName(input).isPresent();
             case "location":
                 return !locationService.getLocationByName(input).isPresent();
             case "patient":

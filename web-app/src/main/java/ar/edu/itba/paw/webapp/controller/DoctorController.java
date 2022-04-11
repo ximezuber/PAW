@@ -249,11 +249,13 @@ public class DoctorController {
     public Response createDoctor(final DoctorForm form)
             throws DuplicateEntityException, EntityNotFoundException,
             ar.edu.itba.paw.model.exceptions.BadRequestException {
+
         if (!form.getPassword().equals(form.getRepeatPassword()))
             throw new ar.edu.itba.paw.model.exceptions.BadRequestException("password-mismatch");
         String encodedPassword = passwordEncoder.encode(form.getPassword());
-        Specialty specialty = specialtyService.getSpecialtyByName(form.getSpecialty());
-        if (specialty == null) throw new EntityNotFoundException("specialty");
+        Specialty specialty = specialtyService.getSpecialtyByName(form.getSpecialty())
+                .orElseThrow(() -> new EntityNotFoundException("specialty"));
+
         doctorService.createDoctor(specialty, form.getLicense(), form.getPhoneNumber()
                 ,form.getFirstName(), form.getLastName(), encodedPassword, form.getEmail());
         return Response.created(uriInfo.getAbsolutePathBuilder().path(form.getLicense()).build()).build();

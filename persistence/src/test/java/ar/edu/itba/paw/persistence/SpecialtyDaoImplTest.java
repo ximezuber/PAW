@@ -16,9 +16,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 @Transactional
 @Sql("classpath:schema.sql")
@@ -30,8 +30,6 @@ public class SpecialtyDaoImplTest {
 
     private static final String name2 = "specialty2";
 
-//    @PersistenceContext
-//    private EntityManager entityManager;
 
     @Autowired
     private SpecialtyDaoImpl specialtyDao;
@@ -47,10 +45,10 @@ public class SpecialtyDaoImplTest {
 
     @Test
     public void testGetSpecialtyByName(){
-        Specialty specialty = specialtyDao.getSpecialtyByName(name);
+        Optional<Specialty> specialty = specialtyDao.getSpecialtyByName(name);
 
-        assertNotNull(specialty);
-        assertEquals(name, specialty.getSpecialtyName());
+        assertTrue(specialty.isPresent());
+        assertEquals(name, specialty.get().getSpecialtyName());
 
     }
 

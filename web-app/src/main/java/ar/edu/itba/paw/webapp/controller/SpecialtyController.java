@@ -47,7 +47,7 @@ public class SpecialtyController {
 
         List<SpecialtyDto> specialties = specialtyService.getPaginatedObjects(page).stream()
                 .map(SpecialtyDto::fromSpecialty).collect(Collectors.toList());
-        int maxPage = specialtyService.maxAvailablePage() - 1;
+        int maxPage = specialtyService.maxAvailablePage();
 
         URI basePath = uriInfo.getAbsolutePathBuilder().build();
         String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage);
@@ -79,18 +79,38 @@ public class SpecialtyController {
     }
 
     /**
+     * Returns a Specialty
+     * @param name
+     * @param request
+     * @return Specialty
+     */
+    @GET
+    @Path("/{name}")
+    @Produces(value = { MediaType.APPLICATION_JSON })
+    public Response getSpecialty(@PathParam("name") String name, @Context Request request)
+            throws EntityNotFoundException {
+        Specialty specialty = specialtyService.getSpecialtyByName(name)
+                .orElseThrow(() -> new EntityNotFoundException("specialty"));
+        SpecialtyDto dto = SpecialtyDto.fromSpecialty(specialty);
+
+        return CacheHelper.handleResponse(dto, specialtyCaching, "specialties", request).build();
+    }
+
+    /**
      * Lets ADMIN delete specialty. If a doctor belongs to the specialty, it throws
      * EntityDependencyException.
-     * @param specialty
+     * @param name
      * @return
      * @throws EntityNotFoundException
      * @throws EntityDependencyException
      */
     @DELETE
-    @Path("/{specialty}")
+    @Path("/{name}")
     @Produces(value = { MediaType.APPLICATION_JSON })
-    public Response deleteSpecialty(@PathParam("specialty") final String specialty)
+    public Response deleteSpecialty(@PathParam("name") final String name)
             throws EntityNotFoundException, EntityDependencyException {
+        Specialty specialty = specialtyService.getSpecialtyByName(name)
+                        .orElseThrow(() -> new EntityNotFoundException("specialty"));
         specialtyService.deleteSpecialty(specialty);
         return Response.noContent().build();
     }
