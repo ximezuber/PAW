@@ -2,9 +2,11 @@ package ar.edu.itba.paw.webapp.controller;
 
 import ar.edu.itba.paw.interfaces.service.ClinicService;
 import ar.edu.itba.paw.interfaces.service.LocationService;
+import ar.edu.itba.paw.interfaces.service.PrepaidService;
 import ar.edu.itba.paw.interfaces.service.PrepaidToClinicService;
 import ar.edu.itba.paw.model.Clinic;
 import ar.edu.itba.paw.model.Location;
+import ar.edu.itba.paw.model.Prepaid;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
 import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 import ar.edu.itba.paw.webapp.caching.ClinicCaching;
@@ -33,6 +35,9 @@ public class ClinicController {
 
     @Autowired
     private PrepaidToClinicService prepaidToClinicService;
+
+    @Autowired
+    private PrepaidService prepaidService;
 
     @Autowired
     private LocationService locationService;
@@ -178,9 +183,12 @@ public class ClinicController {
 
        clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
 
-        List<PrepaidDto> prepaid = prepaidToClinicService.getPrepaidForClinic(clinicId, page)
+       Clinic clinic = clinicService.getClinicById(clinicId)
+               .orElseThrow(() -> new EntityNotFoundException("clinic"));
+
+        List<PrepaidDto> prepaid = prepaidToClinicService.getPrepaidForClinic(clinic, page)
                 .stream().map(PrepaidDto::fromPrepaid).collect(Collectors.toList());
-        int maxPage = prepaidToClinicService.maxAvailablePagePerClinic(clinicId);
+        int maxPage = prepaidToClinicService.maxAvailablePagePerClinic(clinic);
         URI basePath = uriInfo.getAbsolutePathBuilder().build();
         String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxPage);
         Response.ResponseBuilder response = CacheHelper.handleResponse(prepaid, prepaidCaching,
@@ -207,9 +215,9 @@ public class ClinicController {
     public Response getAllClinicPrepaid(@PathParam("clinicId") final Integer clinicId,
                                       @Context Request request) throws EntityNotFoundException {
 
-        clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
+        Clinic clinic = clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
 
-        List<PrepaidDto> prepaid = prepaidToClinicService.getPrepaidForClinic(clinicId)
+        List<PrepaidDto> prepaid = prepaidToClinicService.getPrepaidForClinic(clinic)
                 .stream().map(PrepaidDto::fromPrepaid).collect(Collectors.toList());
         return CacheHelper.handleResponse(prepaid, prepaidCaching, new GenericEntity<List<PrepaidDto>>(prepaid) {},
                 "prepaid", request).build();
@@ -219,19 +227,23 @@ public class ClinicController {
     /**
      * Lets ADMIN add a prepaid to a specific clinic
      * @param clinicId
-     * @param prepaidId
+     * @param prepaidName
      * @return
      * @throws EntityNotFoundException
      */
     @PUT
-    @Path("{clinicId}/prepaid/{prepaidId}")
+    @Path("{clinicId}/prepaid/{name}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response addPrepaidToClinic(@PathParam("clinicId") final Integer clinicId,
-                                       @PathParam("prepaidId") final String prepaidId)
+                                       @PathParam("name") final String prepaidName)
             throws EntityNotFoundException {
 
-        prepaidToClinicService.addPrepaidToClinic(prepaidId, clinicId);
+        Prepaid prepaid = prepaidService.getPrepaidByName(prepaidName)
+                .orElseThrow(() -> new EntityNotFoundException("prepaid"));
+        Clinic clinic = clinicService.getClinicById(clinicId)
+                        .orElseThrow(() -> new EntityNotFoundException("clinic"));
+        prepaidToClinicService.addPrepaidToClinic(prepaid, clinic);
         return Response.noContent().build();
 
     }
@@ -239,17 +251,21 @@ public class ClinicController {
     /**
      * Lets ADMIN remove a prepaid from a specific clinic
      * @param clinicId
-     * @param prepaid
+     * @param prepaidName
      * @return
      * @throws EntityNotFoundException
      */
     @DELETE
-    @Path("{clinicId}/prepaid/{prepaidId}")
+    @Path("{clinicId}/prepaid/{name}")
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response removePrepaidFromClinic(@PathParam("clinicId") final Integer clinicId,
-                                            @PathParam("prepaidId") final String prepaid)
+                                            @PathParam("name") final String prepaidName)
             throws EntityNotFoundException {
-        prepaidToClinicService.deletePrepaidFromClinic(prepaid, clinicId);
+        Prepaid prepaid = prepaidService.getPrepaidByName(prepaidName)
+                        .orElseThrow(() -> new EntityNotFoundException("prepaid"));
+        Clinic clinic = clinicService.getClinicById(clinicId)
+                        .orElseThrow(() -> new EntityNotFoundException("clinic"));
+        prepaidToClinicService.deletePrepaidFromClinic(prepaid, clinic);
         return Response.ok().build();
 
     }

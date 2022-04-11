@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PrepaidToClinicServiceImpl implements PrepaidToClinicService {
@@ -29,41 +30,39 @@ public class PrepaidToClinicServiceImpl implements PrepaidToClinicService {
 
     @Transactional
     @Override
-    public PrepaidToClinic addPrepaidToClinic(String prepaidName, int clinicId) throws EntityNotFoundException {
-        Prepaid prepaid = prepaidService.getPrepaidByName(prepaidName)
-                .orElseThrow(() -> new EntityNotFoundException("prepaid"));
-        Clinic clinic = clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
+    public PrepaidToClinic addPrepaidToClinic(Prepaid prepaid, Clinic clinic) {
         return prepaidToClinicDao.addPrepaidToClinic(prepaid, clinic);
     }
 
     @Override
-    public boolean clinicHasPrepaid(String prepaid, int clinic) {
-        return prepaidToClinicDao.clinicHasPrepaid(prepaid,clinic);
+    public boolean clinicHasPrepaid(String prepaidName, int clinicId) {
+        Optional<Prepaid> prepaid = prepaidService.getPrepaidByName(prepaidName);
+        Optional<Clinic> clinic = clinicService.getClinicById(clinicId);
+        if (!prepaid.isPresent() || !clinic.isPresent()) return false;
+        return prepaidToClinicDao.clinicHasPrepaid(prepaid.get(), clinic.get());
     }
 
     @Transactional
     @Override
-    public long deletePrepaidFromClinic(String prepaidName, int clinicId) throws EntityNotFoundException {
-        Prepaid prepaid = prepaidService.getPrepaidByName(prepaidName)
-                .orElseThrow(() -> new EntityNotFoundException("prepaid"));
-        Clinic clinic = clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
-        if (!clinicHasPrepaid(prepaidName, clinicId)) throw new EntityNotFoundException("clinic-prepaid");
-        return prepaidToClinicDao.deletePrepaidFromClinic(prepaidName, clinicId);
+    public void deletePrepaidFromClinic(Prepaid prepaid, Clinic clinic) throws EntityNotFoundException {
+        PrepaidToClinic prepaidToClinic = prepaidToClinicDao.getPrepaidToClinic(prepaid, clinic)
+                .orElseThrow(() -> new EntityNotFoundException("clinic-prepaid"));
+        prepaidToClinicDao.deletePrepaidFromClinic(prepaidToClinic);
     }
 
     @Override
-    public int maxAvailablePagePerClinic(int id) {
-        return prepaidToClinicDao.maxAvailablePagePerClinic(id);
+    public int maxAvailablePagePerClinic(Clinic clinic) {
+        return prepaidToClinicDao.maxAvailablePagePerClinic(clinic);
     }
 
     @Override
-    public List<Prepaid> getPrepaidForClinic(int clinic, int page) {
-        return prepaidToClinicDao.getPrepaidsForClinic(clinic, page);
+    public List<Prepaid> getPrepaidForClinic(Clinic clinic, int page) {
+        return prepaidToClinicDao.getPrepaidForClinic(clinic, page);
     }
 
     @Override
-    public List<Prepaid> getPrepaidForClinic(int clinic) {
-        return prepaidToClinicDao.getPrepaidsForClinic(clinic);
+    public List<Prepaid> getPrepaidForClinic(Clinic clinic) {
+        return prepaidToClinicDao.getPrepaidForClinic(clinic);
     }
 
     @Override

@@ -5,19 +5,22 @@ import ar.edu.itba.paw.model.Prepaid;
 import ar.edu.itba.paw.model.PrepaidToClinic;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PrepaidToClinicDao extends PaginationDao<PrepaidToClinic> {
     List<PrepaidToClinic> getPrepaidToClinics();
 
     PrepaidToClinic addPrepaidToClinic(Prepaid prepaid, Clinic clinic);
 
-    boolean clinicHasPrepaid(String prepaid,int clinic);
+    boolean clinicHasPrepaid(Prepaid prepaid, Clinic clinic);
 
-    List<Prepaid> getPrepaidsForClinic(int clinic, int page);
+    Optional<PrepaidToClinic> getPrepaidToClinic(Prepaid prepaid, Clinic clinic);
 
-    List<Prepaid> getPrepaidsForClinic(int clinic);
+    List<Prepaid> getPrepaidForClinic(Clinic clinic, int page);
 
-    long deletePrepaidFromClinic(String prepaid, int clinic);
+    List<Prepaid> getPrepaidForClinic(Clinic clinic);
 
-    int maxAvailablePagePerClinic(int id);
+    void deletePrepaidFromClinic(PrepaidToClinic prepaidToClinic);
+
+    int maxAvailablePagePerClinic(Clinic id);
 }

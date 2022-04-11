@@ -47,7 +47,7 @@ public class PrepaidToClinicDaoImplTest {
 
     @Test
     public void testAddPrepaidToClinic(){
-        PrepaidToClinic prepaidToClinic = prepaidToClinicDao.addPrepaidToClinic(prepaid2,clinic2);
+        PrepaidToClinic prepaidToClinic = prepaidToClinicDao.addPrepaidToClinic(prepaid2, clinic2);
 
         assertNotNull(prepaidToClinic);
         assertEquals(prepaid2.getName(), prepaidToClinic.getPrepaid().getName());
@@ -56,11 +56,11 @@ public class PrepaidToClinicDaoImplTest {
 
     @Test
     public void testClinicHasPrepaid(){
-//        boolean bool1 = prepaidToClinicDao.clinicHasPrepaid(prepaid.getName(), clinic.getId());
-//        boolean bool2 = prepaidToClinicDao.clinicHasPrepaid(prepaid.getName(), clinic2.getId());
-//
-//        Assert.assertTrue(bool1);
-//        Assert.assertFalse(bool2);
+        boolean bool1 = prepaidToClinicDao.clinicHasPrepaid(prepaid, clinic);
+        boolean bool2 = prepaidToClinicDao.clinicHasPrepaid(prepaid, clinic2);
+
+        Assert.assertTrue(bool1);
+        Assert.assertFalse(bool2);
     }
 
 }
