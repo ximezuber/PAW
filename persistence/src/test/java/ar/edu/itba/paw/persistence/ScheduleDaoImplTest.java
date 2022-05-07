@@ -11,6 +11,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -36,9 +37,6 @@ public class ScheduleDaoImplTest {
 
     private static final int hour2 = 10;
 
-//    @PersistenceContext
-//    private EntityManager entityManager;
-
     @Autowired
     private ScheduleDaoImpl scheduleDao;
 
@@ -63,11 +61,11 @@ public class ScheduleDaoImplTest {
 
     @Test
     public void testHasSchedule(){
-        boolean bool1 = scheduleDao.doctorHasSchedule(doctorClinic.getDoctor(), day, hour);
-        boolean bool2 = scheduleDao.doctorHasSchedule(doctorClinic.getDoctor(), day2, hour2);
+        Optional<Schedule> bool1 = scheduleDao.getDoctorScheduledHour(doctorClinic.getDoctor(), day, hour);
+        Optional<Schedule> bool2 = scheduleDao.getDoctorScheduledHour(doctorClinic.getDoctor(), day2, hour2);
 
-        Assert.assertTrue(bool1);
-        Assert.assertFalse(bool2);
+        Assert.assertTrue(bool1.isPresent());
+        Assert.assertFalse(bool2.isPresent());
 
     }
 

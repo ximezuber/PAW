@@ -9,7 +9,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.print.Doc;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -67,7 +66,7 @@ public class DoctorClinicDaoImplTest {
 
     @Test
     public void testGetFilteredDoctorsByLocation(){
-        List<Doctor> doctorClinics = doctorClinicDao.getFilteredDoctorClinics(location, new Specialty(""),
+        List<Doctor> doctorClinics = doctorClinicDao.getFilteredDoctorInClinics(location, new Specialty(""),
                 "", "", new Prepaid(""), 0);
 
         assertNotNull(doctorClinics);
@@ -76,7 +75,7 @@ public class DoctorClinicDaoImplTest {
 
     @Test
     public void testGetFilteredDoctorsBySpecialty(){
-        List<Doctor> doctors = doctorClinicDao.getFilteredDoctorClinics(new Location(""), specialty,
+        List<Doctor> doctors = doctorClinicDao.getFilteredDoctorInClinics(new Location(""), specialty,
                 "", "", new Prepaid(""), 0);
 
         assertNotNull(doctors);
@@ -87,7 +86,7 @@ public class DoctorClinicDaoImplTest {
 
     @Test
     public void testGetFilteredDoctorsByFirstName(){
-        List<Doctor> doctors = doctorClinicDao.getFilteredDoctorClinics(new Location(""), new Specialty(""),
+        List<Doctor> doctors = doctorClinicDao.getFilteredDoctorInClinics(new Location(""), new Specialty(""),
                 doc.getFirstName(), "", new Prepaid(""), 0);
 
         assertNotNull(doctors);
@@ -98,7 +97,7 @@ public class DoctorClinicDaoImplTest {
 
     @Test
     public void testGetFilteredDoctorsByLastName(){
-        List<Doctor> doctors = doctorClinicDao.getFilteredDoctorClinics(new Location(""), new Specialty(""),
+        List<Doctor> doctors = doctorClinicDao.getFilteredDoctorInClinics(new Location(""), new Specialty(""),
                 "", doc.getLastName(), new Prepaid(""), 0);
 
         assertNotNull(doctors);
@@ -109,7 +108,7 @@ public class DoctorClinicDaoImplTest {
 
     @Test
     public void testGetFilteredDoctorsByConsultPrice(){
-        List<Doctor> doctors = doctorClinicDao.getFilteredDoctorClinics(new Location(""), new Specialty(""),
+        List<Doctor> doctors = doctorClinicDao.getFilteredDoctorInClinics(new Location(""), new Specialty(""),
                 "", "", new Prepaid(""), consultPrice);
 
         assertNotNull(doctors);

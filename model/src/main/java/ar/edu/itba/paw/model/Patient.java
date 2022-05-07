@@ -14,8 +14,9 @@ public class Patient {
     @Id
     private String email;
 
-    @Column(name = "prepaid")
-    private String prepaid;
+    @OneToOne
+    @JoinColumn(name = "prepaid")
+    private Prepaid prepaid;
 
     @Column(name = "prepaidNumber")
     private String prepaidNumber;
@@ -31,7 +32,7 @@ public class Patient {
     private List<Doctor> favorites;
 
     
-    public Patient(String id, String prepaid, String prepaidNumber,User user) {
+    public Patient(String id, Prepaid prepaid, String prepaidNumber,User user) {
         this.user = user;
         this.id = id;
         this.prepaid = prepaid;
@@ -58,7 +59,7 @@ public class Patient {
         return id;
     }
 
-    public String getPrepaid() {
+    public Prepaid getPrepaid() {
         return prepaid;
     }
 
@@ -95,7 +96,7 @@ public class Patient {
         this.user.setLastName(lastName);
     }
 
-    public void setPrepaid(String prepaid) {
+    public void setPrepaid(Prepaid prepaid) {
         this.prepaid = prepaid;
     }
 

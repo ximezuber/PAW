@@ -1,9 +1,7 @@
 package ar.edu.itba.paw.service;
 
 import ar.edu.itba.paw.interfaces.dao.ScheduleDao;
-import ar.edu.itba.paw.interfaces.service.ClinicService;
 import ar.edu.itba.paw.interfaces.service.DoctorClinicService;
-import ar.edu.itba.paw.interfaces.service.DoctorService;
 import ar.edu.itba.paw.model.*;
 import ar.edu.itba.paw.model.exceptions.ConflictException;
 import org.junit.Assert;
@@ -13,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.Optional;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ScheduleServiceImplTest {
@@ -38,16 +38,13 @@ public class ScheduleServiceImplTest {
     @Test
     public void testCreate() throws ConflictException {
         // Set up
-        Mockito.when(doctorClinicService.getDoctorClinic(Mockito.eq(doc.getLicense()),
-                        Mockito.eq(clinic.getId())))
-                .thenReturn(dc);
-        Mockito.when(scheduleDao.doctorHasSchedule(Mockito.eq(doc), Mockito.eq(day), Mockito.eq(time)))
-                .thenReturn(false);
+        Mockito.when(scheduleDao.getDoctorScheduledHour(Mockito.eq(doc), Mockito.eq(day), Mockito.eq(time)))
+                .thenReturn(Optional.empty());
         Mockito.when(scheduleDao.createSchedule(Mockito.eq(day), Mockito.eq(time), Mockito.eq(dc)))
                 .thenReturn(new Schedule(day, time, dc));
 
         // Execute
-        Schedule schedule = scheduleService.createSchedule(time, day, doc.getLicense(), clinic.getId());
+        Schedule schedule = scheduleService.createSchedule(time, day, dc);
 
         // Assert
         Assert.assertEquals(doc.getLicense(), schedule.getDoctorClinic().getDoctor().getLicense());
@@ -59,13 +56,10 @@ public class ScheduleServiceImplTest {
     @Test(expected = ConflictException.class)
     public void testCreateExists() throws ConflictException {
         // Set up
-        Mockito.when(doctorClinicService.getDoctorClinic(Mockito.eq(doc.getLicense()),
-                        Mockito.eq(clinic.getId())))
-                .thenReturn(dc);
-        Mockito.when(scheduleDao.doctorHasSchedule(Mockito.eq(doc), Mockito.eq(day), Mockito.eq(time)))
-                .thenReturn(true);
+        Mockito.when(scheduleDao.getDoctorScheduledHour(Mockito.eq(doc), Mockito.eq(day), Mockito.eq(time)))
+                .thenReturn(Optional.of(new Schedule(day, time, dc)));
 
         // Execute
-        scheduleService.createSchedule(time, day, doc.getLicense(), clinic.getId());
+        scheduleService.createSchedule(time, day, dc);
     }
 }

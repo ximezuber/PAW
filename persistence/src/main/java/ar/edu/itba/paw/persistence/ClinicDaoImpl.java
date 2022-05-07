@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
@@ -65,15 +64,13 @@ public class ClinicDaoImpl implements ClinicDao {
         query.setParameter("location", location.getLocationName());
         return query.getResultList();
     }
+
     @Override
-    public boolean clinicExists(String name, String address, Location location) {
+    public Optional<Clinic> getClinicByName(String name) {
         TypedQuery<Clinic> query = entityManager.createQuery("FROM Clinic AS clinic" +
-                " WHERE clinic.location.name = :location AND clinic.name = :name AND clinic.address = :address",
-                Clinic.class);
-        query.setParameter("location", location.getLocationName());
+                        " WHERE clinic.name = :name", Clinic.class);
         query.setParameter("name", name);
-        query.setParameter("address", address);
-        return !query.getResultList().isEmpty();
+        return query.getResultList().stream().findFirst();
     }
 
     @Override

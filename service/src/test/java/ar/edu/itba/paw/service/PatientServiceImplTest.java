@@ -1,10 +1,7 @@
 package ar.edu.itba.paw.service;
 
 import ar.edu.itba.paw.interfaces.dao.PatientDao;
-import ar.edu.itba.paw.interfaces.service.AppointmentService;
-import ar.edu.itba.paw.interfaces.service.DoctorService;
-import ar.edu.itba.paw.interfaces.service.FavoriteService;
-import ar.edu.itba.paw.interfaces.service.UserService;
+import ar.edu.itba.paw.interfaces.service.*;
 import ar.edu.itba.paw.model.*;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
 import ar.edu.itba.paw.model.exceptions.FavouriteExistsException;
@@ -20,6 +17,7 @@ import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientServiceImplTest {
@@ -46,7 +44,7 @@ public class PatientServiceImplTest {
     private UserService userService;
 
     @Mock
-    private DoctorService doctorService;
+    private PrepaidService prepaidService;
 
     @Mock
     private FavoriteService favoriteService;
@@ -54,11 +52,13 @@ public class PatientServiceImplTest {
     @Test
     public void testCreate() throws DuplicateEntityException {
         //Set Up
-        Mockito.when(mockDao.create(Mockito.eq(id),Mockito.eq(prepaid.getName()),
+        Mockito.when(mockDao.create(Mockito.eq(id),Mockito.eq(prepaid),
                 Mockito.eq(prepaidNumber), Mockito.eq(user)))
-                .thenReturn(new Patient(id, prepaid.getName(), prepaidNumber, user));
+                .thenReturn(new Patient(id, prepaid, prepaidNumber, user));
         Mockito.when(userService.createUser(Mockito.eq(user.getFirstName()), Mockito.eq(user.getLastName()),
                 Mockito.eq(user.getPassword()), Mockito.eq(user.getEmail()))).thenReturn(user);
+        Mockito.when(prepaidService.getPrepaidByName(Mockito.eq(prepaid.getName())))
+                .thenReturn(Optional.of(prepaid));
         //Execute
         Patient patient = patientService.create(id, prepaid.getName(), prepaidNumber, user.getFirstName(), user.getLastName(), user.getPassword(), user.getEmail());
 
@@ -66,7 +66,7 @@ public class PatientServiceImplTest {
         Assert.assertNotNull(patient);
         Assert.assertEquals(user.getEmail(), patient.getEmail());
         Assert.assertEquals(id, patient.getId());
-        Assert.assertEquals(prepaid.getName(), patient.getPrepaid());
+        Assert.assertEquals(prepaid.getName(), patient.getPrepaid().getName());
         Assert.assertEquals(prepaidNumber, patient.getPrepaidNumber());
         Assert.assertEquals(user.getLastName(), patient.getLastName());
         Assert.assertEquals(user.getFirstName(), patient.getFirstName());
@@ -76,8 +76,8 @@ public class PatientServiceImplTest {
     @Test(expected = DuplicateEntityException.class)
     public void testCreateEmailExists() throws DuplicateEntityException {
         // Set up
-        Mockito.when(userService.userExists(user.getEmail()))
-                .thenReturn(true);
+        Mockito.when(userService.findUserByEmail(user.getEmail()))
+                .thenReturn(Optional.of(user));
 
         // Execute
        patientService.create(id, prepaid.getName(), prepaidNumber, user.getFirstName(), user.getLastName(), user.getPassword(), user.getEmail());
@@ -87,57 +87,24 @@ public class PatientServiceImplTest {
     @Test
     public void tessAddFavorites() throws FavouriteExistsException {
         // Set up
-        Patient patient = new Patient(id, prepaid.getName(), prepaidNumber, user);
-        Mockito.when(doctorService.getDoctorByLicense(license))
-                .thenReturn(doctor);
-        Mockito.when(mockDao.getPatientByEmail(user.getEmail()))
-                .thenReturn(patient);
-        Mockito.when(favoriteService.isFavorite(Mockito.eq(doctor), Mockito.eq(patient)))
-                .thenReturn(false);
-
+        Patient patient = new Patient(id, prepaid, prepaidNumber, user);
+        Mockito.when(favoriteService.getFavorite(Mockito.eq(doctor), Mockito.eq(patient)))
+                .thenReturn(Optional.empty());
 
         // Execute
-        patientService.addFavorite(user.getEmail(), license);
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void tessAddFavoritesNoDoc() throws FavouriteExistsException, EntityNotFoundException {
-        // Set up
-        Patient patient = new Patient(id, prepaid.getName(), prepaidNumber, user);
-        Mockito.when(doctorService.getDoctorByLicense(license))
-                .thenReturn(null);
-
-        // Execute
-        patientService.addFavorite(user.getEmail(), license);
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    public void tessAddFavoritesNoPatient() throws FavouriteExistsException, EntityNotFoundException {
-        // Set up
-        Patient patient = new Patient(id, prepaid.getName(), prepaidNumber, user);
-        Mockito.when(doctorService.getDoctorByLicense(license))
-                .thenReturn(doctor);
-        Mockito.when(mockDao.getPatientByEmail(user.getEmail()))
-                .thenReturn(null);
-
-        // Execute
-        patientService.addFavorite(user.getEmail(), license);
+        patientService.addFavorite(patient, doctor);
     }
 
     @Test(expected = FavouriteExistsException.class)
     public void tessAddFavoritesFavExists() throws FavouriteExistsException, EntityNotFoundException {
         // Set up
-        Patient patient = new Patient(id, prepaid.getName(), prepaidNumber, user);
-        Mockito.when(doctorService.getDoctorByLicense(license))
-                .thenReturn(doctor);
-        Mockito.when(mockDao.getPatientByEmail(user.getEmail()))
-                .thenReturn(patient);
-        Mockito.when(favoriteService.isFavorite(Mockito.eq(doctor), Mockito.eq(patient)))
-                .thenReturn(true);
+        Patient patient = new Patient(id, prepaid, prepaidNumber, user);
+        Mockito.when(favoriteService.getFavorite(Mockito.eq(doctor), Mockito.eq(patient)))
+                .thenReturn(Optional.of(new Favorite(doctor, patient)));
 
 
         // Execute
-        patientService.addFavorite(user.getEmail(), license);
+        patientService.addFavorite(patient, doctor);
     }
 }
 

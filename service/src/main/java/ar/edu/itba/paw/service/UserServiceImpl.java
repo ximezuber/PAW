@@ -9,8 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class UserServiceImpl implements UserService {
@@ -26,50 +25,38 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User createUser(String firstName,String lastName, String password, String email) {
+    public User createUser(String firstName, String lastName, String password, String email) {
         return userDao.createUser(firstName, lastName, password, email);
     }
 
     @Override
-    public User findUserByEmail(String email) {
+    public Optional<User> findUserByEmail(String email) {
         return userDao.findUserByEmail(email);
     }
 
     @Override
-    public boolean userExists(String email) {
-        return (userDao.findUserByEmail(email) != null);
-    }
-
-    @Override
     public boolean isDoctor(String email) {
-        return doctorService.isDoctor(email);
+        return doctorService.getDoctorByEmail(email).isPresent();
     }
 
     @Override
     public boolean isAdmin(String email) {
-        return adminService.isAdmin(email);
+        return adminService.getAdmin(email).isPresent();
     }
 
     @Transactional
     @Override
-    public long deleteUser(String email) {
-        return userDao.deleteUser(email);
+    public void deleteUser(User user) {
+        userDao.deleteUser(user);
     }
 
     @Transactional
     @Override
-    public void updateUser(String email, String newPassword, String firstName, String lastName) {
-        Map<String,String> args = new HashMap<>();
-        if(newPassword != null){
-            args.put("password", newPassword);
-        }
-        if(!firstName.equals("")){
-            args.put("firstName", firstName);
-        }
-        if(!lastName.equals("")){
-            args.put("lastName", lastName);
-        }
-        userDao.updateUser(email, args);
+    public void updateUser(User user, String email, String newPassword, String firstName, String lastName) {
+        firstName = firstName == null || firstName.equals("") ? user.getFirstName() : firstName;
+        lastName = lastName == null || lastName.equals("") ? user.getLastName() : lastName;
+        email = email == null || email.equals("") ? user.getEmail() : email;
+        userDao.updateUser(user, firstName, lastName, newPassword, email);
     }
 
 }

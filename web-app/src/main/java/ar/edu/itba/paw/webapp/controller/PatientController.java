@@ -9,6 +9,7 @@ import ar.edu.itba.paw.model.Patient;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
 import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 import ar.edu.itba.paw.model.exceptions.FavouriteExistsException;
+import ar.edu.itba.paw.model.exceptions.NoPrepaidNumberException;
 import ar.edu.itba.paw.webapp.caching.DoctorCaching;
 import ar.edu.itba.paw.webapp.caching.PatientCaching;
 import ar.edu.itba.paw.webapp.dto.DoctorDto;
@@ -64,8 +65,8 @@ public class PatientController {
     @PreAuthorize("hasPermission(#patientEmail, 'user')")
     public Response getPatient(@PathParam("id") final String patientEmail,
                                @Context Request request) throws EntityNotFoundException {
-        Patient patient = patientService.getPatientByEmail(patientEmail);
-        if(patient == null) throw new EntityNotFoundException("patient");
+        Patient patient = patientService.getPatientByEmail(patientEmail)
+                .orElseThrow(() -> new EntityNotFoundException("patient"));
 
         PatientDto dto = PatientDto.fromPatient(patient, uriInfo);
         return CacheHelper.handleResponse(dto, patientCaching, "patient", request).build();
@@ -76,8 +77,11 @@ public class PatientController {
     @Path("{id}")
     @Produces(value = { MediaType.APPLICATION_JSON })
     @PreAuthorize("hasPermission(#patientEmail, 'user')")
-    public Response deletePatient(@PathParam("id") final String patientEmail) {
-        patientService.deletePatient(patientEmail);
+    public Response deletePatient(@PathParam("id") final String patientEmail) throws EntityNotFoundException {
+        Patient patient = patientService.getPatientByEmail(patientEmail)
+                .orElseThrow(() -> new EntityNotFoundException("patient"));
+
+        patientService.deletePatient(patient);
         return Response.noContent().build();
     }
 
@@ -86,11 +90,12 @@ public class PatientController {
     @Produces(value = { MediaType.APPLICATION_JSON })
     @PreAuthorize("hasPermission(#patientEmail, 'user')")
     public Response updatePatient(@PathParam("id") final String patientEmail,
-                                  PersonalInformationForm form) throws EntityNotFoundException {
-        Patient patient = patientService.getPatientByEmail(patientEmail);
-        if(patient == null) throw new EntityNotFoundException("patient");
+                                  PersonalInformationForm form) throws EntityNotFoundException, NoPrepaidNumberException {
+        Patient patient = patientService.getPatientByEmail(patientEmail)
+                .orElseThrow(() -> new EntityNotFoundException("patient"));
 
-        patientService.updatePatientProfile(patientEmail, SecurityHelper.processNewPassword(form.getNewPassword(),
+
+        patientService.updatePatientProfile(patient, patientEmail, SecurityHelper.processNewPassword(form.getNewPassword(),
                 passwordEncoder, userService, patientEmail), form.getFirstName(),
                 form.getLastName(), form.getPrepaid(), form.getPrepaidNumber());
         return Response.noContent().build();
@@ -100,7 +105,7 @@ public class PatientController {
     @POST
     @Produces(value = { MediaType.APPLICATION_JSON, })
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createPatient(final SignUpForm form) throws DuplicateEntityException {
+    public Response createPatient(final SignUpForm form) throws DuplicateEntityException, EntityNotFoundException {
         String encodedPassword = passwordEncoder.encode(form.getPassword());
         patientService.create(form.getId(), form.getPrepaid(),
                 form.getPrepaidNumber(), form.getFirstName(),
@@ -128,13 +133,13 @@ public class PatientController {
                                         @Context Request request) throws EntityNotFoundException {
         page = (page < 0) ? 0 : page;
 
-        Patient patient = patientService.getPatientByEmail(patientEmail);
-        if(patient == null) throw new EntityNotFoundException("patient");
+        Patient patient = patientService.getPatientByEmail(patientEmail)
+                .orElseThrow(() -> new EntityNotFoundException("patient"));
 
         if (license != null) {
-            Doctor doc = doctorService.getDoctorByLicense(license);
-            if (doc == null) throw new EntityNotFoundException("doctor");
-            if (favoriteService.isFavorite(doc, patient)) {
+            Doctor doc = doctorService.getDoctorByLicense(license)
+                    .orElseThrow(() -> new EntityNotFoundException("doctor"));
+            if (favoriteService.getFavorite(doc, patient).isPresent()) {
                 DoctorDto dto = DoctorDto.fromDoctor(doc, uriInfo);
                 List<DoctorDto> docDto = Collections.singletonList(dto);
                 return CacheHelper.handleResponse(docDto, doctorCaching,
@@ -169,7 +174,12 @@ public class PatientController {
     @PreAuthorize("hasPermission(#patientEmail, 'user')")
     public Response removeFromFavorites(@PathParam("id") final String patientEmail,
                                         @QueryParam("license") String doctorLicense) throws EntityNotFoundException {
-        patientService.deleteFavorite(patientEmail, doctorLicense);
+        Patient patient = patientService.getPatientByEmail(patientEmail)
+                .orElseThrow(() -> new EntityNotFoundException("patient"));
+        Doctor doc = doctorService.getDoctorByLicense(doctorLicense)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+
+        patientService.deleteFavorite(patient, doc);
         return Response.noContent().build();
     }
 
@@ -179,8 +189,15 @@ public class PatientController {
     @Consumes(MediaType.APPLICATION_JSON)
     @PreAuthorize("hasPermission(#patientEmail, 'user')")
     public Response addFavorite(@PathParam("id") final String patientEmail,
-                                @QueryParam("license") String doctorLicense) throws EntityNotFoundException, FavouriteExistsException {
-        patientService.addFavorite(patientEmail, doctorLicense);
+                                @QueryParam("license") String doctorLicense)
+            throws EntityNotFoundException, FavouriteExistsException {
+
+        Patient patient = patientService.getPatientByEmail(patientEmail)
+                .orElseThrow(() -> new EntityNotFoundException("patient"));
+        Doctor doc = doctorService.getDoctorByLicense(doctorLicense)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+
+        patientService.addFavorite(patient, doc);
         return Response.created(uriInfo.getAbsolutePath()).build();
     }
 

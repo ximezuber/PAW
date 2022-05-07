@@ -5,6 +5,7 @@ import ar.edu.itba.paw.model.Favorite;
 import ar.edu.itba.paw.model.Patient;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FavoriteService {
 
@@ -12,9 +13,9 @@ public interface FavoriteService {
 
     List<Favorite> getPatientsFavorite(Patient patient);
 
-    boolean isFavorite(Doctor doctor, Patient patient);
+    Optional<Favorite> getFavorite(Doctor doctor, Patient patient);
 
-    void deleteFavorite(Doctor doctor, Patient patient);
+    void deleteFavorite(Favorite favorite);
 
     List<Favorite> getPaginatedObjects(int page, Patient patient);
 

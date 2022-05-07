@@ -12,8 +12,6 @@ public interface PrepaidToClinicDao extends PaginationDao<PrepaidToClinic> {
 
     PrepaidToClinic addPrepaidToClinic(Prepaid prepaid, Clinic clinic);
 
-    boolean clinicHasPrepaid(Prepaid prepaid, Clinic clinic);
-
     Optional<PrepaidToClinic> getPrepaidToClinic(Prepaid prepaid, Clinic clinic);
 
     List<Prepaid> getPrepaidForClinic(Clinic clinic, int page);
@@ -22,5 +20,5 @@ public interface PrepaidToClinicDao extends PaginationDao<PrepaidToClinic> {
 
     void deletePrepaidFromClinic(PrepaidToClinic prepaidToClinic);
 
-    int maxAvailablePagePerClinic(Clinic id);
+    int maxAvailablePagePerClinic(Clinic clinic);
 }

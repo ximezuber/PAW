@@ -1,7 +1,11 @@
 package ar.edu.itba.paw.webapp.helpers.validation.implementations;
 
+import ar.edu.itba.paw.interfaces.service.ClinicService;
 import ar.edu.itba.paw.interfaces.service.DoctorClinicService;
+import ar.edu.itba.paw.interfaces.service.DoctorService;
 import ar.edu.itba.paw.interfaces.service.ScheduleService;
+import ar.edu.itba.paw.model.Clinic;
+import ar.edu.itba.paw.model.Doctor;
 import ar.edu.itba.paw.model.DoctorClinic;
 import ar.edu.itba.paw.webapp.helpers.validation.annotations.UniqueSchedule;
 import org.springframework.beans.BeanWrapperImpl;
@@ -9,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import java.util.Optional;
 
 public class ScheduleValidator implements ConstraintValidator<UniqueSchedule,Object> {
 
@@ -26,6 +31,12 @@ public class ScheduleValidator implements ConstraintValidator<UniqueSchedule,Obj
     @Autowired
     DoctorClinicService doctorClinicService;
 
+    @Autowired
+    DoctorService doctorService;
+
+    @Autowired
+    ClinicService clinicService;
+
     @Override
     public void initialize(UniqueSchedule constraintAnnotation) {
         license = constraintAnnotation.license();
@@ -40,7 +51,14 @@ public class ScheduleValidator implements ConstraintValidator<UniqueSchedule,Obj
         Object scheduleClinic = new BeanWrapperImpl(value).getPropertyValue(clinic);
         Object scheduleHour = new BeanWrapperImpl(value).getPropertyValue(hour);
         Object scheduleDay = new BeanWrapperImpl(value).getPropertyValue(day);
-        DoctorClinic doctorClinic = doctorClinicService.getDoctorClinic(scheduleLicense.toString(), (int)scheduleClinic);
-        return !scheduleService.doctorHasScheduleInClinic(doctorClinic, (int)scheduleDay, (int)scheduleHour);
+        Optional<Doctor> doctor = doctorService.getDoctorByLicense(scheduleLicense.toString());
+        Optional<Clinic> clinic = clinicService.getClinicById((int)scheduleClinic);
+        if (clinic.isPresent() && doctor.isPresent()) {
+            Optional<DoctorClinic> doctorClinic = doctorClinicService.getDoctorClinic(doctor.get(), clinic.get());
+            if (doctorClinic.isPresent())
+                return scheduleService.getDoctorsClinicSchedule(doctorClinic.get(), (int)scheduleDay, (int)scheduleHour)
+                        .isPresent();
+        }
+        return false;
     }
 }

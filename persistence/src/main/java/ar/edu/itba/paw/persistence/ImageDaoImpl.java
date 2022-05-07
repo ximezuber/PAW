@@ -7,9 +7,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class ImageDaoImpl implements ImageDao {
@@ -18,22 +17,30 @@ public class ImageDaoImpl implements ImageDao {
     private EntityManager entityManager;
 
     @Override
-    public void createProfileImage(byte[] image, Doctor doctor) {
-        Doctor doc = entityManager.find(Doctor.class, doctor.getLicense());
+    public Image createProfileImage(byte[] image, Doctor doctor) {
+        Doctor doc = entityManager.merge(doctor);
         Image im = new Image(doc, image);
         entityManager.persist(im);
+        return im;
     }
 
     @Override
     public void deleteProfileImage(Image profileImage) {
-        entityManager.remove(profileImage);
+        Image contextImage = entityManager.merge(profileImage);
+        entityManager.remove(contextImage);
     }
 
     @Override
-    public Image getProfileImage(String doctor){
-        TypedQuery<Image> query = entityManager.createQuery("from Image as image where image.doctor.license = :doctor",Image.class);
-        query.setParameter("doctor",doctor);
-        List<Image> list = query.getResultList();
-        return list.isEmpty() ? null : list.get(0);
+    public Optional<Image> getProfileImageByLicense(String license){
+        TypedQuery<Image> query = entityManager.createQuery("FROM Image AS image " +
+                "WHERE image.doctor.license = :license", Image.class);
+        query.setParameter("license", license);
+        return query.getResultList().stream().findFirst();
+    }
+
+    @Override
+    public Optional<Image> getProfileImageById(int id) {
+        Image image = entityManager.find(Image.class, id);
+        return Optional.ofNullable(image);
     }
 }

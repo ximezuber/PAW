@@ -71,6 +71,16 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
 
     @Override
+    public Optional<Appointment> getAppointment(User patient, LocalDateTime date) {
+        TypedQuery<Appointment> query = entityManager.createQuery("FROM Appointment AS ap" +
+                " WHERE ap.patient = :email " +
+                "AND ap.appointmentKey.date = :date", Appointment.class);
+        query.setParameter("email", patient.getEmail());
+        query.setParameter("date", date);
+        return query.getResultList().stream().findFirst();
+    }
+
+    @Override
     public int getMaxAvailablePage(Patient patient) {
         return (int) (Math.ceil(( ((double)getPatientsAppointments(patient.getUser()).size()) / (double)MAX_APPOINTMENTS_PER_PAGE)));
     }
@@ -91,23 +101,23 @@ public class AppointmentDaoImpl implements AppointmentDao {
     public int cancelAllAppointmentsOnSchedule(DoctorClinic doctorClinic, int day, int hour) {
         final Query query = entityManager.createQuery("DELETE FROM Appointment AS ap WHERE " +
                 "ap.appointmentKey.doctor = :doctor AND ap.clinic = :clinic AND " +
-                "DAY(ap.appointmentKey.date) = :day AND HOUR(ap.appointmentKey.date) = :hour");
+                "DATE_PART('isodow', ap.appointmentKey.date) = :day AND HOUR(ap.appointmentKey.date) = :hour");
         query.setParameter("doctor", doctorClinic.getDoctor().getLicense());
         query.setParameter("clinic", doctorClinic.getClinic().getId());
-        query.setParameter("day", day - 1);
+        query.setParameter("day", day);
         query.setParameter("hour", hour);
         return query.executeUpdate();
     }
 
     @Override
-    public boolean hasAppointment(String doctorLicense, String patientEmail, LocalDateTime date) {
+    public Optional<Appointment> getAppointment(Doctor doctor, Patient patient, LocalDateTime date) {
         TypedQuery<Appointment> query = entityManager.createQuery("FROM Appointment AS ap" +
                 " WHERE ap.doctorClinic.doctor.license = :doctor AND ap.patient = :email " +
                 "AND ap.appointmentKey.date = :date", Appointment.class);
-        query.setParameter("doctor", doctorLicense);
-        query.setParameter("email", patientEmail);
+        query.setParameter("doctor", doctor.getLicense());
+        query.setParameter("email", patient.getEmail());
         query.setParameter("date", date);
-        return !query.getResultList().isEmpty();
+        return query.getResultList().stream().findFirst();
     }
 
     @Override

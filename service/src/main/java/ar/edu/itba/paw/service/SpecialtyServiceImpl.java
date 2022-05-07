@@ -7,7 +7,6 @@ import ar.edu.itba.paw.model.Doctor;
 import ar.edu.itba.paw.model.Specialty;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
 import ar.edu.itba.paw.model.exceptions.EntityDependencyException;
-import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +57,7 @@ public class SpecialtyServiceImpl implements SpecialtyService {
 
     @Transactional
     @Override
-    public void deleteSpecialty(Specialty specialty) throws EntityDependencyException {;
+    public void deleteSpecialty(Specialty specialty) throws EntityDependencyException {
         List<Doctor> doctorsWithSpecialty = doctorService.getDoctorBySpecialty(specialty);
         if (!doctorsWithSpecialty.isEmpty()) throw new EntityDependencyException("doctors");
         specialtyDao.deleteSpecialty(specialty);

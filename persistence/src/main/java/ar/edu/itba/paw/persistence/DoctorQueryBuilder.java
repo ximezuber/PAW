@@ -17,7 +17,7 @@ public class DoctorQueryBuilder {
             query.append("doctorCli.doctor.user.firstName = :firstName and ");
         }
         if(!(lastName.equals(""))){
-            query.append("doctorCli.doctor.user.lastName = :lastName and ");
+            query.append("doctorCli.doctor.user.lastName LIKE CONCAT(:lastName,'%')  and ");
         }
         if(!(prepaid.equals(""))){
             query.append("p.prepaid.name = :prepaid");

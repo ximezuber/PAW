@@ -24,9 +24,6 @@ public class PrepaidDaoImplTest {
 
     private static final String name2 = "prepaid3";
 
-//    @PersistenceContext
-//    private EntityManager entityManager;
-
     @Autowired
     private PrepaidDaoImpl prepaidDao;
 

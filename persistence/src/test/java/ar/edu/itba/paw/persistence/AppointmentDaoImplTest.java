@@ -62,7 +62,7 @@ public class AppointmentDaoImplTest {
     public void testGetAllDoctorsAppointments(){
         final List<Appointment> apps = appointmentDao.getAllDoctorsAppointments(doc);
         assertNotNull(apps);
-        Assert.assertTrue(!apps.isEmpty());
+        Assert.assertFalse(apps.isEmpty());
         assertEquals(doc.getLicense(), apps.get(0).getDoctorClinic().getDoctor().getLicense());
 
     }

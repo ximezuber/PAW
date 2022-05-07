@@ -58,7 +58,7 @@ public class PrepaidServiceImplTest {
     public void testDelete() {
         // Set up
         Prepaid prepaid = new Prepaid(name);
-        Mockito.when(patientService.getPatientsByPrepaid(name))
+        Mockito.when(patientService.getPatientsByPrepaid(prepaid))
                 .thenReturn(Collections.emptyList());
 
         // Execute

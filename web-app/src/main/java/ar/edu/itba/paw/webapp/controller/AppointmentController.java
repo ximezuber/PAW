@@ -1,9 +1,7 @@
 package ar.edu.itba.paw.webapp.controller;
 
-import ar.edu.itba.paw.interfaces.service.AppointmentService;
-import ar.edu.itba.paw.interfaces.service.UserService;
-import ar.edu.itba.paw.model.Appointment;
-import ar.edu.itba.paw.model.User;
+import ar.edu.itba.paw.interfaces.service.*;
+import ar.edu.itba.paw.model.*;
 import ar.edu.itba.paw.model.exceptions.*;
 import ar.edu.itba.paw.webapp.caching.AppointmentCaching;
 import ar.edu.itba.paw.webapp.dto.AppointmentDto;
@@ -33,6 +31,15 @@ public class AppointmentController {
     private AppointmentService appointmentService;
 
     @Autowired
+    private DoctorService doctorService;
+
+    @Autowired
+    private ClinicService clinicService;
+
+    @Autowired
+    private DoctorClinicService doctorClinicService;
+
+    @Autowired
     private AppointmentCaching appointmentCaching;
 
     @Context
@@ -53,8 +60,8 @@ public class AppointmentController {
                                         @Context Request request) throws EntityNotFoundException {
         page = (page < 0) ? 0 : page;
 
-        User user = userService.findUserByEmail(email);
-        if(user == null) throw new EntityNotFoundException("user");
+        User user = userService.findUserByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("user"));
 
         List<AppointmentDto> appointments = appointmentService.getPaginatedAppointments(user, page)
                 .stream().map(appointment -> AppointmentDto.fromAppointment(appointment, uriInfo))
@@ -111,9 +118,22 @@ public class AppointmentController {
     @Consumes(MediaType.APPLICATION_JSON)
     @PreAuthorize("hasPermission(#form.patient, 'user')")
     public Response createAppointment(final AppointmentForm form) throws
-            DateInPastException, OutOfScheduleException, AppointmentAlreadyScheduledException, HasAppointmentException {
-        Appointment appointment = appointmentService.createAppointment(form.getLicense(), form.getClinic(),
-                form.getPatient(), form.getYear(), form.getMonth(), form.getDay(),
+            DateInPastException, OutOfScheduleException, AppointmentAlreadyScheduledException,
+            HasAppointmentException, EntityNotFoundException {
+        Doctor doctor = doctorService.getDoctorByLicense(form.getLicense())
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+
+        Clinic clinic = clinicService.getClinicById(form.getClinic())
+                .orElseThrow(() -> new EntityNotFoundException("clinic"));
+
+        DoctorClinic doctorClinic = doctorClinicService.getDoctorClinic(doctor, clinic)
+                .orElseThrow(() -> new EntityNotFoundException("doctor-in-clinic"));
+
+        User user = userService.findUserByEmail(form.getPatient())
+                .orElseThrow(() -> new EntityNotFoundException("patient"));
+
+        Appointment appointment = appointmentService.createAppointment(doctorClinic,
+                user, form.getYear(), form.getMonth(), form.getDay(),
                 form.getTime());
 
         // TODO correct the URI
@@ -139,8 +159,11 @@ public class AppointmentController {
 
         Map<String, String> id = parseId(decodedId);
 
+        Doctor doctor = doctorService.getDoctorByLicense(id.get("license"))
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+
         Optional<Appointment> appointment = appointmentService.getAppointment(
-                id.get("license"),
+                doctor,
                 Integer.parseInt(id.get("year")),
                 Integer.parseInt(id.get("month")),
                 Integer.parseInt(id.get("day")),

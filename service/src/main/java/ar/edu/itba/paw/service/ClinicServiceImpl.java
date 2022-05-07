@@ -5,7 +5,6 @@ import ar.edu.itba.paw.interfaces.service.ClinicService;
 import ar.edu.itba.paw.model.Clinic;
 import ar.edu.itba.paw.model.Location;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
-import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +23,8 @@ public class ClinicServiceImpl implements ClinicService {
     @Override
     public Clinic createClinic(String name, String address, Location location)
             throws DuplicateEntityException {
-        if (clinicExists(name, address, location.getLocationName())) throw new DuplicateEntityException("clinic-exists");
+        if (clinicExists(name, address, location.getLocationName()))
+            throw new DuplicateEntityException("clinic-exists");
         return clinicDao.createClinic(name, address, location);
     }
 
@@ -44,8 +44,16 @@ public class ClinicServiceImpl implements ClinicService {
     }
 
     @Override
+    public Optional<Clinic> getClinicByName(String name) {
+        return clinicDao.getClinicByName(name);
+    }
+
+    @Override
     public boolean clinicExists(String name, String address, String location) {
-        return clinicDao.clinicExists(name, address, new Location(location));
+        Optional<Clinic> clinic = clinicDao.getClinicByName(name);
+        return clinic.filter(value -> value.getAddress().equals(address)
+                        && value.getLocation().getLocationName().equals(location))
+                .isPresent();
     }
 
     @Transactional

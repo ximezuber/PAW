@@ -41,7 +41,7 @@ public class Appointment {
         this.appointmentKey = new AppointmentKey(doctorClinic.getDoctor().getLicense(), date);
     }
 
-    public Appointment(){
+    public Appointment() {
     }
 
     public DoctorClinic getDoctorClinic() {

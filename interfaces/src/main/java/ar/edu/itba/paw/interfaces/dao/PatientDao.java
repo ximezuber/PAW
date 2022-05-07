@@ -1,19 +1,20 @@
 package ar.edu.itba.paw.interfaces.dao;
 
 import ar.edu.itba.paw.model.Patient;
+import ar.edu.itba.paw.model.Prepaid;
 import ar.edu.itba.paw.model.User;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 public interface PatientDao {
-    Patient create(String id, String prepaid, String prepaidNumber, User user);
+    Patient create(String id, Prepaid prepaid, String prepaidNumber, User user);
 
-    Patient getPatientByEmail(String email);
+    Optional<Patient> getPatientByEmail(String email);
 
-    void updatePatient(String email, Map<String, String> args);
+    void updatePatient(Patient patient, String id, Prepaid prepaid, String prepaidNumber);
 
-    List<Patient> getPatientsByPrepaid(String prepaid);
+    List<Patient> getPatientsByPrepaid(Prepaid prepaid);
 
     List<Patient> getPatientsById(String id);
 

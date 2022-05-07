@@ -2,10 +2,10 @@ package ar.edu.itba.paw.service;
 
 import ar.edu.itba.paw.interfaces.dao.DoctorDao;
 import ar.edu.itba.paw.interfaces.service.DoctorService;
+import ar.edu.itba.paw.interfaces.service.SpecialtyService;
 import ar.edu.itba.paw.interfaces.service.UserService;
 import ar.edu.itba.paw.model.*;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
-import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,14 +22,16 @@ public class DoctorServiceImpl implements DoctorService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private SpecialtyService specialtyService;
+
     @Transactional
     @Override
     public Doctor createDoctor(Specialty specialty, String license, String phoneNumber,
                                String firstName, String lastName, String password, String email)
             throws DuplicateEntityException {
-        Doctor isDoctor = getDoctorByLicense(license);
-        if (isDoctor != null) throw new DuplicateEntityException("license-in-use");
-        if (userService.findUserByEmail(email) != null) throw new DuplicateEntityException("email-in-use");
+        if (getDoctorByLicense(license).isPresent()) throw new DuplicateEntityException("license-in-use");
+        if (userService.findUserByEmail(email).isPresent()) throw new DuplicateEntityException("email-in-use");
         User user = userService.createUser(firstName, lastName, password, email);
         return doctorDao.createDoctor(specialty, license, phoneNumber, user);
     }
@@ -45,12 +47,12 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public Doctor getDoctorByLicense(String license) {
+    public Optional<Doctor> getDoctorByLicense(String license) {
         return doctorDao.getDoctorByLicense(license);
     }
 
     @Override
-    public Doctor getDoctorByEmail(String email) {
+    public Optional<Doctor> getDoctorByEmail(String email) {
         return doctorDao.getDoctorByEmail(email);
     }
 
@@ -60,9 +62,7 @@ public class DoctorServiceImpl implements DoctorService {
             return Collections.emptyList();
         }
 
-        //not inline for debugging purposes
-        List<Doctor> doctors = doctorDao.getPaginatedDoctorsInList(licenses, page);
-        return doctors;
+        return doctorDao.getPaginatedDoctorsInList(licenses, page);
     }
 
     @Override
@@ -83,38 +83,27 @@ public class DoctorServiceImpl implements DoctorService {
         return doctorDao.maxAvailablePage();
     }
 
-
+    @Transactional
     @Override
-    public boolean isDoctor(String email) {
-        return doctorDao.isDoctor(email);
+    public void deleteDoctor(Doctor doctor) {
+        userService.deleteUser(doctor.getUser());
     }
 
     @Transactional
     @Override
-    public long deleteDoctor(String license) throws EntityNotFoundException {
-        Doctor doc = getDoctorByLicense(license);
-        if (doc == null) throw new EntityNotFoundException("doctor");
-        return userService.deleteUser(doc.getEmail());
-    }
+    public void updateDoctorProfile (Doctor doctor,
+            String email, String newPassword, String firstName, String lastName,
+            String phoneNumber, String newSpecialty) {
 
-    @Transactional
-    @Override
-    public void updateDoctorProfile(
-            String email, String newPassword, String firstName, String lastName, // updates user fields
-            String phoneNumber, String specialty) { // updates image field
-
-        userService.updateUser(email, newPassword, firstName, lastName);
-        Doctor doctor = getDoctorByEmail(email);
-        updateDoctor(doctor.getLicense(), phoneNumber, specialty);
-    }
-
-    private void updateDoctor(String license, String phoneNumber, String specialty) {
-        Map<String, String> args = new HashMap<>();
-        args.put("phoneNumber", phoneNumber);
-        if (specialty.equals("")) {
-            specialty = null;
+        userService.updateUser(doctor.getUser(), email, newPassword, firstName, lastName);
+        Specialty specialty;
+        if (phoneNumber == null || phoneNumber.equals(""))
+            phoneNumber = doctor.getPhoneNumber();
+        if (newSpecialty == null || newSpecialty.equals("")) {
+            specialty = doctor.getSpecialty();
+        } else {
+            specialty = specialtyService.getSpecialtyByName(newSpecialty).orElse(doctor.getSpecialty());
         }
-        args.put("specialty", specialty);
-        doctorDao.updateDoctor(license, args);
+        doctorDao.updateDoctor(doctor, doctor.getLicense(), specialty, phoneNumber);
     }
 }

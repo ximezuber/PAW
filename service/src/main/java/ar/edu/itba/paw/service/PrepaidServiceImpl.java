@@ -6,7 +6,7 @@ import ar.edu.itba.paw.interfaces.service.PrepaidService;
 import ar.edu.itba.paw.model.Patient;
 import ar.edu.itba.paw.model.Prepaid;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
-import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
+import ar.edu.itba.paw.model.exceptions.NoPrepaidNumberException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +24,7 @@ public class PrepaidServiceImpl implements PrepaidService {
     @Autowired
     private PatientService patientService;
 
+    @Override
     public List<Prepaid> getPrepaid() {
         return prepaidDao.getPrepaid();
     }
@@ -44,10 +45,14 @@ public class PrepaidServiceImpl implements PrepaidService {
     @Transactional
     @Override
     public void deletePrepaid(Prepaid prepaid) {
-        List<Patient> patients = patientService.getPatientsByPrepaid(prepaid.getName());
+        List<Patient> patients = patientService.getPatientsByPrepaid(prepaid);
         prepaidDao.deletePrepaid(prepaid);
         for(Patient patient : patients) {
-            patientService.updatePatient(patient.getEmail(), null ,null);
+            try {
+                patientService.updatePatient(patient, null, null ,null);
+            } catch (NoPrepaidNumberException e) {
+                // As prepaid is NULL it will never get to this condition
+            }
         }
     }
 

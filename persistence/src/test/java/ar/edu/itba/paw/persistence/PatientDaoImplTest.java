@@ -18,8 +18,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import java.util.Optional;
+
+import static org.junit.Assert.*;
 
 @Transactional
 @Sql("classpath:schema.sql")
@@ -45,12 +46,12 @@ public class PatientDaoImplTest {
 
     @Test
     public void testCreate(){
-        Patient patient = patientDao.create(id, prepaid.getName(), pripaidNumber, user2);
+        Patient patient = patientDao.create(id, prepaid, pripaidNumber, user2);
 
         assertNotNull(patient);
         assertEquals(user2.getEmail(), patient.getEmail());
         assertEquals(id, patient.getId());
-        assertEquals(prepaid.getName(), patient.getPrepaid());
+        assertEquals(prepaid.getName(), patient.getPrepaid().getName());
         assertEquals(pripaidNumber, patient.getPrepaidNumber());
         assertEquals(user2.getFirstName(), patient.getFirstName());
         assertEquals(user2.getLastName(), patient.getLastName());
@@ -58,10 +59,10 @@ public class PatientDaoImplTest {
 
     @Test
     public void testGetPatientByEmail(){
-        Patient patient = patientDao.getPatientByEmail(user.getEmail());
+        Optional<Patient> patient = patientDao.getPatientByEmail(user.getEmail());
 
-        assertNotNull(patient);
-        assertEquals(user.getEmail(), patient.getEmail());
+        assertTrue(patient.isPresent());
+        assertEquals(user.getEmail(), patient.get().getEmail());
     }
 
 }

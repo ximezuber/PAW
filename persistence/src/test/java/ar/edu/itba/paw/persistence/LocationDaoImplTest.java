@@ -31,9 +31,6 @@ public class LocationDaoImplTest {
 
     private static final String name2 = "location2";
 
-//    @PersistenceContext
-//    private EntityManager entityManager;
-
     @Autowired
     private LocationDaoImpl locationDao;
 

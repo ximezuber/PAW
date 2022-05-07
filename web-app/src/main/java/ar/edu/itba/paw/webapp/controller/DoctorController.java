@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 
@@ -37,6 +38,9 @@ public class DoctorController {
 
     @Autowired
     private DoctorService doctorService;
+
+    @Autowired
+    private ClinicService clinicService;
 
     @Autowired
     private UserService userService;
@@ -151,7 +155,8 @@ public class DoctorController {
         List<DoctorDto> doctors = doctorService.getPaginatedDoctors(licenses, page)
                 .stream().map(d -> DoctorDto.fromDoctor(d, uriInfo)).collect(Collectors.toList());
 
-        Response.ResponseBuilder response =  CacheHelper.handleResponse(doctors, doctorCaching, new GenericEntity<List<DoctorDto>>(doctors) {},
+        Response.ResponseBuilder response =  CacheHelper.handleResponse(doctors, doctorCaching,
+                new GenericEntity<List<DoctorDto>>(doctors) {},
                         "doctors", request);
         if(!linkValue.isEmpty()) {
             response.header("Link", linkValue);
@@ -169,14 +174,11 @@ public class DoctorController {
     @Path("/{license}")
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response getDoctor(@PathParam("license") final String license,
-                              @Context Request request) throws NotFoundException {
-        Doctor doctor = doctorService.getDoctorByLicense(license);
-        if(doctor != null) {
-            DoctorDto dto = DoctorDto.fromDoctor(doctor, uriInfo);
-            return CacheHelper.handleResponse(dto, doctorCaching, "doctor", request).build();
-        } else {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
+                              @Context Request request) throws NotFoundException, EntityNotFoundException {
+        Doctor doctor = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+        DoctorDto dto = DoctorDto.fromDoctor(doctor, uriInfo);
+        return CacheHelper.handleResponse(dto, doctorCaching, "doctor", request).build();
     }
 
     /**
@@ -191,8 +193,9 @@ public class DoctorController {
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response getDoctorByEmail(@PathParam("email") final String email,
                                      @Context Request request) throws EntityNotFoundException {
-        Doctor doctor = doctorService.getDoctorByEmail(email);
-        if (doctor == null) throw new EntityNotFoundException("doctor");
+        Doctor doctor = doctorService.getDoctorByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+
         DoctorDto dto = DoctorDto.fromDoctor(doctor, uriInfo);
         return CacheHelper.handleResponse(dto, doctorCaching, "doctor", request).build();
     }
@@ -207,7 +210,9 @@ public class DoctorController {
     @Path("/{license}")
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response deleteDoctor(@PathParam("license") final String license) throws EntityNotFoundException {
-        doctorService.deleteDoctor(license);
+         Doctor doctor = doctorService.getDoctorByLicense(license)
+                 .orElseThrow(() -> new EntityNotFoundException("doctor"));
+        doctorService.deleteDoctor(doctor);
         return Response.noContent().build();
     }
 
@@ -225,9 +230,10 @@ public class DoctorController {
     @PreAuthorize("hasPermission(#license, 'doctor')")
     public Response updateDoctor(@PathParam("license") final String license, @Valid EditDoctorProfileForm form)
             throws EntityNotFoundException {
-        Doctor doctor = doctorService.getDoctorByLicense(license);
-        if(doctor == null) throw new EntityNotFoundException("doctor");
+        Doctor doctor = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));;
             doctorService.updateDoctorProfile(
+                    doctor,
                     doctor.getEmail(),
                     SecurityHelper.processNewPassword(form.getNewPassword(), passwordEncoder, userService, doctor.getEmail()),
                     form.getFirstName(),form.getLastName(),
@@ -269,14 +275,14 @@ public class DoctorController {
      */
     @GET
     @Path("/{license}/image")
-    @Produces(value = { MediaType.MULTIPART_FORM_DATA })
+    @Produces(value = { "image/*" })
     public Response getProfileImage(@PathParam("license") final String license,
                                     @Context Request request) throws EntityNotFoundException {
-        Doctor d = doctorService.getDoctorByLicense(license);
-        if(d == null) throw new EntityNotFoundException("doctor");
+        Doctor d = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));;
 
-        Image img = imageService.getProfileImage(d.getLicense());
-        if (img == null) throw new EntityNotFoundException("image");
+        Image img = imageService.getImageByLicense(d.getLicense())
+                .orElseThrow(() -> new EntityNotFoundException("image"));
 
         ImageDto dto = ImageDto.fromImage(img.getImage());
         return CacheHelper.handleResponse(dto.getImage(), imageCaching, "profileImage", request).build();
@@ -293,9 +299,11 @@ public class DoctorController {
     @Produces(value = { MediaType.APPLICATION_JSON })
     @PreAuthorize("hasPermission(#license, 'doctor')")
     public Response deleteProfileImage(@PathParam("license") final String license) throws EntityNotFoundException {
-        Doctor doctor = doctorService.getDoctorByLicense(license);
-        if(doctor == null) throw new EntityNotFoundException("doctor");
-        imageService.deleteProfileImage(license);
+        doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));;
+        Image image = imageService.getImageByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("image"));;
+        imageService.deleteProfileImage(image);
         return Response.noContent().build();
     }
 
@@ -311,7 +319,7 @@ public class DoctorController {
      * @throws UnsupportedMediaTypeException
      * @throws IOException
      */
-    @POST
+    @PUT
     @Path("/{license}/image")
     @Consumes("multipart/form-data")
     @Produces(value = { MediaType.APPLICATION_JSON })
@@ -321,8 +329,9 @@ public class DoctorController {
                                        @FormDataParam("profileImage") FormDataContentDisposition fileMetaData)
             throws EntityNotFoundException, ar.edu.itba.paw.model.exceptions.BadRequestException,
             ImageTooLargeException, UnsupportedMediaTypeException, IOException {
-        Doctor doctor = doctorService.getDoctorByLicense(license);
-        if (doctor == null) throw new EntityNotFoundException("doctor");
+        Doctor doctor = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+
         if (fileInputStream == null || fileMetaData == null) throw new ImageInfoMissingException();
         String extension = fileMetaData.getFileName().substring(fileMetaData.getFileName().lastIndexOf('.'));
         if (!SUPPORTED_IMAGES_TYPES.contains(extension))
@@ -332,10 +341,11 @@ public class DoctorController {
 
         if (array.length > MAX_FILE_SIZE) throw new ImageTooLargeException();
 
-        if (imageService.getProfileImage(doctor.getLicense()) == null)
+        Optional<Image> image = imageService.getImageByLicense(doctor.getLicense());
+        if (!image.isPresent())
             imageService.createProfileImage(array, doctor);
         else {
-            imageService.deleteProfileImage(license);
+            imageService.deleteProfileImage(image.get());
             imageService.createProfileImage(array, doctor);
         }
         return Response.created(uriInfo.getAbsolutePath()).build();
@@ -358,8 +368,8 @@ public class DoctorController {
                                   @Context Request request) throws EntityNotFoundException {
         page = (page < 0) ? 0 : page;
 
-        Doctor doctor = doctorService.getDoctorByLicense(license);
-        if(doctor == null) throw new EntityNotFoundException("doctor");
+        Doctor doctor = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
         final List<DoctorClinicDto> doctorClinics = doctorClinicService.getPaginatedDoctorsClinics(doctor, page)
                 .stream().map(dc -> DoctorClinicDto.fromDoctorClinic(dc, uriInfo))
                 .collect(Collectors.toList());
@@ -390,8 +400,8 @@ public class DoctorController {
     public Response getAllDoctorsClinics(@PathParam("license") final String license,
                                          @QueryParam("week") @DefaultValue("1") final Integer week,
                                          @Context Request request) throws EntityNotFoundException {
-        Doctor doctor = doctorService.getDoctorByLicense(license);
-        if(doctor == null) throw new EntityNotFoundException("doctor");
+        Doctor doctor = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
         final List<DoctorClinicDto> doctorClinics = doctorClinicService.getDoctorsSubscribedClinics(doctor)
                 .stream().map(dc -> DoctorClinicDto.fromDoctorClinic(dc, uriInfo))
                 .collect(Collectors.toList());
@@ -414,16 +424,18 @@ public class DoctorController {
     public Response createDoctorClinic(@PathParam("license") final String license,
                                        final DoctorClinicForm form) throws EntityNotFoundException,
             DuplicateEntityException {
-        Doctor doctor = doctorService.getDoctorByLicense(license);
-        if(doctor == null) throw new EntityNotFoundException("doctor");
-        doctorClinicService.createDoctorClinic(doctor.getEmail(), form.getClinic(), form.getConsultPrice());
+        Doctor doctor = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+        Clinic clinic = clinicService.getClinicById(form.getClinic())
+                .orElseThrow(() -> new EntityNotFoundException("clinic"));
+        doctorClinicService.createDoctorClinic(doctor, clinic, form.getConsultPrice());
         return Response.created(uriInfo.getAbsolutePathBuilder().path(String.valueOf(form.getClinic())).build()).build();
     }
 
     /**
      * Lets DOCTOR unsubscribe from clinic
      * @param license
-     * @param clinic
+     * @param clinicId
      * @return
      * @throws EntityNotFoundException
      */
@@ -432,16 +444,22 @@ public class DoctorController {
     @Produces(value = { MediaType.APPLICATION_JSON })
     @PreAuthorize("hasPermission(#license, 'doctor')")
     public Response deleteDoctorClinic(@PathParam("license") final String license,
-                                       @PathParam("clinic") final Integer clinic) throws EntityNotFoundException {
+                                       @PathParam("clinic") final Integer clinicId) throws EntityNotFoundException {
+        Doctor doctor = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+        Clinic clinic = clinicService.getClinicById(clinicId)
+                .orElseThrow(() -> new EntityNotFoundException("clinic"));
+        DoctorClinic doctorClinic = doctorClinicService.getDoctorClinic(doctor, clinic)
+                .orElseThrow(() -> new EntityNotFoundException("doctor-in-clinic"));
 
-        doctorClinicService.deleteDoctorClinic(license, clinic);
+        doctorClinicService.deleteDoctorClinic(doctorClinic);
         return Response.noContent().build();
     }
 
     /**
      * Lets DOCTOR edit consult price for specific clinic
      * @param license
-     * @param clinic
+     * @param clinicId
      * @param price
      * @return
      * @throws EntityNotFoundException
@@ -451,9 +469,16 @@ public class DoctorController {
     @Produces(value = { MediaType.APPLICATION_JSON })
     @PreAuthorize("hasPermission(#license, 'doctor')")
     public Response editDoctorClinicPrice (@PathParam("license") final String license,
-                                           @PathParam("clinic") final Integer clinic,
+                                           @PathParam("clinic") final Integer clinicId,
                                            @QueryParam("price") final Integer price) throws EntityNotFoundException {
-        doctorClinicService.editPrice(license, clinic, price);
+        Doctor doctor = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+        Clinic clinic = clinicService.getClinicById(clinicId)
+                .orElseThrow(() -> new EntityNotFoundException("clinic"));
+        DoctorClinic doctorClinic = doctorClinicService.getDoctorClinic(doctor, clinic)
+                .orElseThrow(() -> new EntityNotFoundException("doctor-in-clinic"));
+
+        doctorClinicService.editPrice(doctorClinic, price);
         return Response.noContent().build();
     }
 
@@ -462,33 +487,40 @@ public class DoctorController {
     @Path("/{license}/clinics/{clinic}")
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response getDoctorClinic(@PathParam("license") final String license,
-                                    @PathParam("clinic") final Integer clinic,
+                                    @PathParam("clinic") final Integer clinicId,
                                     @QueryParam("week") @DefaultValue("1") final Integer week,
-                                    @Context Request request) {
-        DoctorClinic dc = doctorClinicService.getDoctorClinic(license,clinic);
+                                    @Context Request request) throws EntityNotFoundException {
+        Doctor doctor = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+        Clinic clinic = clinicService.getClinicById(clinicId)
+                .orElseThrow(() -> new EntityNotFoundException("clinic"));
+        DoctorClinic dc = doctorClinicService.getDoctorClinic(doctor, clinic)
+                .orElseThrow(() -> new EntityNotFoundException("doctor-in-clinic"));
 
-        if(dc != null) {
-            DoctorClinicDto dto = DoctorClinicDto.fromDoctorClinic(dc, uriInfo);
-            return CacheHelper.handleResponse(dto, doctorClinicCaching, "doctorsClinic", request)
-                    .build();
-        }
-        return Response.status(Response.Status.NOT_FOUND.getStatusCode()).build();
+        DoctorClinicDto dto = DoctorClinicDto.fromDoctorClinic(dc, uriInfo);
+        return CacheHelper.handleResponse(dto, doctorClinicCaching, "doctorsClinic", request)
+                .build();
     }
 
     /**
      * Returns doctors schedule for a specific clinic
      * @param license
-     * @param clinic
+     * @param clinicId
      * @return List if Schedules
      */
     @GET
     @Path("/{license}/clinics/{clinic}/schedules")
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response getDoctorClinicSchedules(@PathParam("license") final String license,
-                                             @PathParam("clinic") final Integer clinic,
+                                             @PathParam("clinic") final Integer clinicId,
                                              @Context Request request) throws EntityNotFoundException {
-        DoctorClinic dc = doctorClinicService.getDoctorClinic(license, clinic);
-        if(dc == null) throw new EntityNotFoundException("doctor-clinic");
+        Doctor doctor = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+        Clinic clinic = clinicService.getClinicById(clinicId)
+                .orElseThrow(() -> new EntityNotFoundException("clinic"));
+        DoctorClinic dc = doctorClinicService.getDoctorClinic(doctor, clinic)
+                .orElseThrow(() -> new EntityNotFoundException("doctor-in-clinic"));
+
         List<ScheduleDto> schedules = scheduleService.getDoctorClinicSchedule(dc)
                 .stream().map(s -> ScheduleDto.fromSchedule(s, uriInfo)).collect(Collectors.toList());
         return CacheHelper.handleResponse(schedules, scheduleCaching,
@@ -506,8 +538,8 @@ public class DoctorController {
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response getDoctorSchedules(@PathParam("license") final String license,
                                        @Context Request request) throws EntityNotFoundException {
-        Doctor doctor = doctorService.getDoctorByLicense(license);
-        if(doctor == null) throw new EntityNotFoundException("doctor");
+        Doctor doctor = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
 
         List<ScheduleDto> schedules = scheduleService.getDoctorSchedule(doctor).stream()
                 .map(s -> ScheduleDto.fromSchedule(s, uriInfo)).collect(Collectors.toList());
@@ -517,7 +549,7 @@ public class DoctorController {
     /**
      * Lets DOCTOR delete a scheduled working hour for a specific clinic
      * @param license
-     * @param clinic
+     * @param clinicId
      * @param day
      * @param hour
      * @return
@@ -527,21 +559,27 @@ public class DoctorController {
     @Produces(value = { MediaType.APPLICATION_JSON })
     @PreAuthorize("hasPermission(#license, 'doctor')")
     public Response deleteDoctorClinicSchedule(@PathParam("license") final String license,
-                                               @PathParam("clinic") final Integer clinic,
+                                               @PathParam("clinic") final Integer clinicId,
                                                @QueryParam("day") final Integer day,
                                                @QueryParam("hour") final Integer hour)
             throws EntityNotFoundException, OutOfRangeException {
-        DoctorClinic dc = doctorClinicService.getDoctorClinic(license,clinic);
-        if(dc == null) throw new EntityNotFoundException("doctor-clinic");
+        Doctor doctor = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+        Clinic clinic = clinicService.getClinicById(clinicId)
+                .orElseThrow(() -> new EntityNotFoundException("clinic"));
+        DoctorClinic dc = doctorClinicService.getDoctorClinic(doctor, clinic)
+                .orElseThrow(() -> new EntityNotFoundException("doctor-in-clinic"));
+        Schedule schedule = scheduleService.getDoctorsClinicSchedule(dc, day, hour)
+                .orElseThrow(() -> new EntityNotFoundException("schedule"));
 
-        scheduleService.deleteSchedule(hour, day, license, clinic);
+        scheduleService.deleteSchedule(schedule);
         return Response.noContent().build();
     }
 
     /**
      * Lets DOCTOR schedule a working hour for a specific clinic
      * @param license
-     * @param clinic
+     * @param clinicId
      * @param form
      * @return
      */
@@ -551,13 +589,16 @@ public class DoctorController {
     @Consumes(MediaType.APPLICATION_JSON)
     @PreAuthorize("hasPermission(#license, 'doctor')")
     public Response createSchedule(@PathParam("license") final String license,
-                                   @PathParam("clinic") final Integer clinic,
+                                   @PathParam("clinic") final Integer clinicId,
                                    ScheduleForm form) throws EntityNotFoundException, ConflictException {
-        DoctorClinic dc = doctorClinicService.getDoctorClinic(license, clinic);
-        if(dc == null) throw new EntityNotFoundException("doctor-clinic");
+        Doctor doctor = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+        Clinic clinic = clinicService.getClinicById(clinicId)
+                .orElseThrow(() -> new EntityNotFoundException("clinic"));
+        DoctorClinic dc = doctorClinicService.getDoctorClinic(doctor, clinic)
+                .orElseThrow(() -> new EntityNotFoundException("doctor-in-clinic"));
 
-        scheduleService.createSchedule(form.getHour(), form.getDay(), dc.getDoctor().getLicense(),
-                dc.getClinic().getId());
+        scheduleService.createSchedule(form.getHour(), form.getDay(), dc);
         return Response.created(uriInfo.getAbsolutePath()).build();
 
     }
@@ -575,10 +616,10 @@ public class DoctorController {
     @Produces(value = { MediaType.APPLICATION_JSON })
     public Response getDoctorAvailableAppointments(@PathParam("license") final String license,
                                                    @Context Request request) throws EntityNotFoundException {
-        Doctor doc = doctorService.getDoctorByLicense(license);
-        if (doc == null) throw new EntityNotFoundException("doctor");
+        Doctor doctor = doctorService.getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
 
-        List<AppointmentDto> appointments = appointmentService.getDoctorsAvailableAppointments(doc)
+        List<AppointmentDto> appointments = appointmentService.getDoctorsAvailableAppointments(doctor)
                 .stream().map(appointment -> AppointmentDto.fromAppointment(appointment, uriInfo))
                 .collect(Collectors.toList());
         return CacheHelper.handleResponse(appointments, appointmentCaching,

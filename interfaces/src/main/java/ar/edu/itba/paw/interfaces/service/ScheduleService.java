@@ -8,15 +8,16 @@ import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 import ar.edu.itba.paw.model.exceptions.OutOfRangeException;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ScheduleService {
-    Schedule createSchedule(int hour, int day, String license, int clinicId) throws ConflictException;
+    Schedule createSchedule(int hour, int day, DoctorClinic doctorClinic) throws ConflictException;
 
     List<Schedule> getDoctorClinicSchedule(DoctorClinic doctorClinic);
 
-    List<Schedule> getDoctorSchedule (Doctor doctor);
+    List<Schedule> getDoctorSchedule(Doctor doctor);
 
-    boolean doctorHasScheduleInClinic(DoctorClinic doctorClinic, int day, int hour);
+    Optional<Schedule> getDoctorsClinicSchedule(DoctorClinic doctorClinic, int day, int hour);
 
-    void deleteSchedule(int hour, int day, String license, int clinicId) throws OutOfRangeException, EntityNotFoundException;
+    void deleteSchedule(Schedule schedule) throws OutOfRangeException, EntityNotFoundException;
 }

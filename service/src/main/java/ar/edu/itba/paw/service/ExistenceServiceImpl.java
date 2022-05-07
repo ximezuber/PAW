@@ -27,14 +27,14 @@ public class ExistenceServiceImpl implements ExistenceService {
 
 
     @Override
-    public boolean exists(String input,String type) {
+    public boolean exists(String input, String type) {
         switch(type){
             case "doctor":
-                return doctorService.getDoctorByLicense(input) == null;
+                return !doctorService.getDoctorByLicense(input).isPresent();
             case "user":
-                return !userService.userExists(input);
+                return !userService.findUserByEmail(input).isPresent();
             case "prepaid":
-                return prepaidService.getPrepaidByName(input) == null;
+                return !prepaidService.getPrepaidByName(input).isPresent();
             case "specialty":
                 return !specialtyService.getSpecialtyByName(input).isPresent();
             case "location":

@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class FavoriteServiceImpl implements FavoriteService {
@@ -30,14 +31,14 @@ public class FavoriteServiceImpl implements FavoriteService {
     }
 
     @Override
-    public boolean isFavorite(Doctor doctor, Patient patient) {
-        return favoriteDao.isFavorite(doctor, patient);
+    public Optional<Favorite> getFavorite(Doctor doctor, Patient patient) {
+        return favoriteDao.getFavorite(doctor, patient);
     }
 
     @Transactional
     @Override
-    public void deleteFavorite(Doctor doctor, Patient patient) {
-        favoriteDao.deleteFavorite(doctor, patient);
+    public void deleteFavorite(Favorite favorite) {
+        favoriteDao.deleteFavorite(favorite);
     }
 
     @Override

@@ -5,6 +5,7 @@ import ar.edu.itba.paw.model.DoctorClinic;
 import ar.edu.itba.paw.model.Schedule;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ScheduleDao {
     Schedule createSchedule(int hour, int day, DoctorClinic doctorClinic);
@@ -13,7 +14,7 @@ public interface ScheduleDao {
 
     List<Schedule> getDoctorsSchedule(Doctor doctor);
 
-    int deleteSchedule(int hour, int day, DoctorClinic doctorClinic);
+    void deleteSchedule(Schedule schedule);
 
-    boolean doctorHasSchedule(Doctor doctor, int day, int hour);
+    Optional<Schedule> getDoctorScheduledHour(Doctor doctor, int day, int hour);
 }

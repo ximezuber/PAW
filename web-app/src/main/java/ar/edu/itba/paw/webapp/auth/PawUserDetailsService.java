@@ -27,11 +27,8 @@ public class PawUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(final String email) throws UsernameNotFoundException {
 
-        final User user = us.findUserByEmail(email);
-
-        if (user == null) {
-            throw new UsernameNotFoundException("No user by the email " + email);
-        }
+        final User user = us.findUserByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("No user by the email " + email));
 
         final Collection<? extends GrantedAuthority> authorities;
 

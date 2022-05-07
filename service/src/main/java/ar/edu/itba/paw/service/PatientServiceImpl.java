@@ -5,15 +5,13 @@ import ar.edu.itba.paw.interfaces.service.*;
 import ar.edu.itba.paw.model.*;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
 import ar.edu.itba.paw.model.exceptions.FavouriteExistsException;
+import ar.edu.itba.paw.model.exceptions.NoPrepaidNumberException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class PatientServiceImpl implements PatientService {
@@ -22,7 +20,7 @@ public class PatientServiceImpl implements PatientService {
     private PatientDao patientDao;
 
     @Autowired
-    private AppointmentService appointmentService;
+    private PrepaidService prepaidService;
 
     @Autowired
     private UserService userService;
@@ -30,26 +28,29 @@ public class PatientServiceImpl implements PatientService {
     @Autowired
     private FavoriteService favoriteService;
 
-    @Autowired
-    private DoctorService doctorService;
-
     private static final String NoPrepaid = "";
 
     @Transactional
     @Override
-    public Patient create(String id, String prepaid, String prepaidNumber, String firstName, String lastName, String password,
-                          String email) throws DuplicateEntityException {
-        if (userService.userExists(email)) throw new DuplicateEntityException("user-exists");
-        if(prepaid.equals(NoPrepaid)) {
+    public Patient create(String id, String prepaidName, String prepaidNumber, String firstName,
+                          String lastName, String password, String email) throws DuplicateEntityException,
+            EntityNotFoundException {
+        if (userService.findUserByEmail(email).isPresent()) throw new DuplicateEntityException("user-exists");
+        Prepaid prepaid;
+        if(prepaidName == null || prepaidName.equals(NoPrepaid)) {
             prepaid = null;
             prepaidNumber = null;
+        } else {
+            prepaid = prepaidService.getPrepaidByName(prepaidName)
+                    .orElseThrow(() -> new EntityNotFoundException("prepaid"));
+
         }
         User user = userService.createUser(firstName, lastName, password, email);
         return patientDao.create(id, prepaid, prepaidNumber, user);
     }
 
     @Override
-    public Patient getPatientByEmail(String email) {
+    public Optional<Patient> getPatientByEmail(String email) {
         return patientDao.getPatientByEmail(email);
     }
 
@@ -59,51 +60,46 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    public List<Patient> getPatientsByPrepaid(String prepaid) {
+    public List<Patient> getPatientsByPrepaid(Prepaid prepaid) {
         return patientDao.getPatientsByPrepaid(prepaid);
     }
 
     @Transactional
     @Override
-    public void updatePatientProfile(String email, String newPassword, String firstName,
-                                     String lastName, String prepaid, String prepaidNumber) {
-        userService.updateUser(email, newPassword, firstName, lastName);
-        updatePatient(email, prepaid, prepaidNumber);
+    public void updatePatientProfile(Patient patient, String email, String newPassword, String firstName,
+                                     String lastName, String prepaid, String prepaidNumber) throws NoPrepaidNumberException {
+        userService.updateUser(patient.getUser(), email, newPassword, firstName, lastName);
+        updatePatient(patient, email, prepaid, prepaidNumber);
     }
 
     @Transactional
     @Override
-    public void updatePatient(String email, String prepaid, String prepaidNumber) {
-
-        Map<String,String> args = new HashMap<>();
-        if(!(prepaid == null || prepaid.equals("")) ){
-            args.put("prepaid",prepaid);
+    public void updatePatient(Patient patient, String email, String prepaidName, String prepaidNumber)
+            throws NoPrepaidNumberException {
+        Prepaid prepaid;
+        if(prepaidName == null || prepaidName.equals("")){
+            prepaid = null;
+            prepaidNumber = null;
+        } else {
+            prepaid = prepaidService.getPrepaidByName(prepaidName)
+                    .orElseThrow(() -> new EntityNotFoundException("prepaid"));
+            if (prepaidNumber == null || prepaidNumber.equals("")) throw new NoPrepaidNumberException();
         }
 
-        // In case we want to intentionally set prepaidNumber to null
-        // or if we want to update our prepaidNumber
-        if(prepaidNumber == null || !(prepaidNumber.equals(""))) {
-            args.put("prepaidNumber", prepaidNumber);
-        }
-
-        patientDao.updatePatient(email,args);
+        patientDao.updatePatient(patient, email, prepaid, prepaidNumber);
     }
 
     @Override
     @Transactional
-    public void deletePatient(String email) {
-        userService.deleteUser(email);
+    public void deletePatient(Patient patient) {
+        userService.deleteUser(patient.getUser());
     }
 
 
     @Override
-    public void addFavorite(String patientEmail, String license) throws FavouriteExistsException,
+    public void addFavorite(Patient patient, Doctor doctor) throws FavouriteExistsException,
             EntityNotFoundException {
-        Doctor doctor = doctorService.getDoctorByLicense(license);
-        Patient patient = getPatientByEmail(patientEmail);
-        if (doctor == null) throw new EntityNotFoundException("doctor");
-        if (patient == null) throw new EntityNotFoundException("patient");
-        if (!favoriteService.isFavorite(doctor, patient)){
+        if (!favoriteService.getFavorite(doctor, patient).isPresent()){
             favoriteService.create(doctor,patient);
         } else {
             throw new FavouriteExistsException();
@@ -111,16 +107,10 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    public void deleteFavorite(String patientEmail, String license) throws EntityNotFoundException {
-        Doctor doctor = doctorService.getDoctorByLicense(license);
-        Patient patient = getPatientByEmail(patientEmail);
-        if (doctor == null) throw new EntityNotFoundException("doctor");
-        if (patient == null) throw new EntityNotFoundException("patient");
+    public void deleteFavorite(Patient patient, Doctor doctor) throws EntityNotFoundException {
+        Favorite favorite = favoriteService.getFavorite(doctor, patient)
+                .orElseThrow(() -> new EntityNotFoundException("favorite"));
+        favoriteService.deleteFavorite(favorite);
 
-        if(favoriteService.isFavorite(doctor, patient)){
-            favoriteService.deleteFavorite(doctor,patient);
-        } else {
-            throw new EntityNotFoundException("favorite");
-        }
     }
 }

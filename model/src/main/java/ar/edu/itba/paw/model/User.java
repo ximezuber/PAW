@@ -56,6 +56,14 @@ public class User {
         this.lastName = lastName;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if(obj instanceof User) {

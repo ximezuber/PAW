@@ -6,6 +6,8 @@ import ar.edu.itba.paw.model.Admin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class AdminServiceImpl implements AdminService {
 
@@ -13,13 +15,8 @@ public class AdminServiceImpl implements AdminService {
     private AdminDao adminDao;
 
     @Override
-    public Admin getAdmin(String email) {
+    public Optional<Admin> getAdmin(String email) {
         return adminDao.getAdmin(email);
-    }
-
-    @Override
-    public boolean isAdmin(String email) {
-        return adminDao.isAdmin(email);
     }
 
 }

@@ -39,7 +39,7 @@ public class PrepaidToClinicServiceImpl implements PrepaidToClinicService {
         Optional<Prepaid> prepaid = prepaidService.getPrepaidByName(prepaidName);
         Optional<Clinic> clinic = clinicService.getClinicById(clinicId);
         if (!prepaid.isPresent() || !clinic.isPresent()) return false;
-        return prepaidToClinicDao.clinicHasPrepaid(prepaid.get(), clinic.get());
+        return prepaidToClinicDao.getPrepaidToClinic(prepaid.get(), clinic.get()).isPresent();
     }
 
     @Transactional

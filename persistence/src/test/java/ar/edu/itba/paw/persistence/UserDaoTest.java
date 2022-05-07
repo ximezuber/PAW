@@ -12,8 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import java.util.Optional;
+
+import static org.junit.Assert.*;
 
 @Transactional
 @Sql("classpath:schema.sql")
@@ -55,12 +56,12 @@ public class UserDaoTest {
 
     @Test
     public void testFindUserByEmail(){
-        User user = userDao.findUserByEmail(email2);
+        Optional<User> user = userDao.findUserByEmail(email2);
 
-        assertNotNull(user);
-        assertEquals(email2, user.getEmail());
-        assertEquals(lastName2, user.getLastName());
-        assertEquals(firstName2, user.getFirstName());
+        assertTrue(user.isPresent());
+        assertEquals(email2, user.get().getEmail());
+        assertEquals(lastName2, user.get().getLastName());
+        assertEquals(firstName2, user.get().getFirstName());
 
     }
 }

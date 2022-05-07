@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 @Component
 public class CustomPermissionEvaluator implements PermissionEvaluator {
@@ -26,8 +27,8 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 
         if(propertyFrom.equals("doctor")) {
             String license = targetDomainObject.toString();
-            Doctor doctor = doctorService.getDoctorByLicense(license);
-            return doctor.getEmail().equals(auth.getName());
+            Optional<Doctor> doctor = doctorService.getDoctorByLicense(license);
+            return doctor.get().getEmail().equals(auth.getName());
         } else if(propertyFrom.equals("user")) {
             String email = targetDomainObject.toString();
             return email.equals(auth.getName());

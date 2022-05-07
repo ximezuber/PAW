@@ -9,7 +9,7 @@ public class SecurityHelper {
     public static String processNewPassword(String newPass, PasswordEncoder passwordEncoder, UserService userService, String userEmail) {
         String pass;
         if(newPass == null || newPass.equals("")) {
-            User user = userService.findUserByEmail(userEmail);
+            User user = userService.findUserByEmail(userEmail).get();
             pass = user.getPassword();
         } else {
             pass = passwordEncoder.encode(newPass);

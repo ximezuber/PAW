@@ -13,9 +13,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
+import java.util.Optional;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DoctorServiceImplTest {
@@ -64,9 +63,9 @@ public class DoctorServiceImplTest {
     public void testCreate() throws DuplicateEntityException {
         //Set Up
         Mockito.when(mockDao.getDoctorByLicense(Mockito.eq(license)))
-                .thenReturn(null);
+                .thenReturn(Optional.empty());
         Mockito.when(userService.findUserByEmail(Mockito.eq(email)))
-                .thenReturn(null);
+                .thenReturn(Optional.empty());
         Mockito.when(userService.createUser(Mockito.eq(firstName), Mockito.eq(lastName), Mockito.eq(password), Mockito.eq(email)))
                         .thenReturn(user);
         Mockito.when(mockDao.createDoctor(Mockito.eq(specialty), Mockito.eq(license), Mockito.eq(phone), Mockito.eq(user)))
@@ -89,7 +88,7 @@ public class DoctorServiceImplTest {
     public void testCreateDocExists() throws DuplicateEntityException {
         //Set Up
         Mockito.when(mockDao.getDoctorByLicense(Mockito.eq(license)))
-                .thenReturn(doctor);
+                .thenReturn(Optional.of(doctor));
         //Execute
         doctorService.createDoctor(specialty, license, phone, firstName,
                 lastName, password, email);
@@ -99,9 +98,9 @@ public class DoctorServiceImplTest {
     public void testCreateUserExists() throws DuplicateEntityException {
         //Set Up
         Mockito.when(mockDao.getDoctorByLicense(Mockito.eq(license)))
-                .thenReturn(null);
+                .thenReturn(Optional.empty());
         Mockito.when(userService.findUserByEmail(Mockito.eq(email)))
-                .thenReturn(user);
+                .thenReturn(Optional.of(user));
         //Execute
         doctorService.createDoctor(specialty, license, phone, firstName,
                 lastName, password, email);

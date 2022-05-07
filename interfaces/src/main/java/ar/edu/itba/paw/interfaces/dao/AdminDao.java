@@ -2,9 +2,9 @@ package ar.edu.itba.paw.interfaces.dao;
 
 import ar.edu.itba.paw.model.Admin;
 
+import java.util.Optional;
+
 public interface AdminDao {
 
-    Admin getAdmin(String email);
-
-    boolean isAdmin(String email);
+    Optional<Admin> getAdmin(String email);
 }

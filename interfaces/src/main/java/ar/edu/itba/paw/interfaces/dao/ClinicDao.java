@@ -15,7 +15,7 @@ public interface ClinicDao extends PaginationDao<Clinic> {
 
     List<Clinic> getClinicsByLocation(Location location);
 
-    boolean clinicExists(String name, String address, Location location);
+    Optional<Clinic> getClinicByName(String name);
 
     void updateClinic(Clinic clinic, String name, String address, Location location);
 

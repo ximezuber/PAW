@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.Optional;
 
 @Repository
 public class AdminDaoImpl implements AdminDao {
@@ -13,13 +14,9 @@ public class AdminDaoImpl implements AdminDao {
     private EntityManager entityManager;
 
     @Override
-    public Admin getAdmin(String email){
-        return entityManager.find(Admin.class, email);
-    }
-
-    @Override
-    public boolean isAdmin(String email){
-        return getAdmin(email) != null;
+    public Optional<Admin> getAdmin(String email){
+        Admin admin =  entityManager.find(Admin.class, email);
+        return Optional.ofNullable(admin);
     }
 }
 

@@ -18,6 +18,6 @@ public class UniqueClinicValidator implements ConstraintValidator<ClinicExists, 
 
     @Override
     public boolean isValid(Integer value, ConstraintValidatorContext context) {
-        return clinicService.getClinicById(value) != null;
+        return clinicService.getClinicById(value).isPresent();
     }
 }

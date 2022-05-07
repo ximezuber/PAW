@@ -84,14 +84,8 @@ public class AppointmentServiceImplTest {
         dc.setSchedule(schedules);
 
         Mockito.when(doctorService.getDoctorByLicense(Mockito.eq(license1)))
-                .thenReturn(doc);
-        Mockito.when(doctorClinicService.getDoctorClinicWithSchedule(Mockito.eq(doc.getLicense()),
-                        Mockito.eq(clinic.getId())))
-                .thenReturn(dc);
-        Mockito.when(userService.findUserByEmail(Mockito.eq(email2)))
-                .thenReturn(user2);
+                .thenReturn(Optional.of(doc));
         Mockito.when(messageSource.getMessage(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("message");
-        Mockito.when(userService.isDoctor(email2)).thenReturn(false);
         Mockito.when(userService.isDoctor(email1)).thenReturn(true);
 
     }
@@ -104,12 +98,13 @@ public class AppointmentServiceImplTest {
         Appointment app = new Appointment(date, dc, user2);
         Mockito.when(appointmentDao.createAppointment(Mockito.eq(dc), Mockito.eq(user2), Mockito.any()))
                 .thenReturn(app);
-        Mockito.when(appointmentDao.hasAppointment(Mockito.any(Doctor.class), Mockito.any()))
-                .thenReturn(false);
-        Mockito.when(appointmentDao.hasAppointment(Mockito.any(User.class), Mockito.any()))
-                .thenReturn(false);
+        Mockito.when(appointmentDao.getAppointment(Mockito.eq(doc), Mockito.any()))
+                .thenReturn(Optional.empty());
+        Mockito.when(appointmentDao.getAppointment(Mockito.eq(user2), Mockito.any()))
+                .thenReturn(Optional.empty());
+
         // Execute
-        Appointment result = appointmentService.createAppointment(license1, id1, email2, year, month, day, time);
+        Appointment result = appointmentService.createAppointment(dc, user2, year, month, day, time);
 
         // Assert
         Assert.assertEquals(license1, result.getDoctorClinic().getDoctor().getLicense());
@@ -127,7 +122,7 @@ public class AppointmentServiceImplTest {
             AppointmentAlreadyScheduledException {
 
         // Execute
-        appointmentService.createAppointment(license1, id1, email2, 2010, 1, 1, 10);
+        appointmentService.createAppointment(dc, user2, 2010, 1, 1, 10);
     }
 
     @Test(expected = OutOfScheduleException.class)
@@ -135,15 +130,15 @@ public class AppointmentServiceImplTest {
             throws HasAppointmentException, DateInPastException, OutOfScheduleException,
             AppointmentAlreadyScheduledException {
         // Set up
-        Mockito.when(appointmentDao.hasAppointment(Mockito.any(Doctor.class), Mockito.any()))
-                .thenReturn(false);
-        Mockito.when(appointmentDao.hasAppointment(Mockito.any(User.class), Mockito.any()))
-                .thenReturn(false);
+        Mockito.when(appointmentDao.getAppointment(Mockito.eq(doc), Mockito.any()))
+                .thenReturn(Optional.empty());
+        Mockito.when(appointmentDao.getAppointment(Mockito.eq(user2), Mockito.any()))
+                .thenReturn(Optional.empty());
 
         LocalDateTime newDate = date.plusDays(1);
 
         // Execute
-        appointmentService.createAppointment(license1, id1, email2, newDate.getYear(), newDate.getMonthValue(),
+        appointmentService.createAppointment(dc, user2, newDate.getYear(), newDate.getMonthValue(),
                 newDate.getDayOfMonth(), time);
     }
 
@@ -152,13 +147,13 @@ public class AppointmentServiceImplTest {
             throws HasAppointmentException, DateInPastException, OutOfScheduleException,
             AppointmentAlreadyScheduledException {
         // Set up
-        Mockito.when(appointmentDao.hasAppointment(Mockito.any(Doctor.class), Mockito.any()))
-                .thenReturn(false);
-        Mockito.when(appointmentDao.hasAppointment(Mockito.any(User.class), Mockito.any()))
-                .thenReturn(true);
+        Mockito.when(appointmentDao.getAppointment(Mockito.eq(doc), Mockito.any()))
+                .thenReturn(Optional.empty());
+        Mockito.when(appointmentDao.getAppointment(Mockito.eq(user2), Mockito.any()))
+                .thenReturn(Optional.of(new Appointment(date, dc, user2)));
 
         // Execute
-        appointmentService.createAppointment(license1, id1, email2, year, month, day, time);
+        appointmentService.createAppointment(dc, user2, year, month, day, time);
     }
 
     @Test(expected = HasAppointmentException.class)
@@ -166,14 +161,16 @@ public class AppointmentServiceImplTest {
             throws HasAppointmentException, DateInPastException, OutOfScheduleException,
             AppointmentAlreadyScheduledException {
         // Set up
-        Mockito.when(appointmentDao.hasAppointment(Mockito.any(Doctor.class), Mockito.any()))
-                .thenReturn(true);
+        Mockito.when(appointmentDao.getAppointment(Mockito.eq(user2), Mockito.any()))
+                .thenReturn(Optional.empty());
+        Mockito.when(appointmentDao.getAppointment(Mockito.eq(doc), Mockito.any()))
+                .thenReturn(Optional.of(new Appointment(date, dc, user2)));
         // Execute
-        appointmentService.createAppointment(license1, id1, email2, year, month, day, time);
+        appointmentService.createAppointment(dc, user2, year, month, day, time);
     }
 
     @Test
-    public void testCancelAppPatient() throws EntityNotFoundException, RequestEntityNotFoundException {
+    public void testCancelAppPatient() throws EntityNotFoundException {
         // Set up
         LocalDateTime appDate = LocalDateTime.of(year, month, day, time, 0);
         Appointment app = new Appointment(appDate, dc, user2);

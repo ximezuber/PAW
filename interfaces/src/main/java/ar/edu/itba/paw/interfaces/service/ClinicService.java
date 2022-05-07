@@ -17,6 +17,8 @@ public interface ClinicService extends PaginationService<Clinic> {
 
     List<Clinic> getClinicsByLocation(Location location);
 
+    Optional<Clinic> getClinicByName(String name);
+
     boolean clinicExists(String name, String address, String location);
 
     void updateClinic(Clinic clinic, String name, String address, Location location);

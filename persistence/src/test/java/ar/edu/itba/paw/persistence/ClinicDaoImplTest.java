@@ -1,14 +1,11 @@
 package ar.edu.itba.paw.persistence;
 
-import ar.edu.itba.paw.interfaces.dao.ClinicDao;
 import ar.edu.itba.paw.model.Clinic;
 import ar.edu.itba.paw.model.Location;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -16,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -80,11 +78,14 @@ public class ClinicDaoImplTest {
 
     @Test
     public void testClinicExists() {
-        boolean bool = clinicDao.clinicExists(name, address, location);
-        boolean bool2 = clinicDao.clinicExists(name2, address2, location);
+        Optional<Clinic> clinic1 = clinicDao.getClinicByName(name);
+        Optional<Clinic> clinic2 = clinicDao.getClinicByName(name2);
 
-        Assert.assertTrue(bool);
-        Assert.assertFalse(bool2);
+        Assert.assertTrue(clinic1.isPresent());
+        assertEquals(name, clinic1.get().getName());
+        assertEquals(location.getLocationName(), clinic1.get().getLocation().getLocationName());
+        assertEquals(address, clinic1.get().getAddress());
+        Assert.assertFalse(clinic2.isPresent());
     }
 
 }

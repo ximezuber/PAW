@@ -4,7 +4,6 @@ import ar.edu.itba.paw.interfaces.dao.DoctorClinicDao;
 import ar.edu.itba.paw.interfaces.service.*;
 import ar.edu.itba.paw.model.*;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
-import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,51 +19,40 @@ public class DoctorClinicServiceImpl implements DoctorClinicService {
     @Autowired
     private ScheduleService scheduleService;
 
-    @Autowired
-    private DoctorService doctorService;
-
-    @Autowired
-    private ClinicService clinicService;
-
     @Transactional
     @Override
-    public DoctorClinic createDoctorClinic(String email, int clinicId, int consultPrice)
-            throws EntityNotFoundException, DuplicateEntityException {
-        Doctor doctor = doctorService.getDoctorByEmail(email);
-        Clinic clinic = clinicService.getClinicById(clinicId).orElseThrow(() -> new EntityNotFoundException("clinic"));
-        if (doctor == null) throw new EntityNotFoundException("doctor");
-        DoctorClinic dc = getDoctorClinic(doctor.getLicense(), clinicId);
-        if (dc != null) throw new DuplicateEntityException("doctor-clinic-exists");
+    public DoctorClinic createDoctorClinic(Doctor doctor, Clinic clinic, int consultPrice)
+            throws DuplicateEntityException {
+        Optional<DoctorClinic> dc = doctorClinicDao.getDoctorClinic(doctor, clinic);
+        if (dc.isPresent()) throw new DuplicateEntityException("doctor-clinic-exists");
 
         return doctorClinicDao.createDoctorClinic(doctor, clinic, consultPrice);
     }
 
     @Transactional
     @Override
-    public long deleteDoctorClinic(String license, int clinicid) throws EntityNotFoundException {
-        Doctor doc = doctorService.getDoctorByLicense(license);
-        if (doc == null) throw new EntityNotFoundException("doctor");
-        Clinic clinic = clinicService.getClinicById(clinicid).orElseThrow(() -> new EntityNotFoundException("clinic"));
-        return doctorClinicDao.deleteDoctorClinic(license, clinicid);
+    public void deleteDoctorClinic(DoctorClinic doctorClinic) {
+        doctorClinicDao.deleteDoctorClinic(doctorClinic);
     }
 
     @Override
     public List<DoctorClinic> getDoctorsSubscribedClinics(Doctor doctor) {
-        List<DoctorClinic> list = doctorClinicDao.getDoctorsSubscribedClinics(doctor);
-        return list;
+        return doctorClinicDao.getDoctorsSubscribedClinics(doctor);
     }
 
     @Override
-    public DoctorClinic getDoctorClinic(String license, int clinic) {
-        return doctorClinicDao.getDoctorClinic(license, clinic);
+    public Optional<DoctorClinic> getDoctorClinic(Doctor doctor, Clinic clinic) {
+        return doctorClinicDao.getDoctorClinic(doctor, clinic);
     }
 
     @Override
-    public DoctorClinic getDoctorClinicWithSchedule(String doctor, int clinic) {
-        DoctorClinic doctorClinic = doctorClinicDao.getDoctorClinic(doctor, clinic);
-        if(doctorClinic != null) {
-            List<Schedule> schedules = scheduleService.getDoctorClinicSchedule(doctorClinic);
-            doctorClinic.setSchedule(schedules);
+    public Optional<DoctorClinic> getDoctorClinicWithSchedule(Doctor doctor, Clinic clinic) {
+        Optional<DoctorClinic> doctorClinic = doctorClinicDao.getDoctorClinic(doctor, clinic);
+        if(doctorClinic.isPresent()) {
+            DoctorClinic dc = doctorClinic.get();
+            List<Schedule> schedules = scheduleService.getDoctorClinicSchedule(dc);
+            dc.setSchedule(schedules);
+            doctorClinic = Optional.of(dc);
         }
 
         return doctorClinic;
@@ -75,7 +63,7 @@ public class DoctorClinicServiceImpl implements DoctorClinicService {
                                                                 String firstName, String lastName,
                                                                 Prepaid prepaid, int consultPrice, int page) {
 
-        return doctorClinicDao.getFilteredDoctorClinicsPaginated(location, specialty, firstName,
+        return doctorClinicDao.getFilteredDoctorInClinicsPaginated(location, specialty, firstName,
                 lastName, prepaid, consultPrice, page);
     }
 
@@ -86,9 +74,7 @@ public class DoctorClinicServiceImpl implements DoctorClinicService {
 
     @Transactional
     @Override
-    public void editPrice(String license, int clinicId, int price) throws EntityNotFoundException {
-        DoctorClinic dc = getDoctorClinic(license, clinicId);
-        if (dc == null) throw new EntityNotFoundException("doctor-clinic");
+    public void editPrice(DoctorClinic dc, int price) {
         doctorClinicDao.editPrice(dc, price);
     }
 
@@ -102,14 +88,5 @@ public class DoctorClinicServiceImpl implements DoctorClinicService {
     @Override
     public int maxAvailablePage(Doctor doctor) {
         return doctorClinicDao.maxPageAvailable(doctor);
-    }
-
-    private void setSchedule(List<DoctorClinic> list) {
-        if(list != null) {
-            for (DoctorClinic doctorClinic: list) {
-                List<Schedule> schedules = scheduleService.getDoctorClinicSchedule(doctorClinic);
-                doctorClinic.setSchedule(schedules);
-            }
-        }
     }
 }

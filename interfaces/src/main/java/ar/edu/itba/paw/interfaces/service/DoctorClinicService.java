@@ -2,20 +2,21 @@ package ar.edu.itba.paw.interfaces.service;
 
 import ar.edu.itba.paw.model.*;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
-import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DoctorClinicService {
-    DoctorClinic createDoctorClinic(String email, int clinicId, int consultPrice) throws EntityNotFoundException, DuplicateEntityException;
+    DoctorClinic createDoctorClinic(Doctor doctor, Clinic clinic, int consultPrice)
+            throws DuplicateEntityException;
 
-    long deleteDoctorClinic(String license, int clinicid) throws EntityNotFoundException;
+    void deleteDoctorClinic(DoctorClinic doctorClinic);
 
     List<DoctorClinic> getDoctorsSubscribedClinics(Doctor doctor);
 
-    DoctorClinic getDoctorClinic(String doctor, int clinic);
+    Optional<DoctorClinic> getDoctorClinic(Doctor doctor, Clinic clinic);
 
-    DoctorClinic getDoctorClinicWithSchedule(String doctor, int clinic);
+    Optional<DoctorClinic> getDoctorClinicWithSchedule(Doctor doctor, Clinic clinic);
 
     List<Doctor> getPaginatedFilteredDoctorClinics(Location location, Specialty specialty,
                                                          String firstName, String lastName, Prepaid prepaid,
@@ -23,7 +24,7 @@ public interface DoctorClinicService {
 
     List<DoctorClinic> getPaginatedDoctorsClinics(Doctor doctor, int page);
 
-    void editPrice(String license, int clinicId, int price) throws EntityNotFoundException;
+    void editPrice(DoctorClinic dc, int price);
 
     int maxAvailableFilteredDoctorClinicPage(Location location, Specialty specialty,
                                              String firstName, String lastName, Prepaid prepaid,

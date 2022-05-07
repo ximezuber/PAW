@@ -20,6 +20,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 
+import java.util.Optional;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -56,11 +58,11 @@ public class PrepaidToClinicDaoImplTest {
 
     @Test
     public void testClinicHasPrepaid(){
-        boolean bool1 = prepaidToClinicDao.clinicHasPrepaid(prepaid, clinic);
-        boolean bool2 = prepaidToClinicDao.clinicHasPrepaid(prepaid, clinic2);
+        Optional<PrepaidToClinic> bool1 = prepaidToClinicDao.getPrepaidToClinic(prepaid, clinic);
+        Optional<PrepaidToClinic> bool2 = prepaidToClinicDao.getPrepaidToClinic(prepaid, clinic2);
 
-        Assert.assertTrue(bool1);
-        Assert.assertFalse(bool2);
+        Assert.assertTrue(bool1.isPresent());
+        Assert.assertFalse(bool2.isPresent());
     }
 
 }

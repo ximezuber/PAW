@@ -20,6 +20,7 @@ import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -71,20 +72,20 @@ public class DoctorDaoImplTest {
 
     @Test
     public void testGetDoctorByLicense(){
-        Doctor doctor = doctorDao.getDoctorByLicense(license2);
+        Optional<Doctor> doctor = doctorDao.getDoctorByLicense(license2);
 
-        assertNotNull(doctor);
-        assertEquals(license2, doctor.getLicense());
+        assertTrue(doctor.isPresent());
+        assertEquals(license2, doctor.get().getLicense());
 
     }
 
     @Test
     public void testIsDoctor(){
-        boolean bool1 = doctorDao.isDoctor(docUser2.getEmail());
-        boolean bool2 = doctorDao.isDoctor(user.getEmail());
+        Optional<Doctor> doc1 = doctorDao.getDoctorByEmail(docUser2.getEmail());
+        Optional<Doctor> doc2 = doctorDao.getDoctorByEmail(user.getEmail());
 
-        Assert.assertTrue(bool1);
-        Assert.assertFalse(bool2);
+        Assert.assertTrue(doc1.isPresent());
+        Assert.assertFalse(doc2.isPresent());
     }
 
 }

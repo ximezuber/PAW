@@ -27,7 +27,7 @@ public class UserContextHelper {
         return email;
     }
 
-    public static User getLoggedUser(SecurityContext context, UserService userService) {
-        return userService.findUserByEmail(getLoggedUserEmail(context));
-    }
+//    public static User getLoggedUser(SecurityContext context, UserService userService) {
+//        return userService.findUserByEmail(getLoggedUserEmail(context)).get();
+//    }
 }

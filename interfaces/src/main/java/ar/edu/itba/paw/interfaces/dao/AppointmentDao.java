@@ -18,6 +18,8 @@ public interface AppointmentDao {
 
     Optional<Appointment> getAppointment(Doctor doctor, LocalDateTime date);
 
+    Optional<Appointment> getAppointment(User patient, LocalDateTime date);
+
     int getMaxAvailablePage(Patient patient);
 
     int getMaxAvailablePage(Doctor doctor);
@@ -26,7 +28,7 @@ public interface AppointmentDao {
 
     int cancelAllAppointmentsOnSchedule(DoctorClinic doctorClinic, int day, int hour);
 
-    boolean hasAppointment(String doctorLicense, String patientEmail, LocalDateTime date);
+    Optional<Appointment> getAppointment(Doctor doctor, Patient patient, LocalDateTime date);
 
     boolean hasAppointment(Doctor doctor, LocalDateTime date);
 
