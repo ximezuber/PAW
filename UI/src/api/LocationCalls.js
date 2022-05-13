@@ -13,10 +13,11 @@ const deleteLocation = async (name) => api.delete(
     cons.LOCATIONS_PATH + "/" + name,
     {},
     {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}})
-
+const getLocation = async (name) => api.get(cons.LOCATIONS_PATH + "/" + name);
 export default {
     getLocations,
     getAllLocations,
     addLocation,
-    deleteLocation
+    deleteLocation,
+    getLocation
 }

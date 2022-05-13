@@ -3,6 +3,7 @@ package ar.edu.itba.paw.webapp.controller;
 import ar.edu.itba.paw.interfaces.service.*;
 import ar.edu.itba.paw.model.*;
 import ar.edu.itba.paw.model.exceptions.*;
+import ar.edu.itba.paw.model.exceptions.NotFoundException;
 import ar.edu.itba.paw.webapp.caching.AppointmentCaching;
 import ar.edu.itba.paw.webapp.dto.AppointmentDto;
 import ar.edu.itba.paw.webapp.form.AppointmentForm;
@@ -84,27 +85,27 @@ public class AppointmentController {
 
     /**
      * For doctor or user to cancel an appointment
-     * @param email
-     * @param license
-     * @param year
-     * @param month
-     * @param day
-     * @param time
      * @return
      * @throws EntityNotFoundException
      * @throws RequestEntityNotFoundException
      */
-    @DELETE
+    @DELETE()
+    @Path("/{id}")
     @Produces(value = { MediaType.APPLICATION_JSON })
     @PreAuthorize("hasPermission(#email, 'user')")
-    public Response cancelAppointment(@QueryParam("user") final String email,
-                                      @QueryParam("license") final String license,
-                                      @QueryParam("year") final Integer year,
-                                      @QueryParam("month") final Integer month,
-                                      @QueryParam("day") final Integer day,
-                                      @QueryParam("time") final Integer time) throws EntityNotFoundException {
+    public Response cancelAppointment(@PathParam("id") final String encodedId,
+                                      @NotNull @QueryParam("user") final String email,
+                                      @Context Request request) throws NotFoundException, MalformedIdException {
 
-        appointmentService.cancelUserAppointment(email, license, year, month, day, time);
+        Appointment appointment = getAppointmentByEncodedId(encodedId)
+                .orElseThrow(() -> new NotFoundException("appointment"));
+        appointmentService.cancelUserAppointment(
+                email,
+                appointment.getDoctorClinic().getDoctor().getLicense(),
+                appointment.getAppointmentKey().getDate().getYear(),
+                appointment.getAppointmentKey().getDate().getMonthValue(),
+                appointment.getAppointmentKey().getDate().getDayOfMonth(),
+                appointment.getAppointmentKey().getDate().getHour());
         return Response.noContent().build();
     }
 
@@ -155,20 +156,7 @@ public class AppointmentController {
     public Response getUserAppointments(@PathParam("id") final String encodedId,
                                         @NotNull @QueryParam("user") final String email,
                                         @Context Request request) throws EntityNotFoundException, MalformedIdException {
-        String decodedId = new String(Base64.getDecoder().decode(encodedId));
-
-        Map<String, String> id = parseId(decodedId);
-
-        Doctor doctor = doctorService.getDoctorByLicense(id.get("license"))
-                .orElseThrow(() -> new EntityNotFoundException("doctor"));
-
-        Optional<Appointment> appointment = appointmentService.getAppointment(
-                doctor,
-                Integer.parseInt(id.get("year")),
-                Integer.parseInt(id.get("month")),
-                Integer.parseInt(id.get("day")),
-                Integer.parseInt(id.get("time"))
-        );
+        Optional<Appointment> appointment = getAppointmentByEncodedId(encodedId);
 
         AppointmentDto dto = AppointmentDto.fromAppointment(
                 appointment.orElseThrow(() -> new EntityNotFoundException("appointment")), uriInfo);
@@ -189,6 +177,24 @@ public class AppointmentController {
         map.put("day", id[3]);
         map.put("time", id[4]);
         return map;
+    }
+
+    private Optional<Appointment> getAppointmentByEncodedId(String encodedId) throws MalformedIdException,
+            EntityNotFoundException {
+        String decodedId = new String(Base64.getDecoder().decode(encodedId));
+
+        Map<String, String> id = parseId(decodedId);
+
+        Doctor doctor = doctorService.getDoctorByLicense(id.get("license"))
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
+
+        return  appointmentService.getAppointment(
+                doctor,
+                Integer.parseInt(id.get("year")),
+                Integer.parseInt(id.get("month")),
+                Integer.parseInt(id.get("day")),
+                Integer.parseInt(id.get("time"))
+        );
     }
 
 

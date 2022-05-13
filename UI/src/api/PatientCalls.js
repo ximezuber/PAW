@@ -26,11 +26,15 @@ const getProfile = async (id) => api.get(PATIENT_PATH + "/" + id,{},
 const updateProfile = async (data, id) => api.put(PATIENT_PATH + "/" + id, data,
     {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}})
 
+const deleteProfile = async (id) => api.delete(PATIENT_PATH + "/" + id, {},
+    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}})
+
 export default {
     getFavoriteDoctors,
     deleteFavoriteDoctor,
     isFavorite,
     addFavoriteDoctor,
     updateProfile,
-    getProfile
+    getProfile,
+    deleteProfile
 }

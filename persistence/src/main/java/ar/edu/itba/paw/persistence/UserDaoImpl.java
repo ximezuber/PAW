@@ -2,14 +2,17 @@ package ar.edu.itba.paw.persistence;
 
 import ar.edu.itba.paw.interfaces.dao.UserDao;
 import ar.edu.itba.paw.model.User;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.Optional;
 
-
-@Component
+@Repository
 public class UserDaoImpl implements UserDao {
 
     @PersistenceContext
@@ -17,7 +20,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User createUser(String firstName, String lastName, String password, String email){
-        final User user = new User(firstName, lastName, password, email);
+        User user = new User(firstName, lastName, password, email);
         entityManager.persist(user);
         return user;
     }
@@ -42,7 +45,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void deleteUser(User user) {
-        User contextUser = entityManager.merge(user);
+        User contextUser = entityManager.find(User.class, user.getEmail());
         entityManager.remove(contextUser);
     }
 

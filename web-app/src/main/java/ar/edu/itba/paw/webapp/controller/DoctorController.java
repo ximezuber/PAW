@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.*;
 import javax.ws.rs.NotFoundException;
@@ -146,16 +147,16 @@ public class DoctorController {
                                            @Context Request request) {
         page = (page < 0) ? 0 : page;
 
-        List<String> licenses = doctorService.getDoctors().stream().map(Doctor::getLicense).collect(Collectors.toList());
-        int maxAvailablePage = doctorService.getMaxAvailableDoctorsPage(licenses);
+//        List<String> licenses = doctorService.getDoctors().stream().map(Doctor::getLicense).collect(Collectors.toList());
+        int maxAvailablePage = doctorService.maxAvailablePage();
 
         URI basePath = uriInfo.getAbsolutePathBuilder().build();
         String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxAvailablePage);
 
-        List<DoctorDto> doctors = doctorService.getPaginatedDoctors(licenses, page)
+        List<DoctorDto> doctors = doctorService.getPaginatedObjects(page)
                 .stream().map(d -> DoctorDto.fromDoctor(d, uriInfo)).collect(Collectors.toList());
 
-        Response.ResponseBuilder response =  CacheHelper.handleResponse(doctors, doctorCaching,
+        Response.ResponseBuilder response = CacheHelper.handleResponse(doctors, doctorCaching,
                 new GenericEntity<List<DoctorDto>>(doctors) {},
                         "doctors", request);
         if(!linkValue.isEmpty()) {
@@ -209,10 +210,9 @@ public class DoctorController {
     @DELETE
     @Path("/{license}")
     @Produces(value = { MediaType.APPLICATION_JSON })
+    @Transactional
     public Response deleteDoctor(@PathParam("license") final String license) throws EntityNotFoundException {
-         Doctor doctor = doctorService.getDoctorByLicense(license)
-                 .orElseThrow(() -> new EntityNotFoundException("doctor"));
-        doctorService.deleteDoctor(doctor);
+        doctorService.deleteDoctor(license);
         return Response.noContent().build();
     }
 
@@ -252,6 +252,7 @@ public class DoctorController {
     @POST
     @Produces(value = { MediaType.APPLICATION_JSON, })
     @Consumes(MediaType.APPLICATION_JSON)
+    @Transactional
     public Response createDoctor(final DoctorForm form)
             throws DuplicateEntityException, EntityNotFoundException,
             ar.edu.itba.paw.model.exceptions.BadRequestException {
@@ -259,10 +260,7 @@ public class DoctorController {
         if (!form.getPassword().equals(form.getRepeatPassword()))
             throw new ar.edu.itba.paw.model.exceptions.BadRequestException("password-mismatch");
         String encodedPassword = passwordEncoder.encode(form.getPassword());
-        Specialty specialty = specialtyService.getSpecialtyByName(form.getSpecialty())
-                .orElseThrow(() -> new EntityNotFoundException("specialty"));
-
-        doctorService.createDoctor(specialty, form.getLicense(), form.getPhoneNumber()
+        doctorService.createDoctor(form.getSpecialty(), form.getLicense(), form.getPhoneNumber()
                 ,form.getFirstName(), form.getLastName(), encodedPassword, form.getEmail());
         return Response.created(uriInfo.getAbsolutePathBuilder().path(form.getLicense()).build()).build();
     }

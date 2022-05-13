@@ -16,17 +16,13 @@ const getAppointment = async (email, page) => api.get(
     {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}}
 )
 
-const deleteAppointment = async (email, license, clinic, year, month, day, time) => api.delete(
-    cons.APPOINTMENT_PATH + '?' + cons.USER_QUERY + email + '&' + deleteQueryParams(license, clinic, year,
-        month, day, time),
+const deleteAppointment = async (email, id) => api.delete(
+    cons.APPOINTMENT_PATH + "/" + id + '?' + cons.USER_QUERY + email,
     {},
     {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}}
 )
 
-const deleteQueryParams = (license, clinic, year, month, day, time) => {
-    return cons.LICENSE_QUERY + license + '&' + cons.CLINIC_QUERY + clinic + '&' + cons.YEAR_QUERY + year + '&' +
-        cons.MONTH_QUERY + month + '&' + cons.DAY_QUERY + day + '&' + cons.TIME_QUERY + time;
-}
+
 export default {
     getAvailableAppointments,
     makeAppointment,

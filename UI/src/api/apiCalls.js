@@ -31,8 +31,11 @@ const logout = async () => {
     localStorage.removeItem('lastName')
 }
 
+const makeGetCall = async (path) => api.get(path);
+
 export default {
     login,
     signUp,
     logout,
+    makeGetCall
 }

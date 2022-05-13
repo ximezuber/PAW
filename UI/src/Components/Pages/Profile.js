@@ -31,7 +31,7 @@ function Profile() {
     }, [])
 
     const fetchPrepaids = async () => {
-        const response = await PrepaidCalls.getAllPrepaids();
+        const response = await PrepaidCalls.getAllPrepaid();
         if (response && response.ok) {
             setPrepaids(response.data.map(prepaid => prepaid.name))
         }

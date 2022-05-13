@@ -7,6 +7,9 @@ import ClinicCalls from "../../api/ClinicCalls";
 import PrepaidCalls from "../../api/PrepaidCalls";
 import {useTranslation} from "react-i18next";
 import "../../i18n/i18n"
+import ApiCalls from "../../api/apiCalls";
+import {getPaths} from "../../utils/paginationHelper";
+import {CURRENT, NEXT, PREV} from "./Constants";
 
 function ClinicPrepaids() {
 
@@ -16,14 +19,19 @@ function ClinicPrepaids() {
     const [allPrepaids, setAllPrepaids] = useState([])
     const [clinic, setClinic] = useState({})
     const [message, setMessage] = useState("")
-    const [page, setPage] = useState(0)
-    const [maxPage, setMaxPage] = useState(0)
+    const [paths, setPaths] = useState({})
     const { t } = useTranslation();
 
     const navigate = useNavigate()
 
+    const setPages = (linkHeader) => {
+        const paths = getPaths(linkHeader);
+        setPaths(paths)
+    }
+
     const fetchAllClinicPrepaids = async () => {
-        const response = await ClinicCalls.getAllClinicPrepaids(id);
+        console.log("getting them")
+        const response = await ClinicCalls.getAllClinicPrepaid(id);
         if (response && response.ok) {
             setAllPrepaidClinics(response.data)
         }
@@ -35,11 +43,11 @@ function ClinicPrepaids() {
 
     }
 
-    const fetchClinicPrepaids = async (pag) => {
-        const response = await ClinicCalls.getClinicPrepaids(id, pag);
+    const fetchClinicPrepaids = async () => {
+        const response = await ClinicCalls.getClinicPrepaid(id, 0);
         if (response && response.ok) {
             setPrepaidClinics(response.data)
-            setMaxPage(response.headers.xMaxPage)
+            setPages(response.headers.link)
         }
         if (response.status === 404) {
             if (response.data === "clinic-not-found") {
@@ -50,7 +58,7 @@ function ClinicPrepaids() {
     }
 
     const fetchPrepaids = async () => {
-        const response = await PrepaidCalls.getAllPrepaids();
+        const response = await PrepaidCalls.getAllPrepaid();
         if (response && response.ok) {
             setAllPrepaids(response.data)
         }
@@ -67,18 +75,37 @@ function ClinicPrepaids() {
         }
     }
 
-    useEffect(async () => {
-        await fetchClinicPrepaids(page)
-        await fetchAllClinicPrepaids()
-        await fetchPrepaids()
-        await fetchClinic(id)
+    const fetchPage = async (page) => {
+        const response = await ApiCalls.makeGetCall(paths[page])
+        if (response && response.ok) {
+            setPrepaidClinics(response.data)
+            setPages(response.headers.link)
+        }
+        if (response.status === 404) {
+            if (response.data === "clinic-not-found") {
+                setMessage("errors.clinicNotFound")
+            }
+        }
+
+    }
+
+    useEffect( () => {
+        async function fetchData () {
+            await fetchClinic(id);
+            await fetchClinicPrepaids();
+            console.log("getting in")
+            await fetchAllClinicPrepaids();
+            console.log("getting out")
+            await fetchPrepaids();
+        }
+        fetchData();
     }, [])
 
     const handleAdd = async (newPrepaid) => {
         const response = await ClinicCalls.addClinicPrepaid(id, newPrepaid)
         if (response && response.ok) {
             await fetchAllClinicPrepaids()
-            await fetchClinicPrepaids(page)
+            await fetchPage(CURRENT)
             setMessage("")
         }
         if(response.status === 401) {
@@ -100,7 +127,7 @@ function ClinicPrepaids() {
         const response = await ClinicCalls.deleteClinicPrepaid(id, name)
         if (response && response.ok) {
             await fetchAllClinicPrepaids()
-            await fetchClinicPrepaids(page)
+            await fetchPage(CURRENT)
             setMessage("")
         }
         if (response.status === 404) {
@@ -123,25 +150,23 @@ function ClinicPrepaids() {
     }
 
     const nextPage = async () => {
-        const newPage = page + 1
-        setPage(newPage)
-        await fetchClinicPrepaids(newPage)
+        setMessage("")
+        await fetchPage(NEXT)
     }
     const prevPage = async () => {
-        const newPage = page - 1
-        setPage(newPage)
-        await fetchClinicPrepaids(newPage)
+        setMessage("")
+        await fetchPage(PREV)
     }
 
     const renderPrevButton = () => {
-        if (page !== 0) {
+        if (paths[PREV]) {
             return <Button className="remove-button doc-button-color shadow-sm"
                            onClick={() => prevPage()}>{t("prevButton")}</Button>
         }
     }
 
     const renderNextButton = () => {
-        if (page < maxPage - 1) {
+        if (paths[NEXT]) {
             return <Button className="remove-button doc-button-color shadow-sm"
                            onClick={() => nextPage()}>{t("nextButton")}</Button>
         }

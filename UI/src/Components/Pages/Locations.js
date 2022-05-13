@@ -1,4 +1,4 @@
-import React, {Component, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, Card, Container} from "react-bootstrap";
 import '../CardContainer.css'
 import SinglePropertyAddModal from "../Modals/SinglePropertyAddModal";
@@ -6,31 +6,49 @@ import LocationCalls from "../../api/LocationCalls";
 import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import "../../i18n/i18n"
+import {getPaths} from "../../utils/paginationHelper";
+import ApiCalls from "../../api/apiCalls";
+import {CURRENT, NEXT, PREV} from "./Constants";
 
 function Locations(props){
     const [locations, setLocations] = useState([])
-    const [page, setPage] = useState(0)
-    const [maxPage, setMaxPage] = useState(0)
+    const [paths, setPaths] = useState({})
     const navigate = useNavigate()
     const [message, setMessage] = useState("")
     const { t } = useTranslation();
 
-    const fetchLocations = async (pag) => {
-        const response = await LocationCalls.getLocations(pag)
+    const setPages = (linkHeader) => {
+        const paths = getPaths(linkHeader);
+        setPaths(paths)
+    }
+
+    const fetchLocations = async () => {
+        const response = await LocationCalls.getLocations(0)
         if (response && response.ok){
             setLocations(response.data)
-            setMaxPage(response.headers.xMaxPage)
+            setPages(response.headers.link)
         }
     }
 
-     useEffect(async () => {
-        await fetchLocations(page)
+     useEffect( () => {
+         async function fetchData () {
+             await fetchLocations()
+         }
+         fetchData();
     }, [])
+
+    const fetchPage = async (page) => {
+        const response = await ApiCalls.makeGetCall(paths[page])
+        if (response && response.ok) {
+            setLocations(response.data)
+            setPages(response.headers.link)
+        }
+    }
 
     const deleteLocation = async (name) => {
         const response = await LocationCalls.deleteLocation(name);
         if (response && response.ok) {
-            await fetchLocations(page)
+            await fetchPage(CURRENT)
             setMessage("")
         }
         if (response.status === 404) {
@@ -53,7 +71,7 @@ function Locations(props){
     const handleAdd = async (newLocation) => {
         const response = await LocationCalls.addLocation(newLocation);
         if (response && response.ok) {
-            await fetchLocations(page)
+            await fetchPage(CURRENT)
             setMessage("")
         } else if (response.status === 401) {
             localStorage.removeItem('token')
@@ -67,27 +85,23 @@ function Locations(props){
     }
 
     const nextPage = async () => {
-        const newPage = page + 1
-        setPage(newPage)
         setMessage("")
-        await fetchLocations(newPage)
+        await fetchPage(NEXT)
     }
     const prevPage = async () => {
-        const newPage = page - 1
-        setPage(newPage)
         setMessage("")
-        await fetchLocations(newPage)
+        await fetchPage(PREV)
     }
 
     const renderPrevButton = () => {
-        if (page !== 0) {
+        if (paths[PREV]) {
             return <Button className="remove-button doc-button-color shadow-sm"
                            onClick={() => prevPage()}>{t("prevButton")}</Button>
         }
     }
 
     const renderNextButton = () => {
-        if (page < maxPage) {
+        if (paths[NEXT]) {
             return <Button className="remove-button doc-button-color shadow-sm"
                            onClick={() => nextPage()}>{t("nextButton")}</Button>
         }

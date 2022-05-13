@@ -6,32 +6,50 @@ import {useNavigate} from "react-router-dom";
 import PrepaidCalls from "../../api/PrepaidCalls";
 import "../../i18n/i18n"
 import {useTranslation} from "react-i18next";
+import {getPaths} from "../../utils/paginationHelper";
+import ApiCalls from "../../api/apiCalls";
+import {CURRENT, NEXT, PREV} from "./Constants";
 
 
 function Prepaids(props) {
     const [prepaids, setPrepaids] = useState([]);
-    const [page, setPage] = useState(0)
-    const [maxPage, setMaxPage] = useState(0)
+    const [paths, setPaths] = useState({})
     const navigate = useNavigate()
     const [message, setMessage] = useState("")
     const { t } = useTranslation();
 
-    const fetchPrepaids = async (pag) => {
-        const response = await PrepaidCalls.getPrepaids(pag);
+    const setPages = (linkHeader) => {
+        const paths = getPaths(linkHeader);
+        setPaths(paths)
+    }
+
+    const fetchPrepaids = async () => {
+        const response = await PrepaidCalls.getPrepaid(0);
         if (response && response.ok){
             setPrepaids(response.data)
-            setMaxPage(response.headers.xMaxPage)
+            setPages(response.headers.link)
         }
     }
 
-    useEffect(async () => {
-        await fetchPrepaids(page)
+    useEffect( () => {
+        async function fetchData () {
+            await fetchPrepaids()
+        }
+        fetchData();
     }, [])
+
+    const fetchPage = async (page) => {
+        const response = await ApiCalls.makeGetCall(paths[page])
+        if (response && response.ok) {
+            setPrepaids(response.data)
+            setPages(response.headers.link)
+        }
+    }
 
     const deletePrepaids = async (name) => {
         const response = await PrepaidCalls.deletePrepaid(name);
         if (response && response.ok) {
-            await fetchPrepaids(page)
+            await fetchPage(CURRENT)
             setMessage("")
         }
         if (response.status === 404) {
@@ -49,7 +67,7 @@ function Prepaids(props) {
     const handleAdd = async (newPrepaid) => {
         const response = await PrepaidCalls.addPrepaid(newPrepaid)
         if (response && response.ok) {
-            await fetchPrepaids(page)
+            await fetchPage(CURRENT)
             setMessage("")
         } else if (response.status === 401) {
             localStorage.removeItem('token')
@@ -63,27 +81,23 @@ function Prepaids(props) {
     }
 
     const nextPage = async () => {
-        const newPage = page + 1
-        setPage(newPage)
         setMessage("")
-        await fetchPrepaids(newPage)
+        await fetchPage(NEXT)
     }
     const prevPage = async () => {
-        const newPage = page - 1
-        setPage(newPage)
         setMessage("")
-        await fetchPrepaids(newPage)
+        await fetchPage(PREV)
     }
 
     const renderPrevButton = () => {
-        if (page !== 0) {
+        if (paths[PREV]) {
             return <Button className="remove-button doc-button-color shadow-sm"
                            onClick={() => prevPage()}>{t("prevButton")}</Button>
         }
     }
 
     const renderNextButton = () => {
-        if (page < maxPage - 1) {
+        if (paths[NEXT]) {
             return <Button className="remove-button doc-button-color shadow-sm"
                            onClick={() => nextPage()}>{t("nextButton")}</Button>
         }

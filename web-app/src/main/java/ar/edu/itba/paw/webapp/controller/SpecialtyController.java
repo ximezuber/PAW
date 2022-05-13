@@ -13,6 +13,7 @@ import ar.edu.itba.paw.webapp.helpers.PaginationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -107,6 +108,7 @@ public class SpecialtyController {
     @DELETE
     @Path("/{name}")
     @Produces(value = { MediaType.APPLICATION_JSON })
+    @Transactional
     public Response deleteSpecialty(@PathParam("name") final String name)
             throws EntityNotFoundException, EntityDependencyException {
         Specialty specialty = specialtyService.getSpecialtyByName(name)
@@ -124,6 +126,7 @@ public class SpecialtyController {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @Transactional
     public Response createSpecialty(@Valid final SpecialtyForm form) throws DuplicateEntityException {
         Specialty specialty = specialtyService.createSpecialty(form.getName());
         return Response.created(uriInfo.getAbsolutePathBuilder().

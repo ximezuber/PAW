@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import PropTypes from 'prop-types';
 import './NavBar.css'
 import ApiCalls from "../api/apiCalls";
-import {useLocation, useNavigate} from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../i18n/i18n";
 import {changeLanguage} from "i18next";
@@ -81,11 +81,11 @@ function NavBar(props) {
         <>
             <Navbar variant="dark" expand="lg" sticky="top" className="container-fluid nav-bar shadow-sm">
                 <Container style={{justifyContent: "flex-start"}}>
-                    <Navbar.Brand href={getRoleHome()}>DoctorSearch</Navbar.Brand>
+                    <Navbar.Brand as={Link} to={getRoleHome()}>DoctorSearch</Navbar.Brand>
                     {items.map((item) => {
                         return (
                             <Nav.Item class="ml-auto">
-                                <Nav.Link href={item.link} style={{color: "white"}}>{t("NAVBAR." +item.text)}</Nav.Link>
+                                <Nav.Link as={Link} to={item.link} style={{color: "white"}}>{t("NAVBAR." +item.text)}</Nav.Link>
                             </Nav.Item>
                         )
                     })}
@@ -97,17 +97,17 @@ function NavBar(props) {
                         </Nav.Item>
                         :
                         <Nav.Item  class="ml-auto">
-                            <Nav.Link href="/paw-2019b-4/signUp" style={{color: "white"}}>{t('NAVBAR.signUp')}</Nav.Link>
+                            <Nav.Link as={Link} to="/paw-2019b-4/signUp" style={{color: "white"}}>{t('NAVBAR.signUp')}</Nav.Link>
                         </Nav.Item>}
                     {localStorage.getItem('role') !== null ?
                         ''
                         :
                         <Nav.Item class="ml-auto">
-                            <Nav.Link href="/paw-2019b-4/login" style={{color: "white"}}>{t('NAVBAR.login')}</Nav.Link>
+                            <Nav.Link as={Link} to="/paw-2019b-4/login" style={{color: "white"}}>{t('NAVBAR.login')}</Nav.Link>
                         </Nav.Item>}
                     <ButtonGroup aria-label="Basic example">
-                        <Button className="lang-buttons" onClick={() =>changeLanguage('en')}>EN</Button>
-                        <Button className="lang-buttons" onClick={() =>changeLanguage('es')}>ES</Button>
+                        <Button className="lang-buttons" onClick={() => changeLanguage('en')}>EN</Button>
+                        <Button className="lang-buttons" onClick={() => changeLanguage('es')}>ES</Button>
                     </ButtonGroup>
                 </Container>
             </Navbar>

@@ -41,7 +41,7 @@ function SearchBar(props) {
     }
 
     const fetchPrepaids = async () => {
-        const response = await PrepaidCalls.getAllPrepaids();
+        const response = await PrepaidCalls.getAllPrepaid();
         if (response && response.ok) {
             const data = response.data
             data.push({name: '-'})
