@@ -5,7 +5,8 @@ import LocationCalls from "../api/LocationCalls";
 import SpecialtyCalls from "../api/SpecialtyCalls";
 import PrepaidCalls from "../api/PrepaidCalls";
 import {useTranslation} from "react-i18next";
-import {CURRENT, FIRST} from "./Pages/Constants";
+import {FIRST} from "./Pages/Constants";
+import './SearchBar.css';
 
 function SearchBar(props) {
     const {t} = useTranslation()
@@ -167,7 +168,7 @@ function SearchBar(props) {
                             </InputGroup>
                         </FormGroup>
                     </div>
-                    <div className="list-group-item list-group-item-action">
+                    <div className="list-group-item list-group-item-action button-div">
                         <Button className="doc-button-color" onClick={() => props.handleSearch({
                                 firstName: firstName,
                                 lastName: lastName,

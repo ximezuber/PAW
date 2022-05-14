@@ -24,6 +24,7 @@ import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -267,7 +268,7 @@ public class DoctorController {
      */
     @GET
     @Path("/{license}/image")
-    @Produces(value = { "image/*" })
+    @Produces("image/png")
     public Response getProfileImage(@PathParam("license") final String license,
                                     @Context Request request) throws EntityNotFoundException {
         Doctor d = doctorService.getDoctorByLicense(license)
@@ -276,8 +277,20 @@ public class DoctorController {
         Image img = imageService.getImageByLicense(d.getLicense())
                 .orElseThrow(() -> new EntityNotFoundException("image"));
 
-        ImageDto dto = ImageDto.fromImage(img.getImage());
-        return CacheHelper.handleResponse(dto.getImage(), imageCaching, "profileImage", request).build();
+        EntityTag etag = new EntityTag(Integer.toString(img.hashCode()));
+        Response.ResponseBuilder builder = request.evaluatePreconditions(etag);
+        CacheControl cc = new CacheControl();
+        cc.setMaxAge(Integer.MAX_VALUE);
+        cc.setPrivate(true);
+        Response.ResponseBuilder resp = Response.ok(img.getImage());
+        resp.cacheControl(cc);
+        if(builder == null)
+            resp.tag(etag).build();
+
+        return resp.build();
+
+//        ImageDto dto = ImageDto.fromImage(img.getImage());
+//        return CacheHelper.handleResponse(dto.getImage(), imageCaching, "profileImage", request).build();
     }
 
     /**

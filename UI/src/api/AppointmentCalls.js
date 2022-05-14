@@ -2,7 +2,7 @@ import api from "./index";
 import * as cons from './Constants.js'
 
 const getAvailableAppointments = async (license) => api.get(
-    cons.DOCTORS_PATH + '/' + license + '/' + cons.APPOINTMENT_PATH);
+    cons.DOCTORS_PATH + '/' + license + cons.APPOINTMENT_PATH);
 
 const makeAppointment = async (data) => api.post(
     cons.APPOINTMENT_PATH,

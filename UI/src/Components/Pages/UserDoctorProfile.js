@@ -10,6 +10,7 @@ import DropDownList from "../DropDownList";
 import {dateToString, getMonth, getWeekDate} from "../../utils/dateHelper";
 import PatientCalls from "../../api/PatientCalls";
 import './UserDoctorProfile.css'
+import ApiCalls from "../../api/apiCalls";
 
 
 function UserDoctorProfile(props) {
@@ -36,7 +37,21 @@ function UserDoctorProfile(props) {
     const fetchAvailableAppointments = async () => {
         const response = await AppointmentCalls.getAvailableAppointments(license);
         if (response && response.ok) {
-            setAvailable(response.data)
+            const list = response.data
+            let apps = []
+            for (let i = 0; i < list.length; i++) {
+                const clinic = await fetchClinic(list[i].clinic)
+                const app = {
+                    clinic: clinic,
+                    year: list[i].year,
+                    month: list[i].month,
+                    day: list[i].day,
+                    hour: list[i].hour,
+                    dayOfWeek: list[i].dayOfWeek
+                }
+                apps.push(app)
+            }
+            setAvailable(apps)
             setMessage("")
         }
     }
@@ -44,10 +59,23 @@ function UserDoctorProfile(props) {
     const fetchClinics = async () => {
         const response = await DoctorCalls.getAllClinics(license);
         if (response && response.ok) {
-            setClinics(response.data)
+            const docClinic = response.data
+            const getClinics = [];
+            for (let i = 0; i < docClinic.length; i++) {
+                const clinic = await fetchClinic(docClinic[i].clinic)
+                getClinics.push(clinic);
+            }
+            setClinics(getClinics)
             setMessage("")
         }
 
+    }
+
+    const fetchClinic = async (clinicPath) => {
+        const response = await ApiCalls.makeGetCall(clinicPath);
+        if (response && response.ok) {
+            return response.data
+        }
     }
 
     const fetchImage = async () => {
@@ -68,7 +96,20 @@ function UserDoctorProfile(props) {
     const fetchSchedule = async () => {
         const response = await DoctorCalls.getSchedule(license)
         if (response && response.ok) {
-            setSchedule(response.data)
+            const list = response.data;
+            let sch = []
+            for (let i = 0; i < list.length; i++) {
+                const clinic = await fetchClinic(list[i].clinic)
+                console.log(clinic)
+                const sched = {
+                    clinic: clinic,
+                    day: list[i].day,
+                    hour: list[i].hour,
+                }
+                sch.push(sched)
+                console.log(sched)
+            }
+            setSchedule(sch)
             setMessage("")
         }
     }
@@ -93,22 +134,17 @@ function UserDoctorProfile(props) {
 
     }
 
-
-    useEffect(async () => {
-        await fetchDoctor();
-        await fetchImage();
-        await fetchSchedule();
-        await fetchClinics();
-        await fetchAvailableAppointments();
-        await fetchIsFavorite();
-    },[])
-
-    const getName = () => {
-        if (doctor.user === undefined) {
-            return ""
+    useEffect( () => {
+        async function fetchData () {
+            await fetchDoctor();
+            await fetchImage();
+            await fetchSchedule();
+            await fetchClinics();
+            await fetchAvailableAppointments();
+            await fetchIsFavorite();
         }
-        return doctor.user.firstName + " " + doctor.user.lastName
-    }
+        fetchData();
+    },[])
 
     const handleMakeApp = async () => {
         if (localStorage.getItem('email') === null) {
@@ -208,13 +244,6 @@ function UserDoctorProfile(props) {
         }
     }
 
-    const getEmail = () => {
-        if (doctor.user === undefined) {
-            return ""
-        }
-        return doctor.user.email
-    }
-
     const getRow = (row) => {
         const rowSchedule = schedule.filter(schedule => schedule.hour === row)
         const days = []
@@ -231,7 +260,7 @@ function UserDoctorProfile(props) {
     }
 
     const handleSelectClinic = (clinicName) => {
-        const selected = clinics.filter(dc => dc.clinic.name + " (" + dc.clinic.location + ")" === clinicName)
+        const selected = clinics.filter(clinic => clinic.name + " (" + clinic.location + ")" === clinicName)
         setSelectedClinic(selected[0])
     }
 
@@ -253,7 +282,7 @@ function UserDoctorProfile(props) {
         if (selectedClinic === null) {
             return []
         }
-        return available.filter(appointment => appointment.doctorClinic.clinic.id === selectedClinic.clinic.id)
+        return available.filter(appointment => appointment.clinic.id === selectedClinic.id)
     }
 
     return (
@@ -271,10 +300,10 @@ function UserDoctorProfile(props) {
                             </Button>}
                         </h4>
                         <div className="user-info-label">
-                            <b>{t('FORM.name')}:</b> {getName()}
+                            <b>{t('FORM.name')}:</b> {doctor.firstName + " " + doctor.lastName}
                         </div>
                         <div className="user-info-label">
-                            <b>{t('FORM.email')}:</b> {getEmail()}
+                            <b>{t('FORM.email')}:</b> {doctor.email}
                         </div>
                         <div className="user-info-label">
                             <b>{t('DOC.license')}:</b> {doctor.license}
@@ -289,7 +318,7 @@ function UserDoctorProfile(props) {
                     <Col className="img-col-user mx-3">
                         <img className="user-img-size"
                              src={image === null?
-                                 "/paw-2019b-4/images/docpic.jpg": BASE_URL + "/doctors/" + license +"/image"} />
+                                 "/paw-2019b-4/images/docpic.jpg": BASE_URL + "/doctors/" + license + "/image"} />
                     </Col>
                 </Row>
                 <hr/>
@@ -335,8 +364,8 @@ function UserDoctorProfile(props) {
                         </h4>
                         <Form.Group className="m-3">
                             <Form.Label><b>{t("CLINIC.clinic")}</b>: {selectedClinic === null? "":
-                                selectedClinic.clinic.name + " - " + selectedClinic.clinic.location}</Form.Label>
-                            <DropDownList iterable={clinics.map(dc => dc.clinic.name + " (" + dc.clinic.location + ")")}
+                                selectedClinic.name + " - " + selectedClinic.location}</Form.Label>
+                            <DropDownList iterable={clinics.map(clinic => clinic.name + " (" + clinic.location + ")")}
                                           selectedElement=''
                                           handleSelect={handleSelectClinic}
                                           elementType={t('FORM.selectClinic')}

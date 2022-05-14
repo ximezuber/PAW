@@ -23,7 +23,7 @@ public class AppointmentDto {
         appointmentDto.day = appointment.getAppointmentKey().getDate().getDayOfMonth();
         appointmentDto.hour = appointment.getAppointmentKey().getDate().getHour();
         appointmentDto.dayOfWeek = appointment.getAppointmentKey().getDate().getDayOfWeek().getValue();
-        appointmentDto.patient = uriInfo.getBaseUriBuilder().path("patients")
+        appointmentDto.patient = appointment.getPatientUser() == null ? null : uriInfo.getBaseUriBuilder().path("patients")
                 .path(appointment.getPatientUser().getEmail()).build();
         appointmentDto.doctor = uriInfo.getBaseUriBuilder().path("doctors")
                 .path(appointment.getDoctorClinic().getDoctor().getLicense()).build();
