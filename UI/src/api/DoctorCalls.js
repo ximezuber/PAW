@@ -3,9 +3,7 @@ import * as cons from './Constants.js'
 
 const getDoctorsAdmin = async (pag) => api.get(
     cons.DOCTORS_PATH + cons.ALL_PATH + "?" + cons.PAGE_QUERY + pag);
-const searchDocs = async (pag, location, specialty, firstName, lastName, consultPrice, prepaid) => api.get(
-    cons.DOCTORS_PATH + "?" + cons.PAGE_QUERY + pag
-    + getSearchQuery(location, specialty, firstName, lastName, consultPrice, prepaid))
+const searchDocs = async (pag, params) => api.get(cons.DOCTORS_PATH + "?" + cons.PAGE_QUERY + pag + params)
 const addDoctor = async (data) => api.post(
     cons.DOCTORS_PATH,
     data,

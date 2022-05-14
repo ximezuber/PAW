@@ -5,6 +5,7 @@ import LocationCalls from "../api/LocationCalls";
 import SpecialtyCalls from "../api/SpecialtyCalls";
 import PrepaidCalls from "../api/PrepaidCalls";
 import {useTranslation} from "react-i18next";
+import {CURRENT, FIRST} from "./Pages/Constants";
 
 function SearchBar(props) {
     const {t} = useTranslation()
@@ -66,7 +67,6 @@ function SearchBar(props) {
                 setLastName(event.target.value)
                 break;
             case "consultPrice":
-                console.log(" sss " + event.target.value)
                 setConsultPrice(event.target.value)
                 break;
         }
@@ -83,6 +83,25 @@ function SearchBar(props) {
     const handleSelectPrepaid = (prepaid) => {
         setSelectedPrepaid(prepaid)
     }
+
+    const handleClear = () => {
+        setSelectedLocation('-')
+        setSelectedSpecialty('-')
+        setSelectedPrepaid('-')
+        setLastName('')
+        setFirstName('')
+        setConsultPrice('')
+        props.handleSearch({
+                firstName: null,
+                lastName: null,
+                location: null,
+                specialty: null,
+                prepaid: null,
+                consultPrice: null
+            }, FIRST
+        )
+    }
+
 
     return (
         <>
@@ -124,14 +143,16 @@ function SearchBar(props) {
                     <div className="list-group-item list-group-item-action">
                         <FormGroup className="mb-3" controlId="firstName">
                                     <Form.Label>{t("FORM.firstName")}</Form.Label>
-                                    <Form.Control placeholder="Enter first name" onChange={onChange}/>
+                                    <Form.Control placeholder="Enter first name" value={firstName}
+                                                  onChange={onChange}/>
                                 </FormGroup>
                     </div>
 
                     <div className="list-group-item list-group-item-action">
                         <Form.Group className="mb-3" controlId="lastName">
                                     <Form.Label>{t("FORM.lastName")}</Form.Label>
-                                    <Form.Control placeholder="Enter last name" onChange={onChange}/>
+                                    <Form.Control placeholder="Enter last name" value={lastName}
+                                                  onChange={onChange}/>
                                 </Form.Group>
                     </div>
 
@@ -140,7 +161,8 @@ function SearchBar(props) {
                             <Form.Label>{t("FORM.maxPrice")}</Form.Label>
                             <InputGroup className="mb-3">
                                 <InputGroup.Text>$</InputGroup.Text>
-                                <FormControl aria-label="Amount (to the nearest dollar)" onChange={onChange}/>
+                                <FormControl aria-label="Amount (to the nearest dollar)" value={consultPrice}
+                                             onChange={onChange}/>
                                 <InputGroup.Text>.00</InputGroup.Text>
                             </InputGroup>
                         </FormGroup>
@@ -153,9 +175,12 @@ function SearchBar(props) {
                                 specialty: selectedSpecialty === '-'? null : selectedSpecialty,
                                 prepaid: selectedPrepaid === '-'? null : selectedPrepaid,
                                 consultPrice: consultPrice
-                            }, 0
+                            }, FIRST
                         )}>
                             Search
+                        </Button>
+                        <Button className="doc-button-color" onClick={() => handleClear()}>
+                            Clear
                         </Button>
                     </div>
                 </Form>

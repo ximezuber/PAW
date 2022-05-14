@@ -118,13 +118,7 @@ public class DoctorController {
         List<DoctorDto> doctors = docs
                 .stream().map(d -> DoctorDto.fromDoctor(d, uriInfo)).collect(Collectors.toList());
 
-        URI basePath = uriInfo.getAbsolutePathBuilder()
-                .queryParam("location", location)
-                .queryParam("specialty", specialty)
-                .queryParam("firstName", firstName)
-                .queryParam("lastName", lastName)
-                .queryParam("consultPrice", consultPrice)
-                .queryParam("prepaid", prepaid).build();
+        URI basePath = uriInfo.getAbsolutePathBuilder().build();
         String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxAvailablePage);
         Response.ResponseBuilder response =  CacheHelper.handleResponse(doctors, doctorCaching, new GenericEntity<List<DoctorDto>>(doctors) {},
                         "doctors", request);
