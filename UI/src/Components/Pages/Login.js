@@ -29,7 +29,7 @@ const WrappedLogin = props => {
     const location = useLocation()
     const {t} = useTranslation()
 
-    return <Login navigate={navigate} t={t} location={location} {...props} />
+    return <Login navigate={navigate} t={t} location={location} setRole={props.setRole} {...props} />
 }
 
 class Login extends Component {
@@ -75,23 +75,22 @@ class Login extends Component {
             ApiCalls.login(this.state.email, this.state.password).then(
                 (resp) => {
                     if (resp.status === 200) {
-                        switch (localStorage.getItem('role')) {
+                        const role = resp.headers.xRole
+                        this.props.setRole(role)
+                        switch (role) {
                             case "ROLE_ADMIN":
                                 this.props.navigate("/paw-2019b-4/admin");
-                                window.location.reload()
                                 break;
                             case "ROLE_DOCTOR":
                                 this.props.navigate("/paw-2019b-4/doctor");
-                                window.location.reload()
                                 break;
                             case "ROLE_USER":
                                 if (localStorage.getItem("path") !== null) {
                                     this.props.navigate(localStorage.getItem("path"));
                                     localStorage.removeItem("path")
-                                    window.location.reload()
                                 } else {
                                     this.props.navigate("/paw-2019b-4");
-                                    window.location.reload()
+                                    // window.location.reload()
                                 }
                                 break;
                         }

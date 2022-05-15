@@ -117,21 +117,21 @@ function UserDoctorProfile(props) {
     const fetchIsFavorite = async () => {
         if (localStorage.getItem('email') === null) {
             setIsFavorite(false)
-        }
-        const response = await PatientCalls.isFavorite(localStorage.getItem('email'), license)
-        if (response && response.ok) {
-            setIsFavorite(true)
-            setMessage("")
-        }
-        if (response.status === 404) {
-            if (response.data === "doctor-not-found")
-                setMessage("errors.noDocFound")
-            if (response.data === "not-favorite"){
-                setIsFavorite(false)
+        } else {
+            const response = await PatientCalls.isFavorite(localStorage.getItem('email'), license)
+            if (response && response.ok) {
+                setIsFavorite(true)
                 setMessage("")
             }
+            if (response.status === 404) {
+                if (response.data === "doctor-not-found")
+                    setMessage("errors.noDocFound")
+                if (response.data === "not-favorite"){
+                    setIsFavorite(false)
+                    setMessage("")
+                }
+            }
         }
-
     }
 
     useEffect( () => {
@@ -148,7 +148,8 @@ function UserDoctorProfile(props) {
 
     const handleMakeApp = async () => {
         if (localStorage.getItem('email') === null) {
-            navigate("/paw-2019b-4/login")
+            props.logout()
+            navigate('/paw-2019b-4/login')
         }
         if (selectedClinic === null) {
             setMessage("errors.selectTime")
@@ -171,9 +172,8 @@ function UserDoctorProfile(props) {
                 navigate("/paw-2019b-4/appointments")
             }
             if (response.status === 401) {
-                localStorage.removeItem('token')
-                localStorage.removeItem('role')
                 localStorage.setItem('path', "/" + license + "/profile")
+                props.logout()
                 navigate('/paw-2019b-4/login')
             }
             if (response.status === 400) {
@@ -196,7 +196,8 @@ function UserDoctorProfile(props) {
 
     const makeFavorite = async () => {
         if (localStorage.getItem('email') === null) {
-            navigate("/paw-2019b-4/login")
+            props.logout()
+            navigate('/paw-2019b-4/login')
         }
         const response = await PatientCalls.addFavoriteDoctor(localStorage.getItem('email'), license)
         if (response && response.ok) {
@@ -214,16 +215,16 @@ function UserDoctorProfile(props) {
                 setMessage("errors.favExists")
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
             localStorage.setItem('path', "/" + license + "/profile")
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }
 
     const deleteFavorite = async () => {
         if (localStorage.getItem('email') === null) {
-            navigate("/paw-2019b-4/login")
+            props.logout()
+            navigate('/paw-2019b-4/login')
         }
         const response = await PatientCalls.deleteFavoriteDoctor(localStorage.getItem('email'), license)
         if (response && response.ok) {
@@ -237,9 +238,8 @@ function UserDoctorProfile(props) {
                 setMessage("errors.noPatientEmail")
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
             localStorage.setItem('path', "/" + license + "/profile")
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }

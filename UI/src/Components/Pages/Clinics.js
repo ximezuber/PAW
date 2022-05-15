@@ -72,8 +72,7 @@ function Clinics(props) {
             if (response.data === "clinic-not-found")
                 setMessage("errors.clinicNotFoundDelete")
         } else if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }
@@ -91,8 +90,7 @@ function Clinics(props) {
             setMessage("")
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
         if (response.status === 404) {
@@ -120,8 +118,7 @@ function Clinics(props) {
             setMessage("")
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
         if (response.status === 404) {

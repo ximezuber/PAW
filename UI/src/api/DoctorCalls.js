@@ -56,36 +56,6 @@ const deleteSchedule = async (license, clinicId, day, hour) => api.delete(
     {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}}
 )
 
-const getSearchQuery = (location, specialty, firstName, lastName, consultPrice, prepaid) => {
-    const queryParams = [];
-    if (location !== undefined & location !== null && location !== "") {
-        queryParams.push("location=" + location)
-    }
-    if (specialty !== undefined & specialty !== null && specialty !== "") {
-        queryParams.push("specialty=" + specialty)
-    }
-    if (firstName !== undefined & firstName !== null && firstName !== "") {
-        queryParams.push("firstName=" + firstName)
-    }
-    if (lastName !== undefined & lastName !== null && lastName !== "") {
-        queryParams.push("lastName=" + lastName)
-    }
-    if (consultPrice !== undefined & consultPrice !== null && consultPrice !== 0) {
-        queryParams.push("consultPrice=" + consultPrice)
-    }
-    if (prepaid !== undefined & prepaid !== null && prepaid !== "") {
-        queryParams.push("prepaid=" + prepaid)
-    }
-
-    let query = "";
-
-    for (let i = 0; i < queryParams.length; i++) {
-        query = query + "&" + queryParams[i];
-    }
-
-    return query;
-}
-
 
 export default {
     getDoctorsAdmin,

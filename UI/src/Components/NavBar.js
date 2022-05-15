@@ -14,6 +14,8 @@ function NavBar(props) {
     const navigate = useNavigate()
     const location = useLocation()
     const [items, setItems] = useState([]);
+    const [home, setHome] = useState("")
+    const [loggedIn, setLoggedIn] = useState(false)
     const { t } = useTranslation();
 
     const userNavbarItems = [
@@ -41,9 +43,10 @@ function NavBar(props) {
             text: 'appointments'
         }
     ]
-    const getItems = () => {
+    const getItems = (role) => {
         if (!props.isAuth()) return [];
-        switch (localStorage.getItem('role')) {
+        // eslint-disable-next-line default-case
+        switch (role) {
             case "ROLE_ADMIN":
                 return [];
             case "ROLE_DOCTOR":
@@ -54,20 +57,31 @@ function NavBar(props) {
     }
 
     useEffect(() => {
-        setItems(getItems())
-    },[])
+        function checkUserData() {
+            setItems(getItems(props.role))
+            setHome(getRoleHome(props.role))
+            setLoggedIn(props.isAuth())
+        }
+
+        checkUserData();
+        // window.addEventListener('storage', checkUserData)
+        //
+        // return () => {
+        //     window.removeEventListener('storage', checkUserData)
+        // }
+
+    },[props.role])
 
     const handleLogout = () => {
-        ApiCalls.logout().then(() => {
-            navigate("/paw-2019b-4");
-            window.location.reload()
-        })
+        props.setRole(null)
+        ApiCalls.logout()
+        navigate("/paw-2019b-4");
 
     }
 
-    const getRoleHome = () => {
+    const getRoleHome = (role) => {
         if (!props.isAuth()) return "/paw-2019b-4";
-        switch (localStorage.getItem('role')) {
+        switch (role) {
             case "ROLE_ADMIN":
                 return '/paw-2019b-4/admin';
             case "ROLE_DOCTOR":
@@ -81,7 +95,7 @@ function NavBar(props) {
         <>
             <Navbar variant="dark" expand="lg" sticky="top" className="container-fluid nav-bar shadow-sm">
                 <Container style={{justifyContent: "flex-start"}}>
-                    <Navbar.Brand as={Link} to={getRoleHome()}>DoctorSearch</Navbar.Brand>
+                    <Navbar.Brand as={Link} to={home}>DoctorSearch</Navbar.Brand>
                     {items.map((item) => {
                         return (
                             <Nav.Item class="ml-auto">
@@ -91,7 +105,7 @@ function NavBar(props) {
                     })}
                 </Container>
                 <Container style={{justifyContent: "flex-end"}}>
-                    {localStorage.getItem('role') !== null ?
+                    {loggedIn ?
                         <Nav.Item class="ml-auto">
                             <Nav.Link onClick={() => handleLogout()} style={{color: "white"}}>{t('NAVBAR.logout')}</Nav.Link>
                         </Nav.Item>
@@ -99,7 +113,7 @@ function NavBar(props) {
                         <Nav.Item  class="ml-auto">
                             <Nav.Link as={Link} to="/paw-2019b-4/signUp" style={{color: "white"}}>{t('NAVBAR.signUp')}</Nav.Link>
                         </Nav.Item>}
-                    {localStorage.getItem('role') !== null ?
+                    {loggedIn ?
                         ''
                         :
                         <Nav.Item class="ml-auto">

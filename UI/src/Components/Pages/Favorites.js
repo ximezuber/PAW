@@ -5,7 +5,7 @@ import {Button, Card, Col, Container, Row} from "react-bootstrap";
 import {Link, useNavigate} from "react-router-dom";
 import './Favorites.css'
 
-function Favorites() {
+function Favorites(props) {
     const [doctors, setDoctors] = useState([])
     const [page, setPage] = useState(0)
     const [maxPage, setMaxPage] = useState(0)
@@ -18,8 +18,7 @@ function Favorites() {
     const fetchFavorites = async (pag) => {
         let id = localStorage.getItem('email')
         if (id === null) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
         setIsLoading(true)
@@ -30,9 +29,7 @@ function Favorites() {
             setIsLoading(false)
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
-            localStorage.removeItem('email')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }
@@ -40,8 +37,7 @@ function Favorites() {
     const removeFromFavorites = async (license) => {
         let id = localStorage.getItem('email')
         if (id === null) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
         const response = await PatientCalls.deleteFavoriteDoctor(id, license);
@@ -50,8 +46,7 @@ function Favorites() {
             setMessage("")
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }

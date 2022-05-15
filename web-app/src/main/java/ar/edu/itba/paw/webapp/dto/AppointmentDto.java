@@ -4,6 +4,8 @@ import ar.edu.itba.paw.model.Appointment;
 
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 public class AppointmentDto {
 
@@ -15,8 +17,9 @@ public class AppointmentDto {
     private URI patient;
     private URI doctor;
     private URI clinic;
+    private String id;
 
-    public static AppointmentDto fromAppointment(Appointment appointment, UriInfo uriInfo) {
+    public static AppointmentDto fromAppointment(Appointment appointment, String id, UriInfo uriInfo) {
         AppointmentDto appointmentDto = new AppointmentDto();
         appointmentDto.year = appointment.getAppointmentKey().getDate().getYear();
         appointmentDto.month = appointment.getAppointmentKey().getDate().getMonthValue();
@@ -29,6 +32,7 @@ public class AppointmentDto {
                 .path(appointment.getDoctorClinic().getDoctor().getLicense()).build();
         appointmentDto.clinic = uriInfo.getBaseUriBuilder().path("clinics")
                 .path(String.valueOf(appointment.getDoctorClinic().getClinic().getId())).build();
+        appointmentDto.id = id;
         return appointmentDto;
     }
 
@@ -94,5 +98,13 @@ public class AppointmentDto {
 
     public void setClinic(URI clinic) {
         this.clinic = clinic;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

@@ -9,9 +9,7 @@ const login = async (email, password) => {
     return api.post(cons.LOGIN_PATH, params)
         .then(resp => {
             if(resp.status === 200) {
-                console.log(resp.headers)
                 localStorage.setItem('token', resp.headers.xAuthToken)
-                localStorage.setItem('role', resp.headers.xRole)
             }
 
             return resp
@@ -22,21 +20,26 @@ const signUp = async (data) => {
     return api.post(cons.PATIENT_PATH, data)
 }
 
-const logout = async () => {
+const logout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('role')
     localStorage.removeItem('email')
     localStorage.removeItem('license')
     localStorage.removeItem('firstName')
     localStorage.removeItem('lastName')
+    localStorage.removeItem('specialty')
+    localStorage.removeItem('phone')
     localStorage.removeItem('pathCurrent')
 }
 
 const makeGetCall = async (path) => api.get(path);
 
+const makeAuthGetCall = async (path) => api.get(path, {},
+    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}});
+
 export default {
     login,
     signUp,
     logout,
-    makeGetCall
+    makeGetCall,
+    makeAuthGetCall
 }

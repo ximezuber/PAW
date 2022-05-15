@@ -13,7 +13,7 @@ import '../Pages/Constants'
 import {CURRENT, NEXT, PREV} from "./Constants";
 
 
-function Doctors() {
+function Doctors(props) {
     const [doctors, setDoctors] = useState([])
     const [specialties, setSpecialties] = useState([])
     const [paths, setPaths] = useState({})
@@ -64,8 +64,7 @@ function Doctors() {
             setMessage("")
 
         } else if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         } else if (response.status === 409) {
             if (response.data === 'license-in-use')
@@ -94,8 +93,7 @@ function Doctors() {
                 setMessage("errors.doctorsNotFound")
             }
         } else if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }

@@ -58,8 +58,7 @@ function Prepaids(props) {
             }
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }
@@ -70,8 +69,7 @@ function Prepaids(props) {
             await fetchPage(CURRENT)
             setMessage("")
         } else if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         } else if (response.status === 409) {
             if (response.data === "prepaid-exists") {

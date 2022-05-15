@@ -64,8 +64,12 @@ public class AppointmentController {
         User user = userService.findUserByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("user"));
 
+
         List<AppointmentDto> appointments = appointmentService.getPaginatedAppointments(user, page)
-                .stream().map(appointment -> AppointmentDto.fromAppointment(appointment, uriInfo))
+                .stream().map(appointment -> {
+                    String encodedID = encodeId(appointment);
+                    return AppointmentDto.fromAppointment(appointment,encodedID, uriInfo);
+                })
                 .collect(Collectors.toList());
 
         int maxPage = appointmentService.getMaxAvailablePage(user);
@@ -92,7 +96,6 @@ public class AppointmentController {
     @DELETE()
     @Path("/{id}")
     @Produces(value = { MediaType.APPLICATION_JSON })
-    @PreAuthorize("hasPermission(#email, 'user')")
     public Response cancelAppointment(@PathParam("id") final String encodedId,
                                       @NotNull @QueryParam("user") final String email,
                                       @Context Request request) throws NotFoundException, MalformedIdException {
@@ -137,13 +140,7 @@ public class AppointmentController {
                 user, form.getYear(), form.getMonth(), form.getDay(),
                 form.getTime());
 
-        // TODO correct the URI
-        String id = appointment.getDoctorClinic().getDoctor().getLicense()
-                + "-" + appointment.getAppointmentKey().getDate().getYear()
-                + "-" + appointment.getAppointmentKey().getDate().getMonthValue()
-                + "-" + appointment.getAppointmentKey().getDate().getDayOfMonth()
-                + "-" + appointment.getAppointmentKey().getDate().getHour();
-        String encodedId = Base64.getUrlEncoder().encodeToString(id.getBytes(StandardCharsets.UTF_8));
+        String encodedId = encodeId(appointment);
 
         return Response.created(uriInfo.getBaseUriBuilder().path("appointments")
                 .path(encodedId).queryParam("user", form.getPatient()).build()).build();
@@ -159,7 +156,7 @@ public class AppointmentController {
         Optional<Appointment> appointment = getAppointmentByEncodedId(encodedId);
 
         AppointmentDto dto = AppointmentDto.fromAppointment(
-                appointment.orElseThrow(() -> new EntityNotFoundException("appointment")), uriInfo);
+                appointment.orElseThrow(() -> new EntityNotFoundException("appointment")), encodedId, uriInfo);
 
         Response.ResponseBuilder response = CacheHelper.handleResponse(dto, appointmentCaching,
                  "appointments", request);
@@ -177,6 +174,15 @@ public class AppointmentController {
         map.put("day", id[3]);
         map.put("time", id[4]);
         return map;
+    }
+
+    private String encodeId (Appointment appointment) {
+        String id = appointment.getDoctorClinic().getDoctor().getLicense()
+            + "-" + appointment.getAppointmentKey().getDate().getYear()
+            + "-" + appointment.getAppointmentKey().getDate().getMonthValue()
+            + "-" + appointment.getAppointmentKey().getDate().getDayOfMonth()
+            + "-" + appointment.getAppointmentKey().getDate().getHour();
+        return Base64.getUrlEncoder().encodeToString(id.getBytes(StandardCharsets.UTF_8));
     }
 
     private Optional<Appointment> getAppointmentByEncodedId(String encodedId) throws MalformedIdException,

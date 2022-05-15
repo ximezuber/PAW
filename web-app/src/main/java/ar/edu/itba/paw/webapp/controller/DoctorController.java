@@ -223,6 +223,7 @@ public class DoctorController {
     @Produces(value = { MediaType.APPLICATION_JSON })
     @Consumes(MediaType.APPLICATION_JSON)
     @PreAuthorize("hasPermission(#license, 'doctor')")
+    @Transactional
     public Response updateDoctor(@PathParam("license") final String license, @Valid EditDoctorProfileForm form)
             throws EntityNotFoundException {
         Doctor doctor = doctorService.getDoctorByLicense(license)
@@ -289,8 +290,6 @@ public class DoctorController {
 
         return resp.build();
 
-//        ImageDto dto = ImageDto.fromImage(img.getImage());
-//        return CacheHelper.handleResponse(dto.getImage(), imageCaching, "profileImage", request).build();
     }
 
     /**
@@ -324,7 +323,7 @@ public class DoctorController {
      * @throws UnsupportedMediaTypeException
      * @throws IOException
      */
-    @PUT
+    @POST
     @Path("/{license}/image")
     @Consumes("multipart/form-data")
     @Produces(value = { MediaType.APPLICATION_JSON })
@@ -625,7 +624,7 @@ public class DoctorController {
                 .orElseThrow(() -> new EntityNotFoundException("doctor"));
 
         List<AppointmentDto> appointments = appointmentService.getDoctorsAvailableAppointments(doctor)
-                .stream().map(appointment -> AppointmentDto.fromAppointment(appointment, uriInfo))
+                .stream().map(appointment -> AppointmentDto.fromAppointment(appointment, null, uriInfo))
                 .collect(Collectors.toList());
         return CacheHelper.handleResponse(appointments, appointmentCaching,
                 new GenericEntity<List<AppointmentDto>>(appointments) {}, "appointments",

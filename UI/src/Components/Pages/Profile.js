@@ -11,7 +11,7 @@ import AppointmentCalls from "../../api/AppointmentCalls";
 import {dateToString} from "../../utils/dateHelper";
 import './Profile.css'
 
-function Profile() {
+function Profile(props) {
     const [selectedPrepaid, setSelectedPrepaid] = useState('')
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
@@ -50,8 +50,7 @@ function Profile() {
             localStorage.setItem('prepaidNumber', response.data.prepaidNumber)
             setId(response.data.id)
         } else if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }
@@ -59,8 +58,7 @@ function Profile() {
     const fetchAppointments = async () => {
         const email = localStorage.getItem('email')
         if (email === null) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
         const response = await AppointmentCalls.getAppointment(email, 0)
@@ -68,9 +66,7 @@ function Profile() {
             setAppointments(response.data.slice(0, 3))
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
-            localStorage.removeItem('email')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }

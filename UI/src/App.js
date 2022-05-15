@@ -1,5 +1,5 @@
 import './App.css';
-import {BrowserRouter as Router, Routes, Route, Navigate} from "react-router-dom";
+import {BrowserRouter as Router, Routes, Route, Navigate, useNavigate} from "react-router-dom";
 import Home from './Components/Pages/Home'
 import Navbar from "./Components/NavBar";
 import AdminHome from "./Components/Pages/AdminHome";
@@ -19,14 +19,17 @@ import UserDoctorProfile from "./Components/Pages/UserDoctorProfile";
 import Favorites from "./Components/Pages/Favorites";
 import Profile from "./Components/Pages/Profile";
 import Appointments from "./Components/Pages/Appointments";
+import {useState} from "react";
+import apiCalls from "./api/apiCalls";
 
 function App() {
+    const [role, setRole] = useState(null);
 
-    const isAuth = () => localStorage.getItem('role') !== null;
+    const isAuth = () => role !== null;
 
-    const isAdmin = () => isAuth()? localStorage.getItem('role') === 'ROLE_ADMIN' : false;
-    const isDoc = () => isAuth()? localStorage.getItem('role') === 'ROLE_DOCTOR' : false;
-    const isUser = () => isAuth()? localStorage.getItem('role') === 'ROLE_USER' : false;
+    const isAdmin = () => isAuth(role)? role === 'ROLE_ADMIN' : false;
+    const isDoc = () => isAuth(role)? role === 'ROLE_DOCTOR' : false;
+    const isUser = () => isAuth(role)? role === 'ROLE_USER' : false;
 
     function AdminRoute({ children }) {
         const auth = isAdmin();
@@ -43,31 +46,36 @@ function App() {
         return auth ? children : <Navigate to="/paw-2019b-4/login" />;
     }
 
+    function handleLogout ()  {
+        apiCalls.logout();
+        setRole(null);
+    }
+
   return (
     <div className="App">
         <div className="App-header">
             <Router>
-                <Navbar isAuth={isAuth}/>
+                <Navbar isAuth={isAuth} role={role} setRole={setRole}/>
                 <Routes>
-                    <Route exact path='/paw-2019b-4' element={<Home/>}/>
-                    <Route exact path='/paw-2019b-4/appointments' element={<UserRoute><Appointments user="patient" /></UserRoute>}/>
-                    <Route exact path='/paw-2019b-4/:license/profile' element={<UserDoctorProfile />}/>
-                    <Route exact path="/paw-2019b-4/doctor" element={<DoctorRoute><DoctorHome /></DoctorRoute>} />
-                    <Route exact path="/paw-2019b-4/doctor/clinics" element={<DoctorRoute><DoctorClinics/></DoctorRoute>} />
-                    <Route exact path="/paw-2019b-4/doctor/appointments" element={<DoctorRoute><Appointments user="doctor" /></DoctorRoute>} />
+                    <Route exact path='/paw-2019b-4' element={<Home logout={handleLogout} />}/>
+                    <Route exact path='/paw-2019b-4/appointments' element={<UserRoute><Appointments logout={handleLogout} user="patient" /></UserRoute>}/>
+                    <Route exact path='/paw-2019b-4/:license/profile' element={<UserDoctorProfile logout={handleLogout} />}/>
+                    <Route exact path="/paw-2019b-4/doctor" element={<DoctorRoute><DoctorHome logout={handleLogout} /></DoctorRoute>} />
+                    <Route exact path="/paw-2019b-4/doctor/clinics" element={<DoctorRoute><DoctorClinics logout={handleLogout} /></DoctorRoute>} />
+                    <Route exact path="/paw-2019b-4/doctor/appointments" element={<DoctorRoute><Appointments logout={handleLogout} user="doctor" /></DoctorRoute>} />
                     <Route exact path="/paw-2019b-4/doctor/:license/clinics/:id/schedule"
-                           element={<DoctorRoute><DoctorClinicSchedule /></DoctorRoute>} />
-                    <Route exact path='/paw-2019b-4/admin/' exact element={<AdminRoute><AdminHome /></AdminRoute>}/>
-                    <Route exact path='/paw-2019b-4/admin/locations' element={<AdminRoute><Locations /></AdminRoute>}/>
-                    <Route exact path='/paw-2019b-4/admin/specialties' element={<AdminRoute><Specialties /></AdminRoute>}/>
-                    <Route exact path='/paw-2019b-4/admin/clinics' element={<AdminRoute><Clinics /></AdminRoute>} />
-                    <Route exact path='/paw-2019b-4/admin/prepaids' element={<AdminRoute><Prepaids /></AdminRoute>}/>
-                    <Route exact path='/paw-2019b-4/admin/clinics/:id/prepaids' element={<AdminRoute><ClinicPrepaids/></AdminRoute>}/>
-                    <Route exact path='/paw-2019b-4/admin/doctors' element={<AdminRoute><Doctors/></AdminRoute>}/>
-                    <Route exact path='/paw-2019b-4/login' element={<WrappedLogin />}/>
-                    <Route exact path='/paw-2019b-4/signUp' element={<SignUp />}/>
-                    <Route exact path='/paw-2019b-4/favorites' element={<UserRoute><Favorites /></UserRoute>}/>
-                    <Route exact path='/paw-2019b-4/profile' element={<UserRoute><Profile/></UserRoute>}/>
+                           element={<DoctorRoute><DoctorClinicSchedule logout={handleLogout} /></DoctorRoute>} />
+                    <Route exact path='/paw-2019b-4/admin/' exact element={<AdminRoute><AdminHome logout={handleLogout} /></AdminRoute>}/>
+                    <Route exact path='/paw-2019b-4/admin/locations' element={<AdminRoute><Locations logout={handleLogout} /></AdminRoute>}/>
+                    <Route exact path='/paw-2019b-4/admin/specialties' element={<AdminRoute><Specialties logout={handleLogout} /></AdminRoute>}/>
+                    <Route exact path='/paw-2019b-4/admin/clinics' element={<AdminRoute><Clinics logout={handleLogout} /></AdminRoute>} />
+                    <Route exact path='/paw-2019b-4/admin/prepaids' element={<AdminRoute><Prepaids logout={handleLogout} /></AdminRoute>}/>
+                    <Route exact path='/paw-2019b-4/admin/clinics/:id/prepaids' element={<AdminRoute><ClinicPrepaids logout={handleLogout} /></AdminRoute>}/>
+                    <Route exact path='/paw-2019b-4/admin/doctors' element={<AdminRoute><Doctors logout={handleLogout} /></AdminRoute>}/>
+                    <Route exact path='/paw-2019b-4/login' element={<WrappedLogin setRole={setRole} logout={handleLogout} />}/>
+                    <Route exact path='/paw-2019b-4/signUp' element={<SignUp logout={handleLogout} />}/>
+                    <Route exact path='/paw-2019b-4/favorites' element={<UserRoute><Favorites logout={handleLogout} /></UserRoute>}/>
+                    <Route exact path='/paw-2019b-4/profile' element={<UserRoute><Profile logout={handleLogout} /></UserRoute>}/>
                 </Routes>
             </Router>
         </div>

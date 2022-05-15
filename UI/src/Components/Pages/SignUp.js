@@ -134,7 +134,7 @@ function SignUp() {
 
         if (resp.status === 201) {
             navigate("/paw-2019b-4/login");
-            window.location.reload()
+            // window.location.reload()
         }
         if (resp.status === 409) {
             if (resp.data === "user-exists") {

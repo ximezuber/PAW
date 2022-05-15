@@ -64,7 +64,8 @@ public class DoctorClinicDaoImpl implements DoctorClinicDao {
     @Override
     public List<DoctorClinic> getDoctorClinicPaginatedByList(Doctor doctor, int page) {
         TypedQuery<DoctorClinic> query = entityManager.createQuery("FROM DoctorClinic AS dc "  +
-                " WHERE dc.doctor.license = :doctorLicense ORDER BY dc.doctor.user.lastName, dc.doctor.user.firstName",
+                " WHERE dc.doctor.license = :doctorLicense ORDER BY dc.doctor.user.lastName, dc.doctor.user.firstName, " +
+                        "dc.clinic.id",
                 DoctorClinic.class);
         query.setParameter("doctorLicense", doctor.getLicense());
         return query
@@ -91,7 +92,7 @@ public class DoctorClinicDaoImpl implements DoctorClinicDao {
     @Override
     public void editPrice(DoctorClinic dc, int price) {
         DoctorClinic contextDoctorClinic = entityManager.merge(dc);
-        dc.setConsultPrice(price);
+        contextDoctorClinic.setConsultPrice(price);
         entityManager.persist(contextDoctorClinic);
     }
 

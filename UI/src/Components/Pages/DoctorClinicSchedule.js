@@ -6,6 +6,7 @@ import DoctorCalls from "../../api/DoctorCalls";
 import ClinicCalls from "../../api/ClinicCalls";
 import {useNavigate, useParams} from "react-router-dom";
 import ModifyScheduleModal from "../Modals/ModifyScheduleModal";
+import ApiCalls from "../../api/apiCalls";
 
 function DoctorClinicSchedule(props) {
     const [schedule, setSchedule] = useState([]);
@@ -34,10 +35,30 @@ function DoctorClinicSchedule(props) {
         }
     }
 
+    const fetchEntity = async (path) => {
+        const response = await ApiCalls.makeGetCall(path);
+        if (response && response.ok) {
+            return response.data;
+        }
+    }
+
     const fetchSchedule = async () => {
         const response = await DoctorCalls.getSchedule(license)
         if (response && response.ok) {
-            setSchedule(response.data)
+            const list = response.data;
+            let sch = []
+            for (let i = 0; i < list.length; i++) {
+                const clinic = await fetchEntity(list[i].clinic)
+                console.log(clinic)
+                const sched = {
+                    clinic: clinic,
+                    day: list[i].day,
+                    hour: list[i].hour,
+                }
+                sch.push(sched)
+                console.log(sched)
+            }
+            setSchedule(sch)
             setMessage("")
         }
     }
@@ -71,10 +92,14 @@ function DoctorClinicSchedule(props) {
         return hours
     }
 
-    useEffect(async () => {
-        await fetchDoctor();
-        await fetchClinic();
-        await fetchSchedule()
+    useEffect (() => {
+        async function fetchData () {
+            await fetchDoctor();
+            await fetchClinic();
+            await fetchSchedule()
+        }
+        fetchData();
+
     },[])
 
     const handleAdd = async (day, hour) => {
@@ -119,12 +144,7 @@ function DoctorClinicSchedule(props) {
     }
 
     const handleUnauth = () => {
-        localStorage.removeItem('token')
-        localStorage.removeItem('role')
-        localStorage.removeItem('license')
-        localStorage.removeItem('firstName')
-        localStorage.removeItem('lastName')
-        localStorage.removeItem('specialty')
+        props.logout()
         navigate('/paw-2019b-4/login')
     }
 

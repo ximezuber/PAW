@@ -63,7 +63,6 @@ public class PatientController {
     @GET
     @Path("{id}")
     @Produces(value = { MediaType.APPLICATION_JSON })
-    @PreAuthorize("hasPermission(#patientEmail, 'user')")
     public Response getPatient(@PathParam("id") final String patientEmail,
                                @Context Request request) throws EntityNotFoundException {
         Patient patient = patientService.getPatientByEmail(patientEmail)
