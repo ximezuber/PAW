@@ -28,10 +28,6 @@ function DoctorHome(props) {
             if (response && response.ok) {
                 setDoctor(response.data)
                 localStorage.setItem('license', response.data.license)
-                localStorage.setItem('firstName', response.data.firstName)
-                localStorage.setItem('lastName', response.data.lastName)
-                localStorage.setItem('specialty', response.data.specialty)
-                localStorage.setItem('phone', response.data.phoneNumber)
             }
             if (response.status === 404)
                 setMessage("errors.noDocEmail")
@@ -44,18 +40,23 @@ function DoctorHome(props) {
 
     const fetchImage = async () => {
         const license = localStorage.getItem('license');
-        const response = await ImageCalls.getImage(license)
-        if (response && response.ok) {
-           setImage(response.data)
-        }
-        if (response.status === 404) {
-            if (response.data === "image-not-found") {
-                setImage(null)
+        if(license === undefined) {
+            setMessage("errors.docLoggedNotFound")
+        } else {
+            const response = await ImageCalls.getImage(license)
+            if (response && response.ok) {
+                setImage(response.data)
             }
-            if (response.data === "doctor-not-found") {
-                setMessage("errors.docLoggedNotFound")
+            if (response.status === 404) {
+                if (response.data === "image-not-found") {
+                    setImage(null)
+                }
+                if (response.data === "doctor-not-found") {
+                    setMessage("errors.docLoggedNotFound")
+                }
             }
         }
+
     }
 
     const fetchSpecialties = async () => {
@@ -193,6 +194,7 @@ function DoctorHome(props) {
                         <div className="mt-3">
                             <EditDocProfileModal specialties={specialties.map(specialty=> specialty.name)}
                                                  handleEdit={handleEdit}
+                                                 doctor={doctor}
                             />
                             <Button className="mx-3 shadow-sm remove-button-color" onClick={handleDeleteProfile}> {t('deleteProfile')}</Button>
                         </div>

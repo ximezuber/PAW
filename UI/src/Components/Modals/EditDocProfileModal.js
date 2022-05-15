@@ -1,15 +1,15 @@
 import {useTranslation} from "react-i18next";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 import DropDownList from "../DropDownList";
 
 function EditDocProfileModal(props) {
-    const [firstName, setFirstName] = useState(localStorage.getItem('firstName'))
-    const [lastName, setLastName] = useState(localStorage.getItem('lastName'))
-    const [newPassword, setNewPassword] = useState('')
-    const [repeatPassword, setRepeatPassword] = useState('')
-    const [selectedSpecialty, setSelectedSpecialty] = useState(localStorage.getItem('specialty'))
-    const [phoneNumber, setPhoneNumber] = useState(localStorage.getItem('phone'))
+    const [firstName, setFirstName] = useState("")
+    const [lastName, setLastName] = useState("")
+    const [newPassword, setNewPassword] = useState("")
+    const [repeatPassword, setRepeatPassword] = useState("")
+    const [selectedSpecialty, setSelectedSpecialty] = useState("")
+    const [phoneNumber, setPhoneNumber] = useState("")
     const [show, setShow] = useState(false)
     const [message, setMessage] = useState('')
     const {t} = useTranslation()
@@ -44,9 +44,6 @@ function EditDocProfileModal(props) {
     }
 
     const handleClick = () => {
-        if (selectedSpecialty === '')
-            console.log(localStorage.getItem('specialty'))
-            setSelectedSpecialty(localStorage.getItem('specialty'))
         const doctor = {
             firstName: firstName,
             lastName: lastName,
@@ -64,6 +61,12 @@ function EditDocProfileModal(props) {
         }
     }
 
+    useEffect(() => {
+        setFirstName(props.doctor.firstName)
+        setLastName(props.doctor.lastName)
+        setPhoneNumber(props.doctor.phoneNumber)
+        setSelectedSpecialty(props.doctor.specialty)
+    }, [props.doctor])
     return (
         <>
             <Button variant="edit-remove-button doc-button-color shadow-sm edit-button"
