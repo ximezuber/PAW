@@ -88,7 +88,7 @@ public class PatientServiceImpl implements PatientService {
             if (prepaidNumber == null || prepaidNumber.equals("")) throw new NoPrepaidNumberException();
         }
 
-        patientDao.updatePatient(patient, email, prepaid, prepaidNumber);
+        patientDao.updatePatient(patient, patient.getId(), prepaid, prepaidNumber);
     }
 
     @Override

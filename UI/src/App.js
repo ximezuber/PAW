@@ -23,7 +23,7 @@ import {useState} from "react";
 import apiCalls from "./api/apiCalls";
 
 function App() {
-    const [role, setRole] = useState(null);
+    const [role, setRole] = useState(localStorage.getItem('role'));
 
     const isAuth = () => role !== null;
 
@@ -51,6 +51,11 @@ function App() {
         setRole(null);
     }
 
+    function handleRoleLogin (role) {
+        setRole(role)
+        localStorage.setItem('role', role)
+    }
+
   return (
     <div className="App">
         <div className="App-header">
@@ -59,7 +64,7 @@ function App() {
                 <Routes>
                     <Route exact path='/paw-2019b-4' element={<Home logout={handleLogout} />}/>
                     <Route exact path='/paw-2019b-4/appointments' element={<UserRoute><Appointments logout={handleLogout} user="patient" /></UserRoute>}/>
-                    <Route exact path='/paw-2019b-4/:license/profile' element={<UserDoctorProfile logout={handleLogout} />}/>
+                    <Route exact path='/paw-2019b-4/:license/profile' element={<UserDoctorProfile logout={handleLogout} isUser={isUser}/>}/>
                     <Route exact path="/paw-2019b-4/doctor" element={<DoctorRoute><DoctorHome logout={handleLogout} /></DoctorRoute>} />
                     <Route exact path="/paw-2019b-4/doctor/clinics" element={<DoctorRoute><DoctorClinics logout={handleLogout} /></DoctorRoute>} />
                     <Route exact path="/paw-2019b-4/doctor/appointments" element={<DoctorRoute><Appointments logout={handleLogout} user="doctor" /></DoctorRoute>} />
@@ -72,7 +77,7 @@ function App() {
                     <Route exact path='/paw-2019b-4/admin/prepaids' element={<AdminRoute><Prepaids logout={handleLogout} /></AdminRoute>}/>
                     <Route exact path='/paw-2019b-4/admin/clinics/:id/prepaids' element={<AdminRoute><ClinicPrepaids logout={handleLogout} /></AdminRoute>}/>
                     <Route exact path='/paw-2019b-4/admin/doctors' element={<AdminRoute><Doctors logout={handleLogout} /></AdminRoute>}/>
-                    <Route exact path='/paw-2019b-4/login' element={<WrappedLogin setRole={setRole} logout={handleLogout} />}/>
+                    <Route exact path='/paw-2019b-4/login' element={<WrappedLogin setRole={handleRoleLogin} logout={handleLogout} />}/>
                     <Route exact path='/paw-2019b-4/signUp' element={<SignUp logout={handleLogout} />}/>
                     <Route exact path='/paw-2019b-4/favorites' element={<UserRoute><Favorites logout={handleLogout} /></UserRoute>}/>
                     <Route exact path='/paw-2019b-4/profile' element={<UserRoute><Profile logout={handleLogout} /></UserRoute>}/>

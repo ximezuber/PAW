@@ -11,7 +11,7 @@ import ApiCalls from "../../api/apiCalls";
 import {getPaths} from "../../utils/paginationHelper";
 import {CURRENT, NEXT, PREV} from "./Constants";
 
-function ClinicPrepaids() {
+function ClinicPrepaids(props) {
 
     let {id} = useParams()
     const [prepaidClinics, setPrepaidClinics] = useState([])
@@ -30,7 +30,6 @@ function ClinicPrepaids() {
     }
 
     const fetchAllClinicPrepaids = async () => {
-        console.log("getting them")
         const response = await ClinicCalls.getAllClinicPrepaid(id);
         if (response && response.ok) {
             setAllPrepaidClinics(response.data)
@@ -93,9 +92,7 @@ function ClinicPrepaids() {
         async function fetchData () {
             await fetchClinic(id);
             await fetchClinicPrepaids();
-            console.log("getting in")
             await fetchAllClinicPrepaids();
-            console.log("getting out")
             await fetchPrepaids();
         }
         fetchData();
@@ -109,9 +106,7 @@ function ClinicPrepaids() {
             setMessage("")
         }
         if(response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
-            navigate('/paw-2019b-4/login')
+            props.logout()
         }
         if (response.status === 404) {
             if (response.data === "prepaid-not-found") {
@@ -142,9 +137,7 @@ function ClinicPrepaids() {
             }
         }
         if(response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
-            navigate('/paw-2019b-4/login')
+            props.logout()
         }
 
     }

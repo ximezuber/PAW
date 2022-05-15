@@ -100,14 +100,13 @@ function UserDoctorProfile(props) {
             let sch = []
             for (let i = 0; i < list.length; i++) {
                 const clinic = await fetchClinic(list[i].clinic)
-                console.log(clinic)
                 const sched = {
                     clinic: clinic,
                     day: list[i].day,
                     hour: list[i].hour,
                 }
                 sch.push(sched)
-                console.log(sched)
+
             }
             setSchedule(sch)
             setMessage("")
@@ -115,12 +114,12 @@ function UserDoctorProfile(props) {
     }
 
     const fetchIsFavorite = async () => {
-        if (localStorage.getItem('email') === null) {
+        if (localStorage.getItem('email') === null && props.isUser()) {
             setIsFavorite(false)
         } else {
             const response = await PatientCalls.isFavorite(localStorage.getItem('email'), license)
             if (response && response.ok) {
-                setIsFavorite(true)
+                setIsFavorite(response.data !== undefined && response.data !== null)
                 setMessage("")
             }
             if (response.status === 404) {
@@ -140,8 +139,8 @@ function UserDoctorProfile(props) {
             await fetchImage();
             await fetchSchedule();
             await fetchClinics();
-            await fetchAvailableAppointments();
             await fetchIsFavorite();
+            await fetchAvailableAppointments();
         }
         fetchData();
     },[])
@@ -160,7 +159,7 @@ function UserDoctorProfile(props) {
         else {
             const data = {
                 license: license,
-                clinic: selectedClinic.clinic.id,
+                clinic: selectedClinic.id,
                 patient: localStorage.getItem('email'),
                 time: selectedDateTime.hour,
                 day: selectedDateTime.day,
@@ -172,7 +171,7 @@ function UserDoctorProfile(props) {
                 navigate("/paw-2019b-4/appointments")
             }
             if (response.status === 401) {
-                localStorage.setItem('path', "/" + license + "/profile")
+                localStorage.setItem('path', "/paw-2019b-4/" + license + "/profile")
                 props.logout()
                 navigate('/paw-2019b-4/login')
             }
@@ -215,7 +214,7 @@ function UserDoctorProfile(props) {
                 setMessage("errors.favExists")
         }
         if (response.status === 401) {
-            localStorage.setItem('path', "/" + license + "/profile")
+            localStorage.setItem('path', "/paw-2019b-4/" + license + "/profile")
             props.logout()
             navigate('/paw-2019b-4/login')
         }
@@ -238,7 +237,7 @@ function UserDoctorProfile(props) {
                 setMessage("errors.noPatientEmail")
         }
         if (response.status === 401) {
-            localStorage.setItem('path', "/" + license + "/profile")
+            localStorage.setItem('path', "/paw-2019b-4/" + license + "/profile")
             props.logout()
             navigate('/paw-2019b-4/login')
         }
@@ -265,7 +264,7 @@ function UserDoctorProfile(props) {
     }
 
     const handleSelectDateTime = (dateFormated) => {
-        const selected = getDateTimes().filter(date => t(getWeekDate(date.dayWeek)) + " " + date.day + " " + t(getMonth(date.month)) + ", " + date.year +
+        const selected = getDateTimes().filter(date => t(getWeekDate(date.dayOfWeek)) + " " + date.day + " " + t(getMonth(date.month)) + ", " + date.year +
             " " + date.hour + ":00" === dateFormated)
         setSelectedDateTime(selected[0])
     }

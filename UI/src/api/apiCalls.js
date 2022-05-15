@@ -28,6 +28,7 @@ const logout = () => {
     localStorage.removeItem('lastName')
     localStorage.removeItem('specialty')
     localStorage.removeItem('phone')
+    localStorage.removeItem('role')
     localStorage.removeItem('pathCurrent')
 }
 

@@ -49,14 +49,12 @@ function DoctorClinicSchedule(props) {
             let sch = []
             for (let i = 0; i < list.length; i++) {
                 const clinic = await fetchEntity(list[i].clinic)
-                console.log(clinic)
                 const sched = {
                     clinic: clinic,
                     day: list[i].day,
                     hour: list[i].hour,
                 }
                 sch.push(sched)
-                console.log(sched)
             }
             setSchedule(sch)
             setMessage("")
