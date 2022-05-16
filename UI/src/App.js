@@ -78,7 +78,7 @@ function App() {
                     <Route exact path='/paw-2019b-4/admin/clinics/:id/prepaids' element={<AdminRoute><ClinicPrepaids logout={handleLogout} /></AdminRoute>}/>
                     <Route exact path='/paw-2019b-4/admin/doctors' element={<AdminRoute><Doctors logout={handleLogout} /></AdminRoute>}/>
                     <Route exact path='/paw-2019b-4/login' element={<WrappedLogin setRole={handleRoleLogin} logout={handleLogout} />}/>
-                    <Route exact path='/paw-2019b-4/signUp' element={<SignUp logout={handleLogout} />}/>
+                    <Route exact path='/paw-2019b-4/signUp' element={<SignUp logout={handleLogout} setRole={handleRoleLogin} />}/>
                     <Route exact path='/paw-2019b-4/favorites' element={<UserRoute><Favorites logout={handleLogout} /></UserRoute>}/>
                     <Route exact path='/paw-2019b-4/profile' element={<UserRoute><Profile logout={handleLogout} /></UserRoute>}/>
                 </Routes>

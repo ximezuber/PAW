@@ -10,6 +10,7 @@ import AppointmentCalls from "../../api/AppointmentCalls";
 import {dateToString} from "../../utils/dateHelper";
 import './Profile.css'
 import ApiCalls from "../../api/apiCalls";
+import DoctorCalls from "../../api/DoctorCalls";
 
 function Profile(props) {
     const [selectedPrepaid, setSelectedPrepaid] = useState('')
@@ -103,6 +104,19 @@ function Profile(props) {
             await fetchPrepaids()
     }
 
+    const handleDeleteProfile = async () => {
+        const email = localStorage.getItem('email')
+        if (email === null) {
+            props.logout()
+            navigate('/paw-2019b-4/login')
+        }
+        const response = await PatientCalls.deleteProfile(email)
+        if (response && response.ok) {
+            props.logout()
+            navigate('/paw-2019b-4')
+        }
+    }
+
     return (
         <>
             <Container>
@@ -163,6 +177,8 @@ function Profile(props) {
                                               selectedPrepaid={selectedPrepaid}
                                               prepaidNumber={prepaidNumber}
                         />
+                        <Button className="mx-3 shadow-sm remove-button-color edit-remove-button edit-button app-btn"
+                                onClick={handleDeleteProfile}> {t('deleteProfile')}</Button>
                     </Col>
                     <Col className="col-button">
                         <Link
