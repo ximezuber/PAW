@@ -3,27 +3,43 @@ import {Button, Card, Container} from "react-bootstrap";
 import '../CardContainer.css'
 import DoctorAddModal from "../Modals/DoctorAddModal";
 import DoctorCalls from "../../api/DoctorCalls";
+import ApiCalls from "../../api/apiCalls";
 import SpecialtyCalls from "../../api/SpecialtyCalls";
 import {useNavigate} from "react-router-dom";
 import "../../i18n/i18n";
 import {useTranslation} from "react-i18next";
+import {getPaths} from "../../utils/paginationHelper";
+import '../Pages/Constants'
+import {CURRENT, NEXT, PREV} from "./Constants";
 
-function Doctors() {
+
+function Doctors(props) {
     const [doctors, setDoctors] = useState([])
     const [specialties, setSpecialties] = useState([])
-    const [page, setPage] = useState(0)
-    const [maxPage, setMaxPage] = useState(0)
+    const [paths, setPaths] = useState({})
     const [message, setMessage] = useState("")
     const navigate = useNavigate()
     const { t } = useTranslation();
 
-    const fetchDoctors = async (pag) => {
-        const response = await DoctorCalls.getDoctorsAdmin(pag)
+    const setPages = (linkHeader) => {
+        const paths = getPaths(linkHeader);
+        setPaths(paths)
+    }
+
+    const fetchDoctors = async () => {
+        const response = await DoctorCalls.getDoctorsAdmin(0)
         if (response && response.ok) {
             setDoctors(response.data)
-            setMaxPage(Number(response.headers.xMaxPage))
+            setPages(response.headers.link)
         }
+    }
 
+    const fetchPage = async (page) => {
+        const response = await ApiCalls.makeGetCall(paths[page])
+        if (response && response.ok) {
+            setDoctors(response.data)
+            setPages(response.headers.link)
+        }
     }
 
     const fetchSpecialties = async () => {
@@ -33,19 +49,22 @@ function Doctors() {
         }
     }
 
-    useEffect(async () => {
-        await fetchDoctors(page)
-        await fetchSpecialties()
+    useEffect(() => {
+        async function fetchData () {
+            await fetchDoctors()
+            await fetchSpecialties()
+        }
+        fetchData();
     }, [])
 
     const handleAdd = async (newDoctor) => {
         const response = await DoctorCalls.addDoctor(newDoctor);
         if (response && response.ok) {
-            await fetchDoctors(page)
+            await fetchPage(CURRENT)
             setMessage("")
+
         } else if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         } else if (response.status === 409) {
             if (response.data === 'license-in-use')
@@ -66,7 +85,7 @@ function Doctors() {
     const deleteDoctors = async (license) => {
         const response = await DoctorCalls.deleteDoctor(license)
         if (response && response.status === 204) {
-            await fetchDoctors(page)
+            await fetchPage(CURRENT)
             setMessage("")
         }
         else if (response.status === 404) {
@@ -74,35 +93,30 @@ function Doctors() {
                 setMessage("errors.doctorsNotFound")
             }
         } else if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }
 
     const nextPage = async () => {
-        const newPage = page + 1
-        setPage(newPage)
         setMessage("")
-        await fetchDoctors(newPage)
+        await fetchPage(NEXT)
 
     }
     const prevPage = async () => {
-        const newPage = page - 1
-        setPage(newPage)
         setMessage("")
-        await fetchDoctors(newPage)
+        await fetchPage(PREV)
     }
 
     const renderPrevButton = () => {
-        if (page !== 0) {
+        if (paths[PREV]) {
             return <Button className="doc-button doc-button-color shadow-sm"
                            onClick={() => prevPage()}>{t('prevButton')}</Button>
         }
     }
 
     const renderNextButton = () => {
-        if (page < maxPage - 1) {
+        if (paths[NEXT]) {
             return <Button className="doc-button doc-button-color shadow-sm"
                            onClick={() => nextPage()}>{t('nextButton')}</Button>
         }
@@ -128,7 +142,7 @@ function Doctors() {
                             <Card className="mb-3 doc-card shadow"
                                   key={doctor.license}>
                                 <Card.Body>
-                                    <Card.Title><b>{doctor.user.firstName + ' ' + doctor.user.lastName}</b></Card.Title>
+                                    <Card.Title><b>{doctor.firstName + ' ' + doctor.lastName}</b></Card.Title>
                                     <Card.Text>
                                         <b>{t('DOC.license')}</b>: {doctor.license}
                                     </Card.Text>

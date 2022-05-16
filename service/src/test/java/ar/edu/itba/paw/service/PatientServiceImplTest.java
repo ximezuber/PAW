@@ -3,6 +3,7 @@ package ar.edu.itba.paw.service;
 import ar.edu.itba.paw.interfaces.dao.PatientDao;
 import ar.edu.itba.paw.interfaces.service.*;
 import ar.edu.itba.paw.model.*;
+import ar.edu.itba.paw.model.exceptions.BadRequestException;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
 import ar.edu.itba.paw.model.exceptions.FavouriteExistsException;
 import org.junit.Assert;
@@ -50,7 +51,7 @@ public class PatientServiceImplTest {
     private FavoriteService favoriteService;
 
     @Test
-    public void testCreate() throws DuplicateEntityException {
+    public void testCreate() throws DuplicateEntityException, BadRequestException {
         //Set Up
         Mockito.when(mockDao.create(Mockito.eq(id),Mockito.eq(prepaid),
                 Mockito.eq(prepaidNumber), Mockito.eq(user)))
@@ -74,7 +75,7 @@ public class PatientServiceImplTest {
     }
 
     @Test(expected = DuplicateEntityException.class)
-    public void testCreateEmailExists() throws DuplicateEntityException {
+    public void testCreateEmailExists() throws DuplicateEntityException, BadRequestException {
         // Set up
         Mockito.when(userService.findUserByEmail(user.getEmail()))
                 .thenReturn(Optional.of(user));

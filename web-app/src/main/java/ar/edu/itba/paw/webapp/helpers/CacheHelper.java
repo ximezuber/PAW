@@ -27,6 +27,7 @@ public class CacheHelper {
         map.put("prepaid", 10);
         map.put("patient", 10);
         map.put("favorites", 10);
+        map.put("favoritesFiltered", 10);
 
         return map;
     }

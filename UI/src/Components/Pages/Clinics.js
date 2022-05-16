@@ -7,6 +7,10 @@ import ClinicCalls from "../../api/ClinicCalls";
 import LocationCalls from "../../api/LocationCalls";
 import {useTranslation} from "react-i18next";
 import "../../i18n/i18n";
+import {getPaths} from "../../utils/paginationHelper";
+import {CURRENT, NEXT, PREV} from "./Constants";
+import ApiCalls from "../../api/apiCalls";
+import api from "../../api";
 
 function Clinics(props) {
 
@@ -16,17 +20,29 @@ function Clinics(props) {
     const [editIndex, setEditIndex] = useState(-1)
     const [action, setAction] = useState("Add")
     const [locations, setLocations] = useState([])
-    const [page, setPage] = useState(0)
-    const [maxPage, setMaxPage] = useState(0)
+    const [paths, setPaths] = useState({})
     const [message, setMessage] = useState("")
     const navigate = useNavigate()
     const { t } = useTranslation();
 
-    const fetchClinics = async (pag) => {
-        const response = await ClinicCalls.getClinics(pag)
+    const setPages = (linkHeader) => {
+        const paths = getPaths(linkHeader);
+        setPaths(paths)
+    }
+
+    const fetchClinics = async () => {
+        const response = await ClinicCalls.getClinics(0)
         if (response && response.ok) {
             setClinics(response.data)
-            setMaxPage(Number(response.headers.xMaxPage))
+            setPages(response.headers.link)
+        }
+    }
+
+    const fetchPage = async (page) => {
+        const response = await ApiCalls.makeGetCall(paths[page])
+        if (response && response.ok) {
+            setClinics(response.data)
+            setPages(response.headers.link)
         }
     }
 
@@ -38,21 +54,25 @@ function Clinics(props) {
         }
     }
 
-    useEffect( async () => {
-        await fetchClinics(page)
-        await fetchLocation()
+    useEffect( () => {
+        async function fetchData () {
+            await fetchClinics()
+            await fetchLocation()
+        }
+        fetchData();
     }, [])
 
     const deleteClinic = async (id) => {
         const response = await ClinicCalls.deleteClinic(id);
-        if (response && response.ok)
-            await fetchClinics(page);
+        if (response && response.ok) {
+            await fetchPage(CURRENT);
+            setMessage("")
+        }
         if (response.status === 404) {
             if (response.data === "clinic-not-found")
                 setMessage("errors.clinicNotFoundDelete")
         } else if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }
@@ -66,12 +86,11 @@ function Clinics(props) {
         const response = await ClinicCalls.addClinic(data);
         setShow(false)
         if (response && response.ok) {
-            await fetchClinics(page);
+            await fetchPage(CURRENT);
             setMessage("")
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
         if (response.status === 404) {
@@ -94,13 +113,12 @@ function Clinics(props) {
         }
         const response = await ClinicCalls.editClinic(editedClinic.id, data)
         if (response && response.ok) {
-            await fetchClinics(page);
+            await fetchPage(CURRENT);
             setShow(false)
             setMessage("")
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
         if (response.status === 404) {
@@ -132,28 +150,24 @@ function Clinics(props) {
     }
 
     const nextPage = async () => {
-        const newPage = page + 1
-        await setPage(newPage)
         setMessage("")
-        await fetchClinics(newPage)
+        await fetchPage(NEXT)
 
     }
     const prevPage = async () => {
-        const newPage = page - 1
-        await setPage(newPage)
         setMessage("")
-        await fetchClinics(newPage)
+        await fetchPage(PREV)
     }
 
     const renderPrevButton = () => {
-        if (page !== 0) {
+        if (paths[PREV]) {
             return <Button className="remove-button doc-button-color shadow-sm"
                            onClick={() => prevPage()}>{t("prevButton")}</Button>
         }
     }
 
     const renderNextButton = () => {
-        if (page < maxPage) {
+        if (paths[NEXT]) {
             return <Button className="remove-button doc-button-color shadow-sm"
                            onClick={() => nextPage()}>{t("nextButton")}</Button>
         }

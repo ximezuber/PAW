@@ -6,109 +6,142 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import DoctorCalls from "../../api/DoctorCalls";
 import './home.css'
 import {useTranslation} from "react-i18next";
+import {getPaths} from "../../utils/paginationHelper";
+import {CURRENT, FIRST, NEXT, PREV} from "./Constants";
+import ApiCalls from "../../api/apiCalls";
+import * as path from "path";
 
 
 function Home(props) {
     const [searchParams, setSearchParams] = useSearchParams()
     const [doctors, setDoctors] = useState([])
-    const [specialties, setSpecialties] = useState([])
-    const [locations, setLocations] = useState([])
-    const [prepaids, setPrepaids] = useState([])
     const [message, setMessage] = useState("")
     const [searchCriteria, setSearchCriteria] = useState(null)
-    const [maxPage, setMaxPage] = useState(0)
-    const [page, setPage] = useState(0)
+    const [paths, setPaths] = useState({})
     const [loading, setLoading] = useState(false)
     const {t} = useTranslation()
 
+    const setPages = (linkHeader) => {
+        const paths1 = getPaths(linkHeader);
+        localStorage.setItem('pathCurrent', paths1[CURRENT])
+        setPaths(paths1)
+    }
 
-    const fetchAllDoctorsWithAvailability = async (page) => {
+    const fetchAllDoctorsWithAvailability = async (queryParams) => {
         setLoading(true)
-        const response = await DoctorCalls.searchDocs(page, null, null,
-            null, null, null , null)
+        const response = await DoctorCalls.searchDocs(0, queryParams)
         if (response && response.ok) {
             setDoctors(response.data)
-            setMaxPage(Number(response.headers.xMaxPage))
+            setPages(response.headers.link)
             setMessage("")
-            setSearchParams()
         }
         setLoading(false)
     }
 
-    useEffect(async () => {
-        const pag = searchParams.get('page') === undefined ||  searchParams.get('page') === null ?
-            0: Number(searchParams.get('page'))
+    const handleSearchParams = (criteria) => {
+        let queryParams = "&";
+        queryParams += criteria.location === null?
+            "": "location=" + criteria.location + "&";
+        queryParams += criteria.specialty === null?
+            "": "specialty=" + criteria.specialty + "&";
+        queryParams += criteria.firstName === null || criteria.firstName  === ""?
+            "": "firstName=" + criteria.firstName + "&";
+        queryParams += criteria.lastName  === null || criteria.lastName === ""?
+            "": "lastName=" + criteria.lastName + "&";
+        queryParams += criteria.consultPrice === null || criteria.consultPrice === 0 || criteria.consultPrice === ""?
+            "": "consultPrice=" + criteria.consultPrice + "&";
+        queryParams += criteria.prepaid === null?
+            "": "prepaid=" + criteria.consultPrice + "&";
 
-        console.log("page " + page)
-        const search = {
-            location: searchParams.get('location') === "null"? null: searchParams.get('location'),
-            specialty: searchParams.get('specialty') === "null"? null: searchParams.get('specialty'),
-            firstName: searchParams.get('firstName') === "null"? null: searchParams.get('firstName'),
-            lastName: searchParams.get('lastName') === "null"? null: searchParams.get('lastName'),
-            consultPrice: searchParams.get('consultPrice') === "null" || searchParams.get('consultPrice') === "0"?
-                null: searchParams.get('consultPrice'),
-            prepaid: searchParams.get('prepaid') === "null"? null: searchParams.get('prepaid')
+        return queryParams.slice(0,-1)
+    }
 
+    useEffect( () => {
+        async function fetchData () {
+            const search = {
+                location: searchParams.get('location') === "null" ? null : searchParams.get('location'),
+                specialty: searchParams.get('specialty') === "null" ? null : searchParams.get('specialty'),
+                firstName: searchParams.get('firstName') === "null" ? null : searchParams.get('firstName'),
+                lastName: searchParams.get('lastName') === "null" ? null : searchParams.get('lastName'),
+                consultPrice: searchParams.get('consultPrice') === "null" || searchParams.get('consultPrice') === "0" ?
+                    null : searchParams.get('consultPrice'),
+                prepaid: searchParams.get('prepaid') === "null" ? null : searchParams.get('prepaid')
+
+            }
+            await handleSearch(search, CURRENT);
+
+            setSearchParams({
+                'location': searchParams.get('location') === "null"? null: searchParams.get('location'),
+                'specialty': searchParams.get('specialty') === "null"? null: searchParams.get('specialty'),
+                'firstName': searchParams.get('firstName') === "null"? null: searchParams.get('firstName'),
+                'lastName': searchParams.get('lastName') === "null"? null: searchParams.get('lastName'),
+                'consultPrice': searchParams.get('consultPrice') === "null" || searchParams.get('consultPrice') === "0"?
+                    null: searchParams.get('consultPrice'),
+                'prepaid': searchParams.get('prepaid') === "null"? null: searchParams.get('prepaid')
+            })
         }
-        await handleSearch(search, pag);
-        setSearchParams({'page': pag,
-            'location': searchParams.get('location') === "null"? null: searchParams.get('location'),
-            'specialty': searchParams.get('specialty') === "null"? null: searchParams.get('specialty'),
-            'firstName': searchParams.get('firstName') === "null"? null: searchParams.get('firstName'),
-            'lastName': searchParams.get('lastName') === "null"? null: searchParams.get('lastName'),
-            'consultPrice': searchParams.get('consultPrice') === "null" || searchParams.get('consultPrice') === "0"?
-                null: searchParams.get('consultPrice'),
-            'prepaid': searchParams.get('prepaid') === "null"? null: searchParams.get('prepaid')})
+        fetchData();
 
     }, [])
 
     const nextPage = async () => {
-        const newPage = page + 1
-        setPage(newPage)
         setMessage("")
-        await handleSearch(searchCriteria, newPage)
+        await handleSearch(searchCriteria, NEXT)
 
     }
     const prevPage = async () => {
-        const newPage = page - 1
-        setPage(newPage)
         setMessage("")
-        await handleSearch(searchCriteria, newPage)
+        await handleSearch(searchCriteria, PREV)
     }
 
     const renderPrevButton = () => {
 
-        if (page !== 0) {
+        if (paths[PREV]) {
             return <Button className="doc-button doc-button-color shadow-sm"
                            onClick={() => prevPage()}>{t('prevButton')}</Button>
         }
     }
 
     const renderNextButton = () => {
-        if (page < maxPage - 1) {
+        if (paths[NEXT]) {
             return <Button className="doc-button doc-button-color shadow-sm"
                            onClick={() => nextPage()}>{t('nextButton')}</Button>
         }
     }
 
-    const handleSearch = async (criteria, pag) => {
+    const handleSearch = async (criteria, page) => {
+
         setLoading(true)
         setSearchCriteria(criteria);
-        if (criteria == null) {
-            await fetchAllDoctorsWithAvailability(pag);
-            setSearchParams({'page': pag})
+        setSearchParams({
+            'location':criteria.location,
+            'specialty': criteria.specialty,
+            'firstName': criteria.firstName,
+            'lastName': criteria.lastName,
+            'consultPrice': criteria.consultPrice,
+            'prepaid':criteria.prepaid
+        })
+        const queryParams = handleSearchParams(criteria);
+
+        if (page === FIRST) {
+            await fetchAllDoctorsWithAvailability(queryParams);
             return;
         }
-        setPage(Number(pag))
-        setSearchParams({'page': pag, 'location':criteria.location, 'specialty': criteria.specialty,
-            'firstName': criteria.firstName, 'lastName': criteria.lastName, 'consultPrice': criteria.consultPrice,
-            'prepaid':criteria.prepaid})
-        const response = await DoctorCalls.searchDocs(pag, criteria.location, criteria.specialty,
-            criteria.firstName, criteria.lastName, criteria.consultPrice , criteria.prepaid)
+        let path = paths[page];
+
+        if (!path) {
+            path = localStorage.getItem('pathCurrent')
+            if (!path) {
+                await fetchAllDoctorsWithAvailability(queryParams);
+                return;
+            }
+        }
+
+        const response = await ApiCalls.makeGetCall(path + queryParams)
 
         if (response && response.ok) {
             setDoctors(response.data)
-            setMaxPage(Number(response.headers.xMaxPage))
+            setPages(response.headers.link)
             setMessage("")
         }
         setLoading(false)
@@ -136,7 +169,7 @@ function Home(props) {
                                           style={{color: "#000", width: '20rem', height: '8rem'}}
                                           key={doctor.license}>
                                         <Card.Body className="card-body-doc">
-                                            <Card.Title>{doctor.user.firstName + ' ' + doctor.user.lastName}</Card.Title>
+                                            <Card.Title>{doctor.firstName + ' ' + doctor.lastName}</Card.Title>
                                             <Card.Text>
                                                 {doctor.specialty}
                                             </Card.Text>

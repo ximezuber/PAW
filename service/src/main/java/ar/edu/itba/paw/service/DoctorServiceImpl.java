@@ -6,6 +6,7 @@ import ar.edu.itba.paw.interfaces.service.SpecialtyService;
 import ar.edu.itba.paw.interfaces.service.UserService;
 import ar.edu.itba.paw.model.*;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
+import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,9 +28,12 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Transactional
     @Override
-    public Doctor createDoctor(Specialty specialty, String license, String phoneNumber,
+    public Doctor createDoctor(String specialtyName, String license, String phoneNumber,
                                String firstName, String lastName, String password, String email)
-            throws DuplicateEntityException {
+            throws DuplicateEntityException, EntityNotFoundException {
+        Specialty specialty = specialtyService.getSpecialtyByName(specialtyName)
+                .orElseThrow(() -> new EntityNotFoundException("specialty"));
+
         if (getDoctorByLicense(license).isPresent()) throw new DuplicateEntityException("license-in-use");
         if (userService.findUserByEmail(email).isPresent()) throw new DuplicateEntityException("email-in-use");
         User user = userService.createUser(firstName, lastName, password, email);
@@ -56,14 +60,14 @@ public class DoctorServiceImpl implements DoctorService {
         return doctorDao.getDoctorByEmail(email);
     }
 
-    @Override
-    public List<Doctor> getPaginatedDoctors(List<String> licenses, int page) {
-        if (page < 0 || licenses.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return doctorDao.getPaginatedDoctorsInList(licenses, page);
-    }
+//    @Override
+//    public List<Doctor> getPaginatedDoctors(List<String> licenses, int page) {
+//        if (page < 0 || licenses.isEmpty()) {
+//            return Collections.emptyList();
+//        }
+//
+//        return doctorDao.getPaginatedDoctorsInList(licenses, page);
+//    }
 
     @Override
     public int getMaxAvailableDoctorsPage(List<String> licenses) {
@@ -85,7 +89,9 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Transactional
     @Override
-    public void deleteDoctor(Doctor doctor) {
+    public void deleteDoctor(String license) throws EntityNotFoundException {
+        Doctor doctor = getDoctorByLicense(license)
+                .orElseThrow(() -> new EntityNotFoundException("doctor"));
         userService.deleteUser(doctor.getUser());
     }
 

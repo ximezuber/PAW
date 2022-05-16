@@ -23,6 +23,7 @@ public class PatientDaoImpl implements PatientDao {
         if (prepaid != null) {
             prepaid = entityManager.merge(prepaid);
         }
+        user = entityManager.merge(user);
         Patient patient = new Patient(id, prepaid, prepaidNumber, user);
         entityManager.persist(patient);
         return patient;
@@ -53,7 +54,7 @@ public class PatientDaoImpl implements PatientDao {
 
     @Override
     public List<Patient> getPatientsByPrepaid(Prepaid prepaid) {
-        final TypedQuery<Patient> query = entityManager.createQuery("FROM Patient AS pat WHERE pat.prepaid= :prepaid",
+        final TypedQuery<Patient> query = entityManager.createQuery("FROM Patient AS pat WHERE pat.prepaid.name= :prepaid",
                 Patient.class);
         query.setParameter("prepaid", prepaid.getName());
         return query.getResultList();

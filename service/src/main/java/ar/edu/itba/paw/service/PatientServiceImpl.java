@@ -3,6 +3,7 @@ package ar.edu.itba.paw.service;
 import ar.edu.itba.paw.interfaces.dao.PatientDao;
 import ar.edu.itba.paw.interfaces.service.*;
 import ar.edu.itba.paw.model.*;
+import ar.edu.itba.paw.model.exceptions.BadRequestException;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
 import ar.edu.itba.paw.model.exceptions.FavouriteExistsException;
 import ar.edu.itba.paw.model.exceptions.NoPrepaidNumberException;
@@ -34,8 +35,9 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public Patient create(String id, String prepaidName, String prepaidNumber, String firstName,
                           String lastName, String password, String email) throws DuplicateEntityException,
-            EntityNotFoundException {
+            EntityNotFoundException, BadRequestException {
         if (userService.findUserByEmail(email).isPresent()) throw new DuplicateEntityException("user-exists");
+        if (id.length() > 8) throw new BadRequestException("personal-id-too-long");
         Prepaid prepaid;
         if(prepaidName == null || prepaidName.equals(NoPrepaid)) {
             prepaid = null;
@@ -86,7 +88,7 @@ public class PatientServiceImpl implements PatientService {
             if (prepaidNumber == null || prepaidNumber.equals("")) throw new NoPrepaidNumberException();
         }
 
-        patientDao.updatePatient(patient, email, prepaid, prepaidNumber);
+        patientDao.updatePatient(patient, patient.getId(), prepaid, prepaidNumber);
     }
 
     @Override

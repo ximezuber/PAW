@@ -4,35 +4,57 @@ import PatientCalls from "../../api/PatientCalls";
 import {Button, Card, Col, Container, Row} from "react-bootstrap";
 import {Link, useNavigate} from "react-router-dom";
 import './Favorites.css'
+import {getPaths} from "../../utils/paginationHelper";
+import ApiCalls from "../../api/apiCalls";
+import {CURRENT, NEXT, PREV} from "./Constants";
 
-function Favorites() {
+function Favorites(props) {
     const [doctors, setDoctors] = useState([])
-    const [page, setPage] = useState(0)
-    const [maxPage, setMaxPage] = useState(0)
+    const [paths, setPaths] = useState({})
     const [message, setMessage] = useState("")
     const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(false)
     const {t} = useTranslation()
 
+    const setPages = (linkHeader) => {
+        const paths = getPaths(linkHeader);
+        setPaths(paths)
+    }
 
-    const fetchFavorites = async (pag) => {
+    const fetchFavorites = async () => {
         let id = localStorage.getItem('email')
         if (id === null) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
         setIsLoading(true)
-        const response = await PatientCalls.getFavoriteDoctors(id, pag)
+        const response = await PatientCalls.getFavoriteDoctors(id, 0)
         if (response && response.ok) {
             setDoctors(response.data)
-            setMaxPage(Number(response.headers.xMaxPage))
+            setPages(response.headers.link)
             setIsLoading(false)
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
-            localStorage.removeItem('email')
+            props.logout()
+            navigate('/paw-2019b-4/login')
+        }
+    }
+
+    const fetchPage = async (page) => {
+        let id = localStorage.getItem('email')
+        if (id === null) {
+            props.logout()
+            navigate('/paw-2019b-4/login')
+        }
+        setIsLoading(true)
+        const response = await ApiCalls.makeAuthGetCall(paths[page])
+        if (response && response.ok) {
+            setDoctors(response.data)
+            setPages(response.headers.link)
+            setIsLoading(false)
+        }
+        if (response.status === 401) {
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }
@@ -40,49 +62,47 @@ function Favorites() {
     const removeFromFavorites = async (license) => {
         let id = localStorage.getItem('email')
         if (id === null) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
         const response = await PatientCalls.deleteFavoriteDoctor(id, license);
         if (response && response.ok) {
-            await fetchFavorites(page);
+            await fetchPage(CURRENT)
             setMessage("")
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }
 
-    useEffect(async () => {
-        await fetchFavorites(page);
+    useEffect( () => {
+        async function fetchData () {
+            await fetchFavorites();
+        }
+        fetchData();
+
     }, [])
 
     const nextPage = async () => {
-        const newPage = page + 1
-        setPage(newPage)
         setMessage("")
-        await fetchFavorites(newPage)
+        await fetchPage(NEXT)
 
     }
     const prevPage = async () => {
-        const newPage = page - 1
-        setPage(newPage)
         setMessage("")
-        await fetchFavorites(newPage)
+        await fetchPage(PREV)
     }
 
     const renderPrevButton = () => {
-        if (page !== 0) {
+        if (paths[PREV]) {
             return <Button className="doc-button doc-button-color shadow-sm"
                            onClick={() => prevPage()}>{t('prevButton')}</Button>
         }
     }
 
     const renderNextButton = () => {
-        if (page < maxPage - 1) {
+        if (paths[NEXT]) {
             return <Button className="doc-button doc-button-color shadow-sm"
                            onClick={() => nextPage()}>{t('nextButton')}</Button>
         }
@@ -110,7 +130,7 @@ function Favorites() {
                                     <Card className="mb-3 fav-doc-card shadow"
                                           key={doctor.license}>
                                         <Card.Body className="card-body-doc">
-                                            <Card.Title>{doctor.user.firstName + ' ' + doctor.user.lastName}</Card.Title>
+                                            <Card.Title>{doctor.firstName + ' ' + doctor.lastName}</Card.Title>
                                             <Card.Text>
                                                 {doctor.specialty}
                                             </Card.Text>

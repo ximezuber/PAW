@@ -181,6 +181,7 @@ export const TRANSLATION_ES = {
     editProfileButton: "Editar Perfil",
     changeImgButton: "Cambiar Imagen",
     deleteImgButton: "Eliminar Imagen",
+    deleteProfile: "Eliminar Cuenta",
     cancelButton: "Cancelar",
     with: "con",
     nextApp: "Próximos turnos"

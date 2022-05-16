@@ -11,6 +11,7 @@ import {useNavigate} from "react-router-dom";
 import ImageSelectModal from "../Modals/ImageSelectModal";
 import ImageCalls from "../../api/ImageCalls";
 import {BASE_URL} from "../../Constants";
+import apiCalls from "../../api/apiCalls";
 
 function DoctorHome(props) {
     const [doctor, setDoctor] = useState({})
@@ -27,10 +28,6 @@ function DoctorHome(props) {
             if (response && response.ok) {
                 setDoctor(response.data)
                 localStorage.setItem('license', response.data.license)
-                localStorage.setItem('firstName', response.data.userData.firstName)
-                localStorage.setItem('lastName', response.data.userData.lastName)
-                localStorage.setItem('specialty', response.data.specialty)
-                localStorage.setItem('phone', response.data.phoneNumber)
             }
             if (response.status === 404)
                 setMessage("errors.noDocEmail")
@@ -43,18 +40,23 @@ function DoctorHome(props) {
 
     const fetchImage = async () => {
         const license = localStorage.getItem('license');
-        const response = await ImageCalls.getImage(license)
-        if (response && response.ok) {
-           setImage(response.data)
-        }
-        if (response.status === 404) {
-            if (response.data === "image-not-found") {
-                setImage(null)
+        if(license === undefined) {
+            setMessage("errors.docLoggedNotFound")
+        } else {
+            const response = await ImageCalls.getImage(license)
+            if (response && response.ok) {
+                setImage(response.data)
             }
-            if (response.data === "doctor-not-found") {
-                setMessage("errors.docLoggedNotFound")
+            if (response.status === 404) {
+                if (response.data === "image-not-found") {
+                    setImage(null)
+                }
+                if (response.data === "doctor-not-found") {
+                    setMessage("errors.docLoggedNotFound")
+                }
             }
         }
+
     }
 
     const fetchSpecialties = async () => {
@@ -63,19 +65,6 @@ function DoctorHome(props) {
             setSpecialties(response.data)
             setMessage("")
         }
-    }
-
-    const getDoctorsFirstName = () => {
-        if(doctor.userData === undefined)
-            return "Doctor!";
-        else
-            return doctor.userData.firstName + " "
-    }
-
-    const getDoctorsLastName = () => {
-        if(doctor.userData !== undefined)
-            return doctor.userData.lastName
-        return ''
     }
 
     const handleEdit = async (doctor) => {
@@ -98,7 +87,6 @@ function DoctorHome(props) {
         if (response && response.ok) {
             await fetchImage()
             setMessage("")
-            window.location.reload()
         }
         if (response.status === 401) {
             handleUnauth();
@@ -137,22 +125,32 @@ function DoctorHome(props) {
         }
     }
 
+    const handleDeleteProfile = async () => {
+        const response = await DoctorCalls.deleteDoctor(localStorage.getItem("license"))
+        if (response && response.ok) {
+            props.logout()
+            navigate('/paw-2019b-4')
+        }
+        if (response.status === 404) {
+            if (response.data === "doctor-not-found") {
+                setMessage("errors.docLoggedNotFound")
+            }
+        }
+    }
+
     const handleUnauth = () => {
-        localStorage.removeItem('token')
-        localStorage.removeItem('role')
-        localStorage.removeItem('license')
-        localStorage.removeItem('firstName')
-        localStorage.removeItem('lastName')
-        localStorage.removeItem('specialty')
-        localStorage.removeItem('phone')
+        props.logout()
         navigate('/paw-2019b-4/login')
     }
 
 
-    useEffect(async () => {
-        await fetchDoctor();
-        await fetchSpecialties();
-        await fetchImage();
+    useEffect( () => {
+        async function fetchData () {
+            await fetchDoctor();
+            await fetchSpecialties();
+            await fetchImage();
+        }
+        fetchData();
     }, [])
 
     return (
@@ -161,7 +159,7 @@ function DoctorHome(props) {
                 <Row>
                     <Col>
                         <h3 className="mt-3">
-                            {t('welcome')}, {getDoctorsFirstName()}{getDoctorsLastName()}!
+                            {t('welcome')}, {doctor.firstName} {doctor.lastName}!
                         </h3>
                         <hr />
                     </Col>
@@ -179,7 +177,7 @@ function DoctorHome(props) {
                             {t('NAVBAR.profile')}
                         </h4>
                         <div className="info-label">
-                            <b>{t('FORM.name')}:</b> {getDoctorsFirstName()}{getDoctorsLastName()}
+                            <b>{t('FORM.name')}:</b> {doctor.firstName} {doctor.lastName}
                         </div>
                         <div className="info-label">
                             <b>{t('FORM.email')}:</b> {localStorage.getItem('email')}
@@ -193,9 +191,14 @@ function DoctorHome(props) {
                         <div className="info-label">
                             <b>{t('ADMIN.specialty')}:</b> {doctor.specialty}
                         </div>
-                        <EditDocProfileModal specialties={specialties.map(specialty=> specialty.name)}
-                                             handleEdit={handleEdit}
-                        />
+                        <div className="mt-3">
+                            <EditDocProfileModal specialties={specialties.map(specialty=> specialty.name)}
+                                                 handleEdit={handleEdit}
+                                                 doctor={doctor}
+                            />
+                            <Button className="mx-3 shadow-sm remove-button-color" onClick={handleDeleteProfile}> {t('deleteProfile')}</Button>
+                        </div>
+
                     </Col>
                     <Col>
                         <img className="img-size"

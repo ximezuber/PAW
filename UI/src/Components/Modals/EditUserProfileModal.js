@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {Button, Form, Modal} from "react-bootstrap";
 import DropDownList from "../DropDownList";
@@ -7,12 +7,12 @@ import {useNavigate} from "react-router-dom";
 import '../Pages/Profile.css'
 
 function EditUserProfileModal(props) {
-    const [firstName, setFirstName] = useState(localStorage.getItem('firstName'))
-    const [lastName, setLastName] = useState(localStorage.getItem('lastName'))
+    const [firstName, setFirstName] = useState("")
+    const [lastName, setLastName] = useState("")
     const [newPassword, setNewPassword] = useState('')
     const [repeatPassword, setRepeatPassword] = useState('')
-    const [selectedPrepaid, setSelectedPrepaid] = useState(localStorage.getItem('prepaid'))
-    const [prepaidNumber, setPrepaidNumber] = useState(localStorage.getItem('prepaidNumber'))
+    const [selectedPrepaid, setSelectedPrepaid] = useState("")
+    const [prepaidNumber, setPrepaidNumber] = useState("")
     const [show, setShow] = useState(false)
     const [invalidForm, setInvalidForm] = useState(true)
 
@@ -23,6 +23,14 @@ function EditUserProfileModal(props) {
     const [repeatPasswordErrors, setRepeatPasswordErrors] = useState([])
     const {t} = useTranslation()
     const navigate = useNavigate()
+
+    useEffect(() => {
+        setFirstName(props.firstName)
+        setLastName(props.lastName)
+        setSelectedPrepaid(props.selectedPrepaid)
+        setPrepaidNumber(props.prepaidNumber)
+
+    },[props.firstName, props.lastName, props.selectedPrepaid, props.prepaidNumber])
 
     const onChange = (event) => {
         // eslint-disable-next-line default-case
@@ -124,9 +132,7 @@ function EditUserProfileModal(props) {
             props.handleOk()
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
-            navigate('/paw-2019b-4/login')
+            props.logout()
         }
         setInvalidForm(false)
         handleShow()

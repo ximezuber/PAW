@@ -8,8 +8,8 @@ import ApiCalls from "../../api/apiCalls"
 import {useNavigate} from "react-router-dom";
 import PrepaidCalls from "../../api/PrepaidCalls";
 
-function SignUp() {
-    const [selectedPrepaid, setSelectedPrepaid] = useState('')
+function SignUp(props) {
+    const [selectedPrepaid, setSelectedPrepaid] = useState('-')
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
     const [email, setEmail] = useState('')
@@ -41,9 +41,11 @@ function SignUp() {
     }, [])
 
     const fetchPrepaids = async () => {
-        const response = await PrepaidCalls.getAllPrepaids();
+        const response = await PrepaidCalls.getAllPrepaid();
         if (response && response.ok) {
-            setPrepaids(response.data.map(prepaid => prepaid.name))
+            let data = response.data
+            data.push({name: '-'})
+            setPrepaids(data.map(prepaid => prepaid.name))
         }
     }
 
@@ -126,15 +128,24 @@ function SignUp() {
             password: password,
             repeatPassword: repeatPassword,
             id: document,
-            prepaid: selectedPrepaid,
+            prepaid: selectedPrepaid === '-'? null : selectedPrepaid,
             prepaidNumber: prepaidNumber
         }
 
         const resp = await ApiCalls.signUp(data)
 
         if (resp.status === 201) {
-            navigate("/paw-2019b-4/login");
-            window.location.reload()
+            const response = await ApiCalls.login(email, password)
+            if (response && response.ok) {
+                const role = response.headers.xRole
+                props.setRole(role)
+                if (localStorage.getItem("path") !== null) {
+                    navigate(localStorage.getItem("path"));
+                    localStorage.removeItem("path")
+                } else {
+                    navigate("/paw-2019b-4");
+                }
+            }
         }
         if (resp.status === 409) {
             if (resp.data === "user-exists") {

@@ -6,31 +6,49 @@ import {useNavigate} from "react-router-dom";
 import SpecialtyCalls from "../../api/SpecialtyCalls";
 import {useTranslation} from "react-i18next";
 import "../../i18n/i18n"
+import {getPaths} from "../../utils/paginationHelper";
+import ApiCalls from "../../api/apiCalls";
+import {CURRENT, NEXT, PREV} from "./Constants";
 
 function Specialties(props){
     const [specialties, setSpecialties] = useState([])
-    const [page, setPage] = useState(0)
-    const [maxPage, setMaxPage] = useState(0)
+    const [paths, setPaths] = useState({})
     const navigate = useNavigate()
     const [message, setMessage] = useState("")
     const { t } = useTranslation();
 
-    const fetchSpecialties = async (pag) => {
-        const response = await SpecialtyCalls.getSpecialties(pag);
+    const setPages = (linkHeader) => {
+        const paths = getPaths(linkHeader);
+        setPaths(paths)
+    }
+
+    const fetchSpecialties = async () => {
+        const response = await SpecialtyCalls.getSpecialties(0);
         if (response && response.ok) {
             setSpecialties(response.data);
-            setMaxPage(response.headers.xMaxPage);
+            setPages(response.headers.link);
         }
     }
 
-    useEffect(async () => {
-        await fetchSpecialties(page)
+    useEffect( () => {
+        async function fetchData () {
+            await fetchSpecialties()
+        }
+        fetchData();
     }, [])
+
+    const fetchPage = async (page) => {
+        const response = await ApiCalls.makeGetCall(paths[page])
+        if (response && response.ok) {
+            setSpecialties(response.data)
+            setPages(response.headers.link)
+        }
+    }
 
     const deleteSpecialty = async (name) => {
         const response = await SpecialtyCalls.deleteSpecialty(name);
         if (response && response.ok) {
-            await fetchSpecialties(page)
+            await fetchPage(CURRENT)
             setMessage("")
         }
         if (response.status === 404) {
@@ -44,8 +62,7 @@ function Specialties(props){
             }
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }
@@ -53,11 +70,10 @@ function Specialties(props){
     const handleAdd = async (newSpecialty) => {
         const response = await SpecialtyCalls.addSpecialty(newSpecialty);
         if (response && response.ok) {
-            await fetchSpecialties(page)
+            await fetchPage(CURRENT)
             setMessage("")
         } else if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         } else if (response.status === 409) {
             if (response.data === "specialty-exists") {
@@ -67,27 +83,23 @@ function Specialties(props){
     }
 
     const nextPage = async () => {
-        const newPage = page + 1
-        setPage(newPage)
         setMessage("")
-        await fetchSpecialties(newPage)
+        await fetchPage(NEXT)
     }
     const prevPage = async () => {
-        const newPage = page - 1
-        setPage(newPage)
         setMessage("")
-        await fetchSpecialties(newPage)
+        await fetchPage(PREV)
     }
 
     const renderPrevButton = () => {
-        if (page !== 0) {
+        if (paths[PREV]) {
             return <Button className="remove-button doc-button-color shadow-sm"
                            onClick={() => prevPage()}>{t("prevButton")}</Button>
         }
     }
 
     const renderNextButton = () => {
-        if (page < maxPage) {
+        if (paths[NEXT]) {
             return <Button className="remove-button doc-button-color shadow-sm"
                     onClick={() => nextPage()}>{t("nextButton")}</Button>
         }

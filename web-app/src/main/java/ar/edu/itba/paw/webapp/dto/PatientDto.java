@@ -21,7 +21,7 @@ public class PatientDto {
         patientDto.lastName = patient.getLastName();
         patientDto.email = patient.getEmail();
         patientDto.id = patient.getId();
-        patientDto.prepaid = patient.getPrepaid().getName();
+        patientDto.prepaid = patient.getPrepaid() == null? null:patient.getPrepaid().getName();
         patientDto.prepaidNumber = patient.getPrepaidNumber();
         patientDto.appointments = uriInfo.getBaseUriBuilder().path("appointments")
                 .queryParam("user", patient.getEmail()).build();

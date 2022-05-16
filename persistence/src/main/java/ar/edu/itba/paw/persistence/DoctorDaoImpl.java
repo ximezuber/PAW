@@ -5,6 +5,7 @@ import ar.edu.itba.paw.model.Doctor;
 import ar.edu.itba.paw.model.Specialty;
 import ar.edu.itba.paw.model.User;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -40,7 +41,7 @@ public class DoctorDaoImpl implements DoctorDao {
     @Override
     public List<Doctor> getPaginatedObjects(int page) {
         final TypedQuery<Doctor> query = entityManager.createQuery("FROM Doctor AS doctor" +
-                "ORDER BY doctor.user.firstName, doctor.user.lastName, doctor.license",
+                " ORDER BY doctor.user.lastName, doctor.user.firstName, doctor.license",
                 Doctor.class);
 
         return query.setFirstResult(page * MAX_DOCTORS_PER_PAGE_ADMIN)
@@ -63,7 +64,7 @@ public class DoctorDaoImpl implements DoctorDao {
     @Override
     public List<Doctor> getDoctorBySpecialty(Specialty specialty) {
         final TypedQuery<Doctor> query = entityManager.createQuery("FROM Doctor AS doctor " +
-                "WHERE doctor.specialty.name = :specialty" +
+                "WHERE doctor.specialty.name = :specialty " +
                 "ORDER BY doctor.user.firstName, doctor.user.lastName, doctor.license", Doctor.class);
 
         query.setParameter("specialty", specialty.getSpecialtyName());

@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {Button, Col, Container, Form, Row} from "react-bootstrap";
-import DropDownList from "../DropDownList";
 import {useTranslation} from "react-i18next";
 import '../../i18n/i18n'
 import {Link, useNavigate} from "react-router-dom";
@@ -10,8 +9,10 @@ import EditUserProfileModal from "../Modals/EditUserProfileModal";
 import AppointmentCalls from "../../api/AppointmentCalls";
 import {dateToString} from "../../utils/dateHelper";
 import './Profile.css'
+import ApiCalls from "../../api/apiCalls";
+import DoctorCalls from "../../api/DoctorCalls";
 
-function Profile() {
+function Profile(props) {
     const [selectedPrepaid, setSelectedPrepaid] = useState('')
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
@@ -20,18 +21,21 @@ function Profile() {
     const [prepaids, setPrepaids] = useState([])
     const [appointments, setAppointments] = useState([])
 
-
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-    useEffect(async () => {
-        await fetchProfile()
-        await fetchPrepaids()
-        await fetchAppointments()
+    useEffect( () => {
+        async function fetchData () {
+            await fetchProfile()
+            await fetchPrepaids()
+            await fetchAppointments()
+        }
+        fetchData();
+
     }, [])
 
     const fetchPrepaids = async () => {
-        const response = await PrepaidCalls.getAllPrepaids();
+        const response = await PrepaidCalls.getAllPrepaid();
         if (response && response.ok) {
             setPrepaids(response.data.map(prepaid => prepaid.name))
         }
@@ -40,43 +44,77 @@ function Profile() {
     const fetchProfile = async () => {
         const response = await PatientCalls.getProfile(localStorage.getItem('email'));
         if (response && response.ok) {
-            setFirstName(response.data.userData.firstName)
-            localStorage.setItem('firstName', response.data.userData.firstName)
-            setLastName(response.data.userData.lastName)
-            localStorage.setItem('lastName', response.data.userData.lastName)
+            setFirstName(response.data.firstName)
+            // localStorage.setItem('firstName', response.data.firstName)
+            setLastName(response.data.lastName)
+            // localStorage.setItem('lastName', response.data.lastName)
             setSelectedPrepaid(response.data.prepaid)
-            localStorage.setItem('prepaid', response.data.prepaid)
+            // localStorage.setItem('prepaid', response.data.prepaid)
             setPrepaidNumber(response.data.prepaidNumber)
-            localStorage.setItem('prepaidNumber', response.data.prepaidNumber)
+            // localStorage.setItem('prepaidNumber', response.data.prepaidNumber)
             setId(response.data.id)
         } else if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
+        }
+    }
+
+    const fetchEntity = async (path) => {
+        const response = await ApiCalls.makeGetCall(path);
+        if (response && response.ok) {
+            return response.data
         }
     }
 
     const fetchAppointments = async () => {
         const email = localStorage.getItem('email')
         if (email === null) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
         const response = await AppointmentCalls.getAppointment(email, 0)
         if (response && response.ok) {
-            setAppointments(response.data.slice(0, 3))
+            const list = response.data.slice(0, 3)
+            let apps = []
+            for (let i = 0; i < list.length; i++) {
+                const doctor = await fetchEntity(list[i].doctor)
+                const clinic = await fetchEntity(list[i].clinic)
+                const app = {
+                    id: list[i].id,
+                    clinic: clinic,
+                    year: list[i].year,
+                    month: list[i].month,
+                    day: list[i].day,
+                    hour: list[i].hour,
+                    dayOfWeek: list[i].dayOfWeek,
+                    doctor: doctor,
+                    patient: list[i].patient
+                }
+                apps.push(app)
+            }
+            setAppointments(apps)
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
-            localStorage.removeItem('email')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }
     const handleProfileUpdateOk = async () => {
             await fetchProfile()
             await fetchPrepaids()
+    }
+
+    const handleDeleteProfile = async () => {
+        const email = localStorage.getItem('email')
+        if (email === null) {
+            props.logout()
+            navigate('/paw-2019b-4/login')
+        }
+        const response = await PatientCalls.deleteProfile(email)
+        if (response && response.ok) {
+            props.logout()
+            navigate('/paw-2019b-4')
+        }
     }
 
     return (
@@ -119,7 +157,9 @@ function Profile() {
                             {appointments.map(app => {
                                 return(
                                     <li className="my-3">
-                                        <b>{dateToString(app, t)}</b> {t("with")} <b>{app.doctorClinic.doctor.user.firstName + ' ' + app.doctorClinic.doctor.user.lastName}</b> ({app.doctorClinic.clinic.name})
+                                        <b>{dateToString(app, t)}</b> {t("with")}
+                                        <b>{app.doctor.firstName + ' ' + app.doctor.lastName}</b>
+                                        ({app.clinic.name})
                                     </li>
                                 )
                             })}
@@ -131,8 +171,14 @@ function Profile() {
                     <Col className="col-button">
                         <EditUserProfileModal prepaids={prepaids}
                                               handleOk={handleProfileUpdateOk}
+                                              logout={props.logout}
+                                              firstName={firstName}
+                                              lastName={lastName}
+                                              selectedPrepaid={selectedPrepaid}
                                               prepaidNumber={prepaidNumber}
                         />
+                        <Button className="mx-3 shadow-sm remove-button-color edit-remove-button edit-button app-btn"
+                                onClick={handleDeleteProfile}> {t('deleteProfile')}</Button>
                     </Col>
                     <Col className="col-button">
                         <Link

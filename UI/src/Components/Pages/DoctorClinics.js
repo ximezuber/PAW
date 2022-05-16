@@ -1,33 +1,62 @@
 import React, {useEffect, useState} from "react";
 import DoctorCalls from "../../api/DoctorCalls";
 import ClinicCalls from "../../api/ClinicCalls";
-import {Button, Card, Container, Row} from "react-bootstrap";
+import {Button, Card, Container} from "react-bootstrap";
 import {useTranslation} from "react-i18next";
 import {Link, useNavigate} from "react-router-dom";
 import DoctorClinicAddModal from "../Modals/DoctorClinicAddModal";
 import EditPriceModal from "../Modals/EditPriceModal";
+import ApiCalls from "../../api/apiCalls";
+import {getPaths} from "../../utils/paginationHelper";
+import {CURRENT, NEXT, PREV} from "./Constants";
 
 function DoctorClinics(props) {
     const [clinics, setClinics] = useState([]);
     const [allClinics, setAllClinics] = useState([])
     const [allDoctorClinics, setAllDoctorClinics] = useState([])
-    const [page, setPage] = useState(0);
-    const [maxPage, setMaxPage] = useState(0);
+    const [paths, setPaths] = useState({})
     const [message, setMessage] = useState("")
     const license = localStorage.getItem('license');
     const {t} = useTranslation()
     const navigate = useNavigate()
 
-    const fetchDoctorsClinics = async (pag) => {
-        const response = await DoctorCalls.getClinics(license, pag)
+    const fetchClinic = async (clinicPath) => {
+        const response = await ApiCalls.makeGetCall(clinicPath);
+        if (response && response.ok) {
+            return response.data
+        }
+    }
+
+    const handleDCResponse = async (response) => {
         if (response && response.ok) {
             setClinics(response.data)
-            setMaxPage(Number(response.headers.xMaxPage))
+            const docClinic = response.data
+            const getClinics = [];
+            for (let i = 0; i < docClinic.length; i++) {
+                const clinic = await fetchClinic(docClinic[i].clinic)
+                const dc = {
+                    consultPrice: docClinic[i].consultPrice,
+                    clinic: clinic
+                }
+                getClinics.push(dc);
+            }
+            setClinics(getClinics)
+            setPaths(getPaths(response.headers.link))
             setMessage("")
         }
         if(response.status === 404) {
             setMessage("errors.docLoggedNotFound")
         }
+    }
+
+    const fetchDoctorsClinics = async () => {
+        const response = await DoctorCalls.getClinics(license, 0)
+        await handleDCResponse(response)
+    }
+
+    const fetchPage = async (page) => {
+        const response = await ApiCalls.makeGetCall(paths[page])
+        await handleDCResponse(response)
     }
 
     const fetchAllDoctorClinics = async () => {
@@ -46,13 +75,12 @@ function DoctorClinics(props) {
         if (response && response.ok) {
             setAllClinics(response.data);
         }
-
     }
 
     const handleAdd = async (newDocClinic) => {
         const response = await DoctorCalls.addDoctorToClinic(newDocClinic, license);
         if (response && response.ok) {
-            await fetchDoctorsClinics(page)
+            await fetchPage(CURRENT)
         }
         if (response.status === 409){
             if (response.data === "doctor-clinic-exists")
@@ -66,7 +94,7 @@ function DoctorClinics(props) {
     const handleEditPrice = async (clinicId, price) => {
         const response = await DoctorCalls.editPrice(license, clinicId, price)
         if (response && response.ok) {
-            await fetchDoctorsClinics(page)
+            await fetchPage(CURRENT)
             await fetchAllDoctorClinics()
             setMessage('')
         } else {
@@ -78,7 +106,7 @@ function DoctorClinics(props) {
     const handleDelete = async (clinicId) => {
         const response = await DoctorCalls.deleteDoctorsClinic(license, clinicId)
         if (response && response.ok) {
-            await fetchDoctorsClinics(page)
+            await fetchPage(CURRENT)
             await fetchAllDoctorClinics()
             setMessage('')
         } else {
@@ -96,20 +124,42 @@ function DoctorClinics(props) {
                 setMessage("errors.docClinicNotFound")
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
-            localStorage.removeItem('license')
-            localStorage.removeItem('firstName')
-            localStorage.removeItem('lastName')
-            localStorage.removeItem('specialty')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }
-    useEffect(async () => {
-        await fetchDoctorsClinics(page);
-        await fetchAllClinics();
-        await fetchAllDoctorClinics();
+    useEffect( () => {
+        async function fetchData () {
+            await fetchDoctorsClinics();
+            await fetchAllClinics();
+            await fetchAllDoctorClinics();
+        }
+        fetchData();
     },[])
+
+    const nextPage = async () => {
+        setMessage("")
+        await fetchPage(NEXT)
+
+    }
+    const prevPage = async () => {
+        setMessage("")
+        await fetchPage(PREV)
+    }
+
+    const renderPrevButton = () => {
+        if (paths[PREV]) {
+            return <Button className="doc-button doc-button-color shadow-sm"
+                           onClick={() => prevPage()}>{t('prevButton')}</Button>
+        }
+    }
+
+    const renderNextButton = () => {
+        if (paths[NEXT]) {
+            return <Button className="doc-button doc-button-color shadow-sm"
+                           onClick={() => nextPage()}>{t('nextButton')}</Button>
+        }
+    }
 
     return (
         <>
@@ -160,6 +210,10 @@ function DoctorClinics(props) {
                     })}
                 </div>
             </Container>
+            <div>
+                {renderPrevButton()}
+                {renderNextButton()}
+            </div>
         </>
     )
 }

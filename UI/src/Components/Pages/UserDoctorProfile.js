@@ -10,6 +10,7 @@ import DropDownList from "../DropDownList";
 import {dateToString, getMonth, getWeekDate} from "../../utils/dateHelper";
 import PatientCalls from "../../api/PatientCalls";
 import './UserDoctorProfile.css'
+import ApiCalls from "../../api/apiCalls";
 
 
 function UserDoctorProfile(props) {
@@ -36,7 +37,21 @@ function UserDoctorProfile(props) {
     const fetchAvailableAppointments = async () => {
         const response = await AppointmentCalls.getAvailableAppointments(license);
         if (response && response.ok) {
-            setAvailable(response.data)
+            const list = response.data
+            let apps = []
+            for (let i = 0; i < list.length; i++) {
+                const clinic = await fetchClinic(list[i].clinic)
+                const app = {
+                    clinic: clinic,
+                    year: list[i].year,
+                    month: list[i].month,
+                    day: list[i].day,
+                    hour: list[i].hour,
+                    dayOfWeek: list[i].dayOfWeek
+                }
+                apps.push(app)
+            }
+            setAvailable(apps)
             setMessage("")
         }
     }
@@ -44,10 +59,23 @@ function UserDoctorProfile(props) {
     const fetchClinics = async () => {
         const response = await DoctorCalls.getAllClinics(license);
         if (response && response.ok) {
-            setClinics(response.data)
+            const docClinic = response.data
+            const getClinics = [];
+            for (let i = 0; i < docClinic.length; i++) {
+                const clinic = await fetchClinic(docClinic[i].clinic)
+                getClinics.push(clinic);
+            }
+            setClinics(getClinics)
             setMessage("")
         }
 
+    }
+
+    const fetchClinic = async (clinicPath) => {
+        const response = await ApiCalls.makeGetCall(clinicPath);
+        if (response && response.ok) {
+            return response.data
+        }
     }
 
     const fetchImage = async () => {
@@ -68,51 +96,59 @@ function UserDoctorProfile(props) {
     const fetchSchedule = async () => {
         const response = await DoctorCalls.getSchedule(license)
         if (response && response.ok) {
-            setSchedule(response.data)
+            const list = response.data;
+            let sch = []
+            for (let i = 0; i < list.length; i++) {
+                const clinic = await fetchClinic(list[i].clinic)
+                const sched = {
+                    clinic: clinic,
+                    day: list[i].day,
+                    hour: list[i].hour,
+                }
+                sch.push(sched)
+
+            }
+            setSchedule(sch)
             setMessage("")
         }
     }
 
     const fetchIsFavorite = async () => {
-        if (localStorage.getItem('email') === null) {
+        if (localStorage.getItem('email') === null && props.isUser()) {
             setIsFavorite(false)
-        }
-        const response = await PatientCalls.isFavorite(localStorage.getItem('email'), license)
-        if (response && response.ok) {
-            setIsFavorite(true)
-            setMessage("")
-        }
-        if (response.status === 404) {
-            if (response.data === "doctor-not-found")
-                setMessage("errors.noDocFound")
-            if (response.data === "not-favorite"){
-                setIsFavorite(false)
+        } else {
+            const response = await PatientCalls.isFavorite(localStorage.getItem('email'), license)
+            if (response && response.ok) {
+                setIsFavorite(response.data !== undefined && response.data !== null)
                 setMessage("")
             }
+            if (response.status === 404) {
+                if (response.data === "doctor-not-found")
+                    setMessage("errors.noDocFound")
+                if (response.data === "not-favorite"){
+                    setIsFavorite(false)
+                    setMessage("")
+                }
+            }
         }
-
     }
 
-
-    useEffect(async () => {
-        await fetchDoctor();
-        await fetchImage();
-        await fetchSchedule();
-        await fetchClinics();
-        await fetchAvailableAppointments();
-        await fetchIsFavorite();
+    useEffect( () => {
+        async function fetchData () {
+            await fetchDoctor();
+            await fetchImage();
+            await fetchSchedule();
+            await fetchClinics();
+            await fetchIsFavorite();
+            await fetchAvailableAppointments();
+        }
+        fetchData();
     },[])
-
-    const getName = () => {
-        if (doctor.user === undefined) {
-            return ""
-        }
-        return doctor.user.firstName + " " + doctor.user.lastName
-    }
 
     const handleMakeApp = async () => {
         if (localStorage.getItem('email') === null) {
-            navigate("/paw-2019b-4/login")
+            props.logout()
+            navigate('/paw-2019b-4/login')
         }
         if (selectedClinic === null) {
             setMessage("errors.selectTime")
@@ -123,7 +159,7 @@ function UserDoctorProfile(props) {
         else {
             const data = {
                 license: license,
-                clinic: selectedClinic.clinic.id,
+                clinic: selectedClinic.id,
                 patient: localStorage.getItem('email'),
                 time: selectedDateTime.hour,
                 day: selectedDateTime.day,
@@ -135,9 +171,8 @@ function UserDoctorProfile(props) {
                 navigate("/paw-2019b-4/appointments")
             }
             if (response.status === 401) {
-                localStorage.removeItem('token')
-                localStorage.removeItem('role')
-                localStorage.setItem('path', "/" + license + "/profile")
+                localStorage.setItem('path', "/paw-2019b-4/" + license + "/profile")
+                props.logout()
                 navigate('/paw-2019b-4/login')
             }
             if (response.status === 400) {
@@ -160,7 +195,8 @@ function UserDoctorProfile(props) {
 
     const makeFavorite = async () => {
         if (localStorage.getItem('email') === null) {
-            navigate("/paw-2019b-4/login")
+            props.logout()
+            navigate('/paw-2019b-4/login')
         }
         const response = await PatientCalls.addFavoriteDoctor(localStorage.getItem('email'), license)
         if (response && response.ok) {
@@ -178,16 +214,16 @@ function UserDoctorProfile(props) {
                 setMessage("errors.favExists")
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
-            localStorage.setItem('path', "/" + license + "/profile")
+            localStorage.setItem('path', "/paw-2019b-4/" + license + "/profile")
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
     }
 
     const deleteFavorite = async () => {
         if (localStorage.getItem('email') === null) {
-            navigate("/paw-2019b-4/login")
+            props.logout()
+            navigate('/paw-2019b-4/login')
         }
         const response = await PatientCalls.deleteFavoriteDoctor(localStorage.getItem('email'), license)
         if (response && response.ok) {
@@ -201,18 +237,10 @@ function UserDoctorProfile(props) {
                 setMessage("errors.noPatientEmail")
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
-            localStorage.setItem('path', "/" + license + "/profile")
+            localStorage.setItem('path', "/paw-2019b-4/" + license + "/profile")
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
-    }
-
-    const getEmail = () => {
-        if (doctor.user === undefined) {
-            return ""
-        }
-        return doctor.user.email
     }
 
     const getRow = (row) => {
@@ -231,12 +259,12 @@ function UserDoctorProfile(props) {
     }
 
     const handleSelectClinic = (clinicName) => {
-        const selected = clinics.filter(dc => dc.clinic.name + " (" + dc.clinic.location + ")" === clinicName)
+        const selected = clinics.filter(clinic => clinic.name + " (" + clinic.location + ")" === clinicName)
         setSelectedClinic(selected[0])
     }
 
     const handleSelectDateTime = (dateFormated) => {
-        const selected = getDateTimes().filter(date => t(getWeekDate(date.dayWeek)) + " " + date.day + " " + t(getMonth(date.month)) + ", " + date.year +
+        const selected = getDateTimes().filter(date => t(getWeekDate(date.dayOfWeek)) + " " + date.day + " " + t(getMonth(date.month)) + ", " + date.year +
             " " + date.hour + ":00" === dateFormated)
         setSelectedDateTime(selected[0])
     }
@@ -253,7 +281,7 @@ function UserDoctorProfile(props) {
         if (selectedClinic === null) {
             return []
         }
-        return available.filter(appointment => appointment.doctorClinic.clinic.id === selectedClinic.clinic.id)
+        return available.filter(appointment => appointment.clinic.id === selectedClinic.id)
     }
 
     return (
@@ -271,10 +299,10 @@ function UserDoctorProfile(props) {
                             </Button>}
                         </h4>
                         <div className="user-info-label">
-                            <b>{t('FORM.name')}:</b> {getName()}
+                            <b>{t('FORM.name')}:</b> {doctor.firstName + " " + doctor.lastName}
                         </div>
                         <div className="user-info-label">
-                            <b>{t('FORM.email')}:</b> {getEmail()}
+                            <b>{t('FORM.email')}:</b> {doctor.email}
                         </div>
                         <div className="user-info-label">
                             <b>{t('DOC.license')}:</b> {doctor.license}
@@ -289,7 +317,7 @@ function UserDoctorProfile(props) {
                     <Col className="img-col-user mx-3">
                         <img className="user-img-size"
                              src={image === null?
-                                 "/paw-2019b-4/images/docpic.jpg": BASE_URL + "/doctors/" + license +"/image"} />
+                                 "/paw-2019b-4/images/docpic.jpg": BASE_URL + "/doctors/" + license + "/image"} />
                     </Col>
                 </Row>
                 <hr/>
@@ -335,8 +363,8 @@ function UserDoctorProfile(props) {
                         </h4>
                         <Form.Group className="m-3">
                             <Form.Label><b>{t("CLINIC.clinic")}</b>: {selectedClinic === null? "":
-                                selectedClinic.clinic.name + " - " + selectedClinic.clinic.location}</Form.Label>
-                            <DropDownList iterable={clinics.map(dc => dc.clinic.name + " (" + dc.clinic.location + ")")}
+                                selectedClinic.name + " - " + selectedClinic.location}</Form.Label>
+                            <DropDownList iterable={clinics.map(clinic => clinic.name + " (" + clinic.location + ")")}
                                           selectedElement=''
                                           handleSelect={handleSelectClinic}
                                           elementType={t('FORM.selectClinic')}

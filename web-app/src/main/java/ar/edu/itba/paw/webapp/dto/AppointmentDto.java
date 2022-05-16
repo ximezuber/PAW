@@ -4,6 +4,8 @@ import ar.edu.itba.paw.model.Appointment;
 
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 public class AppointmentDto {
 
@@ -15,20 +17,22 @@ public class AppointmentDto {
     private URI patient;
     private URI doctor;
     private URI clinic;
+    private String id;
 
-    public static AppointmentDto fromAppointment(Appointment appointment, UriInfo uriInfo) {
+    public static AppointmentDto fromAppointment(Appointment appointment, String id, UriInfo uriInfo) {
         AppointmentDto appointmentDto = new AppointmentDto();
         appointmentDto.year = appointment.getAppointmentKey().getDate().getYear();
         appointmentDto.month = appointment.getAppointmentKey().getDate().getMonthValue();
         appointmentDto.day = appointment.getAppointmentKey().getDate().getDayOfMonth();
         appointmentDto.hour = appointment.getAppointmentKey().getDate().getHour();
         appointmentDto.dayOfWeek = appointment.getAppointmentKey().getDate().getDayOfWeek().getValue();
-        appointmentDto.patient = uriInfo.getBaseUriBuilder().path("patients")
+        appointmentDto.patient = appointment.getPatientUser() == null ? null : uriInfo.getBaseUriBuilder().path("patients")
                 .path(appointment.getPatientUser().getEmail()).build();
         appointmentDto.doctor = uriInfo.getBaseUriBuilder().path("doctors")
                 .path(appointment.getDoctorClinic().getDoctor().getLicense()).build();
         appointmentDto.clinic = uriInfo.getBaseUriBuilder().path("clinics")
                 .path(String.valueOf(appointment.getDoctorClinic().getClinic().getId())).build();
+        appointmentDto.id = id;
         return appointmentDto;
     }
 
@@ -94,5 +98,13 @@ public class AppointmentDto {
 
     public void setClinic(URI clinic) {
         this.clinic = clinic;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

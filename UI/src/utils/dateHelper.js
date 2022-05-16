@@ -48,6 +48,6 @@ export const getMonth = (monthInt) => {
 }
 
 export const dateToString = (app, t) => {
-    return t(getWeekDate(app.dayWeek)) + " " + app.day + " " + t(getMonth(app.month)) + ", " + app.year +
+    return t(getWeekDate(app.dayOfWeek)) + " " + app.day + " " + t(getMonth(app.month)) + ", " + app.year +
         " " + app.hour + ":00"
 }

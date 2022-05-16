@@ -3,17 +3,14 @@ package ar.edu.itba.paw.interfaces.service;
 import ar.edu.itba.paw.model.Doctor;
 import ar.edu.itba.paw.model.Patient;
 import ar.edu.itba.paw.model.Prepaid;
-import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
-import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
-import ar.edu.itba.paw.model.exceptions.FavouriteExistsException;
-import ar.edu.itba.paw.model.exceptions.NoPrepaidNumberException;
+import ar.edu.itba.paw.model.exceptions.*;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface PatientService {
     Patient create(String id, String prepaid, String prepaidNumber, String firstName, String lastName,
-                   String password, String email) throws DuplicateEntityException, EntityNotFoundException;
+                   String password, String email) throws DuplicateEntityException, EntityNotFoundException, BadRequestException;
 
     Optional<Patient> getPatientByEmail(String email);
 

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.*;
 import javax.ws.rs.NotFoundException;
@@ -23,6 +24,7 @@ import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -117,13 +119,7 @@ public class DoctorController {
         List<DoctorDto> doctors = docs
                 .stream().map(d -> DoctorDto.fromDoctor(d, uriInfo)).collect(Collectors.toList());
 
-        URI basePath = uriInfo.getAbsolutePathBuilder()
-                .queryParam("location", location)
-                .queryParam("specialty", specialty)
-                .queryParam("firstName", firstName)
-                .queryParam("lastName", lastName)
-                .queryParam("consultPrice", consultPrice)
-                .queryParam("prepaid", prepaid).build();
+        URI basePath = uriInfo.getAbsolutePathBuilder().build();
         String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxAvailablePage);
         Response.ResponseBuilder response =  CacheHelper.handleResponse(doctors, doctorCaching, new GenericEntity<List<DoctorDto>>(doctors) {},
                         "doctors", request);
@@ -146,16 +142,16 @@ public class DoctorController {
                                            @Context Request request) {
         page = (page < 0) ? 0 : page;
 
-        List<String> licenses = doctorService.getDoctors().stream().map(Doctor::getLicense).collect(Collectors.toList());
-        int maxAvailablePage = doctorService.getMaxAvailableDoctorsPage(licenses);
+//        List<String> licenses = doctorService.getDoctors().stream().map(Doctor::getLicense).collect(Collectors.toList());
+        int maxAvailablePage = doctorService.maxAvailablePage();
 
         URI basePath = uriInfo.getAbsolutePathBuilder().build();
         String linkValue = PaginationHelper.linkHeaderValueBuilder(basePath, page, maxAvailablePage);
 
-        List<DoctorDto> doctors = doctorService.getPaginatedDoctors(licenses, page)
+        List<DoctorDto> doctors = doctorService.getPaginatedObjects(page)
                 .stream().map(d -> DoctorDto.fromDoctor(d, uriInfo)).collect(Collectors.toList());
 
-        Response.ResponseBuilder response =  CacheHelper.handleResponse(doctors, doctorCaching,
+        Response.ResponseBuilder response = CacheHelper.handleResponse(doctors, doctorCaching,
                 new GenericEntity<List<DoctorDto>>(doctors) {},
                         "doctors", request);
         if(!linkValue.isEmpty()) {
@@ -209,10 +205,9 @@ public class DoctorController {
     @DELETE
     @Path("/{license}")
     @Produces(value = { MediaType.APPLICATION_JSON })
+    @Transactional
     public Response deleteDoctor(@PathParam("license") final String license) throws EntityNotFoundException {
-         Doctor doctor = doctorService.getDoctorByLicense(license)
-                 .orElseThrow(() -> new EntityNotFoundException("doctor"));
-        doctorService.deleteDoctor(doctor);
+        doctorService.deleteDoctor(license);
         return Response.noContent().build();
     }
 
@@ -228,6 +223,7 @@ public class DoctorController {
     @Produces(value = { MediaType.APPLICATION_JSON })
     @Consumes(MediaType.APPLICATION_JSON)
     @PreAuthorize("hasPermission(#license, 'doctor')")
+    @Transactional
     public Response updateDoctor(@PathParam("license") final String license, @Valid EditDoctorProfileForm form)
             throws EntityNotFoundException {
         Doctor doctor = doctorService.getDoctorByLicense(license)
@@ -252,6 +248,7 @@ public class DoctorController {
     @POST
     @Produces(value = { MediaType.APPLICATION_JSON, })
     @Consumes(MediaType.APPLICATION_JSON)
+    @Transactional
     public Response createDoctor(final DoctorForm form)
             throws DuplicateEntityException, EntityNotFoundException,
             ar.edu.itba.paw.model.exceptions.BadRequestException {
@@ -259,10 +256,7 @@ public class DoctorController {
         if (!form.getPassword().equals(form.getRepeatPassword()))
             throw new ar.edu.itba.paw.model.exceptions.BadRequestException("password-mismatch");
         String encodedPassword = passwordEncoder.encode(form.getPassword());
-        Specialty specialty = specialtyService.getSpecialtyByName(form.getSpecialty())
-                .orElseThrow(() -> new EntityNotFoundException("specialty"));
-
-        doctorService.createDoctor(specialty, form.getLicense(), form.getPhoneNumber()
+        doctorService.createDoctor(form.getSpecialty(), form.getLicense(), form.getPhoneNumber()
                 ,form.getFirstName(), form.getLastName(), encodedPassword, form.getEmail());
         return Response.created(uriInfo.getAbsolutePathBuilder().path(form.getLicense()).build()).build();
     }
@@ -275,7 +269,7 @@ public class DoctorController {
      */
     @GET
     @Path("/{license}/image")
-    @Produces(value = { "image/*" })
+    @Produces("image/png")
     public Response getProfileImage(@PathParam("license") final String license,
                                     @Context Request request) throws EntityNotFoundException {
         Doctor d = doctorService.getDoctorByLicense(license)
@@ -284,8 +278,18 @@ public class DoctorController {
         Image img = imageService.getImageByLicense(d.getLicense())
                 .orElseThrow(() -> new EntityNotFoundException("image"));
 
-        ImageDto dto = ImageDto.fromImage(img.getImage());
-        return CacheHelper.handleResponse(dto.getImage(), imageCaching, "profileImage", request).build();
+        EntityTag etag = new EntityTag(Integer.toString(img.hashCode()));
+        Response.ResponseBuilder builder = request.evaluatePreconditions(etag);
+        CacheControl cc = new CacheControl();
+        cc.setMaxAge(Integer.MAX_VALUE);
+        cc.setPrivate(true);
+        Response.ResponseBuilder resp = Response.ok(img.getImage());
+        resp.cacheControl(cc);
+        if(builder == null)
+            resp.tag(etag).build();
+
+        return resp.build();
+
     }
 
     /**
@@ -319,7 +323,7 @@ public class DoctorController {
      * @throws UnsupportedMediaTypeException
      * @throws IOException
      */
-    @PUT
+    @POST
     @Path("/{license}/image")
     @Consumes("multipart/form-data")
     @Produces(value = { MediaType.APPLICATION_JSON })
@@ -620,7 +624,7 @@ public class DoctorController {
                 .orElseThrow(() -> new EntityNotFoundException("doctor"));
 
         List<AppointmentDto> appointments = appointmentService.getDoctorsAvailableAppointments(doctor)
-                .stream().map(appointment -> AppointmentDto.fromAppointment(appointment, uriInfo))
+                .stream().map(appointment -> AppointmentDto.fromAppointment(appointment, null, uriInfo))
                 .collect(Collectors.toList());
         return CacheHelper.handleResponse(appointments, appointmentCaching,
                 new GenericEntity<List<AppointmentDto>>(appointments) {}, "appointments",

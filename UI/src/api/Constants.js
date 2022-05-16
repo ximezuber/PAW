@@ -12,7 +12,7 @@ export const TIME_QUERY = 'time='
 export const PATIENT_PATH = '/patients';
 export const FAVORITE_PATH = '/favorites'
 export const LOGIN_PATH = '/login';
-export const PREPAIDS_PATH = '/prepaids';
+export const PREPAID_PATH = '/prepaid';
 export const LOCATIONS_PATH = '/locations';
 export const SPECIALTIES_PATH = '/specialties';
 export const DOCTORS_PATH = '/doctors';
@@ -21,4 +21,3 @@ export const ALL_PATH = '/all';
 export const EMAIL_PATH = '/email';
 export const IMAGE_PATH = '/image';
 export const APPOINTMENT_PATH = '/appointments';
-export const AVAILABLE_PATH = '/available'

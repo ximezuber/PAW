@@ -5,35 +5,87 @@ import AppointmentCalls from "../../api/AppointmentCalls";
 import {Button, Card, Container, Row} from "react-bootstrap";
 import './Favorites.css'
 import {dateToString, getMonth, getWeekDate} from "../../utils/dateHelper";
+import {getPaths} from "../../utils/paginationHelper";
+import ApiCalls from "../../api/apiCalls";
+import {CURRENT, NEXT, PREV} from "./Constants";
 
 function Appointments(props) {
     const [appointments, setAppointments] = useState([])
-    const [page, setPage] = useState(0)
-    const [maxPage, setMaxPage] = useState(0)
+    const [paths, setPaths] = useState({})
     const [message, setMessage] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const {t} = useTranslation()
     const navigate = useNavigate()
 
-    const fetchAppointments = async (pag) => {
+    const fetchAppointments = async () => {
         const email = localStorage.getItem('email')
         if (email === null) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
         setIsLoading(true)
-        const response = await AppointmentCalls.getAppointment(email, pag)
+        const response = await AppointmentCalls.getAppointment(email, 0)
+        await handleResponse(response)
+    }
+
+    const fetchPage = async (page) => {
+        const email = localStorage.getItem('email')
+        if (email === null) {
+            props.logout()
+            navigate('/paw-2019b-4/login')
+        } else {
+            setIsLoading(true)
+            const response = await ApiCalls.makeAuthGetCall(paths[page])
+            await handleResponse(response)
+        }
+    }
+
+    const handleResponse = async (response) => {
         if (response && response.ok) {
-            setAppointments(response.data)
-            setMaxPage(Number(response.headers.xMaxPage))
+            const list = response.data
+            let apps = []
+            if (props.user === "doctor") {
+                for (let i = 0; i < list.length; i++) {
+                    const patient = await fetchAuthEntity(list[i].patient)
+                    const clinic = await fetchEntity(list[i].clinic)
+                    const app = {
+                        id: list[i].id,
+                        clinic: clinic,
+                        year: list[i].year,
+                        month: list[i].month,
+                        day: list[i].day,
+                        hour: list[i].hour,
+                        dayOfWeek: list[i].dayOfWeek,
+                        doctor: list[i].doctor,
+                        patient: patient
+                    }
+                    apps.push(app)
+                }
+            } else {
+                for (let i = 0; i < list.length; i++) {
+                    const doctor = await fetchEntity(list[i].doctor)
+                    const clinic = await fetchEntity(list[i].clinic)
+                    const app = {
+                        id: list[i].id,
+                        clinic: clinic,
+                        year: list[i].year,
+                        month: list[i].month,
+                        day: list[i].day,
+                        hour: list[i].hour,
+                        dayOfWeek: list[i].dayOfWeek,
+                        doctor: doctor,
+                        patient:list[i].patient
+                    }
+                    apps.push(app)
+                }
+            }
+            setAppointments(apps)
+            setPaths(getPaths(response.headers.link))
             setMessage("")
             setIsLoading(false)
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
-            localStorage.removeItem('email')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
         if (response.status === 404) {
@@ -42,29 +94,32 @@ function Appointments(props) {
         }
     }
 
+    const fetchEntity = async (path) => {
+        const response = await ApiCalls.makeGetCall(path);
+        if (response && response.ok) {
+            return response.data
+        }
+    }
+    const fetchAuthEntity = async (path) => {
+        const response = await ApiCalls.makeAuthGetCall(path);
+        if (response && response.ok) {
+            return response.data
+        }
+    }
+
     const deleteAppointment = async (app) => {
         const email = localStorage.getItem('email')
         if (email === null) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
-        const response = await AppointmentCalls.deleteAppointment(
-            email,
-            app.doctorClinic.doctor.license,
-            app.doctorClinic.clinic.id,
-            app.year,
-            app.month,
-            app.day,
-            app.hour)
+        const response = await AppointmentCalls.deleteAppointment(email, app.id)
         if (response && response.ok) {
-            await fetchAppointments(page)
+            await fetchPage(CURRENT)
             setMessage("")
         }
         if (response.status === 401) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('role')
-            localStorage.removeItem('email')
+            props.logout()
             navigate('/paw-2019b-4/login')
         }
         if (response.status === 404) {
@@ -75,33 +130,32 @@ function Appointments(props) {
         }
     }
 
-    useEffect(async () => {
-        await fetchAppointments(page);
+    useEffect( () => {
+        async function fetchData () {
+            await fetchAppointments();
+        }
+        fetchData();
     }, [])
 
     const nextPage = async () => {
-        const newPage = page + 1
-        setPage(newPage)
         setMessage("")
-        await fetchAppointments(newPage)
+        await fetchPage(NEXT)
 
     }
     const prevPage = async () => {
-        const newPage = page - 1
-        setPage(newPage)
         setMessage("")
-        await fetchAppointments(newPage)
+        await fetchPage(PREV)
     }
 
     const renderPrevButton = () => {
-        if (page !== 0) {
+        if (paths[PREV]) {
             return <Button className="doc-button doc-button-color shadow-sm"
                            onClick={() => prevPage()}>{t('prevButton')}</Button>
         }
     }
 
     const renderNextButton = () => {
-        if (page < maxPage - 1) {
+        if (paths[NEXT]) {
             return <Button className="doc-button doc-button-color shadow-sm"
                            onClick={() => nextPage()}>{t('nextButton')}</Button>
         }
@@ -129,13 +183,13 @@ function Appointments(props) {
                                     <Card.Title><b>{dateToString(ap, t)}</b></Card.Title>
                                     <Card.Text>
                                         {props.user === "patient"? <div>
-                                            {t("USER.doc")}{ap.doctorClinic.doctor.user.firstName + ' ' + ap.doctorClinic.doctor.user.lastName}
+                                            {t("USER.doc")}{ap.doctor.firstName + ' ' + ap.doctor.lastName} ({ap.doctor.email})
                                         </div>: <div>
                                             {t("USER.patient")}{ap.patient.firstName + ' ' + ap.patient.lastName} ({ap.patient.email})
                                         </div> }
 
                                         <div>
-                                            {t("USER.clinic")} {ap.doctorClinic.clinic.name} - {ap.doctorClinic.clinic.location} ({ap.doctorClinic.clinic.address})
+                                            {t("USER.clinic")} {ap.clinic.name} - {ap.clinic.location} ({ap.clinic.address})
                                         </div>
 
                                     </Card.Text>
