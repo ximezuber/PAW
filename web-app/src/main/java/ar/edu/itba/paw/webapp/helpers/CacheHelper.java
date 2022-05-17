@@ -14,7 +14,7 @@ public class CacheHelper {
         Map<String, Integer> map = new HashMap<>();
         map.put("doctors", 10);
         map.put("doctor", 10);
-        map.put("profileImage", 10);
+        map.put("profileImage", 1000);
         map.put("doctorsClinics", 10);
         map.put("doctorsClinic", 10);
         map.put("schedules", 10);

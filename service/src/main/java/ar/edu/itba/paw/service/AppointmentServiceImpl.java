@@ -29,9 +29,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     private MessageSource messageSource;
 
     @Autowired
-    private DoctorClinicService doctorClinicService;
-
-    @Autowired
     private DoctorService doctorService;
 
     @Autowired
@@ -76,7 +73,6 @@ public class AppointmentServiceImpl implements AppointmentService {
             }
         }
 
-        // TODO : fix locale
         for (Schedule schedule : doctorClinic.getSchedule()) {
             if (date.getDayOfWeek().getValue() == schedule.getDay() && date.getHour() == schedule.getHour()) {
                 Locale locale = LocaleContextHolder.getLocale();
