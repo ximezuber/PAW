@@ -90,7 +90,6 @@ class Login extends Component {
                                     localStorage.removeItem("path")
                                 } else {
                                     this.props.navigate("/paw-2019b-4");
-                                    // window.location.reload()
                                 }
                                 break;
                         }

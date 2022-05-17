@@ -47,7 +47,7 @@ function Favorites(props) {
             navigate('/paw-2019b-4/login')
         }
         setIsLoading(true)
-        const response = await ApiCalls.makeAuthGetCall(paths[page])
+        const response = await ApiCalls.makeGetCall(paths[page])
         if (response && response.ok) {
             setDoctors(response.data)
             setPages(response.headers.link)

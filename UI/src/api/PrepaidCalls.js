@@ -6,11 +6,11 @@ const getPrepaid = async (pag) => api.get(cons.PREPAID_PATH + "?" + cons.PAGE_QU
 const deletePrepaid = async (name) => api.delete(
     cons.PREPAID_PATH + "/" + name,
     {},
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}})
+    {})
 const addPrepaid = async (data) => api.post(
     cons.PREPAID_PATH,
     data,
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}}
+    {}
 );
 
 export default {

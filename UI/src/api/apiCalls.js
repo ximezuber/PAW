@@ -34,13 +34,9 @@ const logout = () => {
 
 const makeGetCall = async (path) => api.get(path);
 
-const makeAuthGetCall = async (path) => api.get(path, {},
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}});
-
 export default {
     login,
     signUp,
     logout,
-    makeGetCall,
-    makeAuthGetCall
+    makeGetCall
 }

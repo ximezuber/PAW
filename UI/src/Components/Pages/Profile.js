@@ -157,9 +157,8 @@ function Profile(props) {
                             {appointments.map(app => {
                                 return(
                                     <li className="my-3">
-                                        <b>{dateToString(app, t)}</b> {t("with")}
-                                        <b>{app.doctor.firstName + ' ' + app.doctor.lastName}</b>
-                                        ({app.clinic.name})
+                                        <b>{dateToString(app, t)}</b> {t("with")}&nbsp;
+                                        <b>{app.doctor.firstName + ' ' + app.doctor.lastName}</b>&nbsp;({app.clinic.name})
                                     </li>
                                 )
                             })}

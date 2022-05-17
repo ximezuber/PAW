@@ -35,7 +35,7 @@ function Appointments(props) {
             navigate('/paw-2019b-4/login')
         } else {
             setIsLoading(true)
-            const response = await ApiCalls.makeAuthGetCall(paths[page])
+            const response = await ApiCalls.makeGetCall(paths[page])
             await handleResponse(response)
         }
     }
@@ -101,7 +101,7 @@ function Appointments(props) {
         }
     }
     const fetchAuthEntity = async (path) => {
-        const response = await ApiCalls.makeAuthGetCall(path);
+        const response = await ApiCalls.makeGetCall(path);
         if (response && response.ok) {
             return response.data
         }

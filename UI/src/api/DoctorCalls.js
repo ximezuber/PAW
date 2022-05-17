@@ -7,16 +7,16 @@ const searchDocs = async (pag, params) => api.get(cons.DOCTORS_PATH + "?" + cons
 const addDoctor = async (data) => api.post(
     cons.DOCTORS_PATH,
     data,
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}}
+    {}
 );
 const deleteDoctor = async (license) => api.delete(
     cons.DOCTORS_PATH + '/' + license,
     {},
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}})
+    {})
 const editDoctor = async (license, data) => api.put(
     cons.DOCTORS_PATH + "/" + license,
     data,
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}}
+    {}
     )
 
 const getClinics = async (license, pag) =>
@@ -32,12 +32,12 @@ const addDoctorToClinic = async (data, license) => api.post(
 const deleteDoctorsClinic = async (license, clinic) => api.delete(
     cons.DOCTORS_PATH + "/" + license + cons.CLINICS_PATH + "/" + clinic,
     {},
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}}
+    {}
 )
 const editPrice = async (license, clinicId, price) => api.put(
     cons.DOCTORS_PATH + "/" + license + cons.CLINICS_PATH + "/" + clinicId + "?" + cons.PRICE_QUERY + price,
     {},
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}}
+    {}
 )
 const getSchedule = async (license) => api.get(
     cons.DOCTORS_PATH + "/" + license + "/schedules")
@@ -47,13 +47,13 @@ const addSchedule = async (license, clinicId, day, hour) => api.post(
         day: day,
         hour: hour
     },
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}}
+    {}
 )
 const deleteSchedule = async (license, clinicId, day, hour) => api.delete(
     cons.DOCTORS_PATH + "/" + license + cons.CLINICS_PATH + "/" + clinicId + "/schedules"
     + "?" + cons.DAY_QUERY + day + "&" + cons.HOUR_QUERY + hour,
     {},
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}}
+    {}
 )
 
 

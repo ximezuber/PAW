@@ -7,11 +7,12 @@ const getAllSpecialties = async () => api.get(cons.SPECIALTIES_PATH + cons.ALL_P
 const addSpecialty = async (data) => api.post(
     cons.SPECIALTIES_PATH,
     data,
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}}
+    {}
 );
+
 const deleteSpecialty = async (name) => api.delete(cons.SPECIALTIES_PATH + "/" + name,
     {},
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}})
+    {})
 
 export default {
     getSpecialties,

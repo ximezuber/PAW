@@ -12,25 +12,32 @@ const getAllClinicPrepaid = async (id) => api.get(cons.CLINICS_PATH + "/" + id +
 const addClinic = async (data) => api.post(
     cons.CLINICS_PATH,
     data,
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}}
+    {}
 )
+
 const addClinicPrepaid = async (clinicId, prepaidId) => api.put(
     cons.CLINICS_PATH + "/" + clinicId + PREPAID_PATH + '/' + prepaidId,
     {},
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}})
+    {}
+)
+
 const editClinic = async (id, data) => api.put(
     cons.CLINICS_PATH + "/" + id,
     data,
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}}
-    )
+    {}
+)
+
 const deleteClinic = async (id) => api.delete(
     cons.CLINICS_PATH + "/" + id,
     {},
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}})
+    {}
+)
+
 const deleteClinicPrepaid = async (clinicId, prepaidId) => api.delete(
     cons.CLINICS_PATH + "/" + clinicId + PREPAID_PATH + "/" + prepaidId,
     {},
-    {headers: {'X-AUTH-TOKEN': localStorage.getItem('token')}})
+    {}
+)
 
 export default {
     getClinics,
