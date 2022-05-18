@@ -21,6 +21,7 @@ function Profile(props) {
     const [prepaidNumber, setPrepaidNumber] = useState('')
     const [prepaids, setPrepaids] = useState([])
     const [appointments, setAppointments] = useState([])
+    const [isLoading, setIsLoading] = useState(false)
     let cachedClinic = {}
     let cachedDoctor = {}
 
@@ -70,6 +71,7 @@ function Profile(props) {
     }
 
     const fetchAppointments = async () => {
+        setIsLoading(true)
         const email = localStorage.getItem('email')
         if (email === null) {
             props.logout()
@@ -109,6 +111,7 @@ function Profile(props) {
             props.logout()
             navigate(`/${WEB_CONTEXT}/login`)
         }
+        setIsLoading(false)
     }
     const handleProfileUpdateOk = async () => {
             await fetchProfile()
@@ -164,6 +167,9 @@ function Profile(props) {
                     </Col>
                     <Col>
                         <h4>{t('nextApp')}</h4>
+                        {isLoading && (
+                            <span className="spinner-border spinner-border-sm mt-3" style={{marginRight:"1rem"}}/>
+                        )}
                         <ul style={{display:"grid", justifyItems:"flex-start"}}>
                             {appointments.map(app => {
                                 return(
