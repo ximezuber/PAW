@@ -4,8 +4,6 @@ import ar.edu.itba.paw.model.Appointment;
 
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 public class AppointmentDto {
 

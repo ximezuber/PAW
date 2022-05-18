@@ -24,8 +24,8 @@ import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,13 +60,7 @@ public class DoctorController {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private SpecialtyService specialtyService;
-
-    @Autowired
     private DoctorCaching doctorCaching;
-
-    @Autowired
-    private ImageCaching imageCaching;
 
     @Autowired
     private DoctorClinicCaching doctorClinicCaching;
@@ -142,7 +136,6 @@ public class DoctorController {
                                            @Context Request request) {
         page = (page < 0) ? 0 : page;
 
-//        List<String> licenses = doctorService.getDoctors().stream().map(Doctor::getLicense).collect(Collectors.toList());
         int maxAvailablePage = doctorService.maxAvailablePage();
 
         URI basePath = uriInfo.getAbsolutePathBuilder().build();

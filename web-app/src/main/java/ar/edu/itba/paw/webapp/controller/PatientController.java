@@ -5,7 +5,6 @@ import ar.edu.itba.paw.interfaces.service.FavoriteService;
 import ar.edu.itba.paw.interfaces.service.PatientService;
 import ar.edu.itba.paw.interfaces.service.UserService;
 import ar.edu.itba.paw.model.Doctor;
-import ar.edu.itba.paw.model.Favorite;
 import ar.edu.itba.paw.model.Patient;
 import ar.edu.itba.paw.model.exceptions.BadRequestException;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
@@ -31,7 +30,6 @@ import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -167,7 +165,6 @@ public class PatientController {
         }
 
         return response.build();
-        // return Response.ok(new GenericEntity<List<DoctorDto>>(favorites) {}).build();
 
     }
 

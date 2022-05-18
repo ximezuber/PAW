@@ -11,23 +11,24 @@ public class CacheHelper {
     private static final Map<String, Integer> cacheTimes = getTimes();
 
     private static Map<String, Integer> getTimes() {
+        //seconds
         Map<String, Integer> map = new HashMap<>();
-        map.put("doctors", 10);
-        map.put("doctor", 10);
-        map.put("profileImage", 1000);
-        map.put("doctorsClinics", 10);
-        map.put("doctorsClinic", 10);
-        map.put("schedules", 10);
-        map.put("appointments", 10);
-        map.put("clinics", 10);
-        map.put("clinic", 10);
-        map.put("clinicPrepaid", 10);
-        map.put("locations", 10);
-        map.put("specialties", 10);
-        map.put("prepaid", 10);
-        map.put("patient", 10);
-        map.put("favorites", 10);
-        map.put("favoritesFiltered", 10);
+        map.put("doctors", 86400); // 24hrs
+        map.put("doctor", 86400);
+        map.put("profileImage", 86400);
+        map.put("doctorsClinics", 86400);
+        map.put("doctorsClinic", 86400);
+        map.put("schedules", 86400);
+        map.put("appointments", 1800); // 30 min
+        map.put("clinics", 86400);
+        map.put("clinic", 86400);
+        map.put("clinicPrepaid", 86400);
+        map.put("locations", 86400);
+        map.put("specialties", 86400);
+        map.put("prepaid", 86400);
+        map.put("patient", 86400);
+        map.put("favorites", 1800);
+        map.put("favoritesFiltered", 1800);
 
         return map;
     }

@@ -5,6 +5,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
 public class PaginationHelper {
+    private PaginationHelper() {throw new UnsupportedOperationException();}
     public static String linkHeaderValueBuilder(URI basePath, int currentPage, int maxPage) {
         URI currentPath = UriBuilder.fromUri(basePath).queryParam("page", currentPage).build();
         String linkValue = "<" + currentPath + ">;rel=current";

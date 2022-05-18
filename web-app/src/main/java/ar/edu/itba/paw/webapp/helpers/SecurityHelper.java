@@ -5,6 +5,7 @@ import ar.edu.itba.paw.model.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class SecurityHelper {
+    private SecurityHelper() {throw new UnsupportedOperationException();}
 
     public static String processNewPassword(String newPass, PasswordEncoder passwordEncoder, UserService userService, String userEmail) {
         String pass;

@@ -8,7 +8,6 @@ import java.net.URI;
 
 public class DoctorClinicDto {
 
-    // TODO: see how to transform this into a better thing
     private URI doctor;
     private URI clinic;
     private int consultPrice;

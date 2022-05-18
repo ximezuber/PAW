@@ -46,7 +46,6 @@ public class AppointmentController {
     @Context
     private UriInfo uriInfo;
 
-    // TODO see if there is a way to move this to doctorController and patientController
     /**
      * Returns a paginated list of a users appointments (doctor or patient)
      * @param email doctor's or patient's email
