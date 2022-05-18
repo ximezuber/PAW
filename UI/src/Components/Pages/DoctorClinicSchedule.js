@@ -7,6 +7,7 @@ import ClinicCalls from "../../api/ClinicCalls";
 import {useNavigate, useParams} from "react-router-dom";
 import ModifyScheduleModal from "../Modals/ModifyScheduleModal";
 import ApiCalls from "../../api/apiCalls";
+import {WEB_CONTEXT} from "../../Constants";
 
 function DoctorClinicSchedule(props) {
     const [schedule, setSchedule] = useState([]);
@@ -148,7 +149,7 @@ function DoctorClinicSchedule(props) {
 
     const handleUnauth = () => {
         props.logout()
-        navigate('/paw-2019b-4/login')
+        navigate("/" + WEB_CONTEXT + "/login")
     }
 
     return (

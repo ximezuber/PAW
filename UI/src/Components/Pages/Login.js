@@ -12,6 +12,7 @@ import '../../i18n/i18n'
 
 import {useLocation, useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
+import {WEB_CONTEXT} from "../../Constants";
 
 
 const required = (value) => {
@@ -79,17 +80,17 @@ class Login extends Component {
                         this.props.setRole(role)
                         switch (role) {
                             case "ROLE_ADMIN":
-                                this.props.navigate("/paw-2019b-4/admin");
+                                this.props.navigate(`/${WEB_CONTEXT}/admin`);
                                 break;
                             case "ROLE_DOCTOR":
-                                this.props.navigate("/paw-2019b-4/doctor");
+                                this.props.navigate(`/${WEB_CONTEXT}/doctor`);
                                 break;
                             case "ROLE_USER":
                                 if (localStorage.getItem("path") !== null) {
                                     this.props.navigate(localStorage.getItem("path"));
                                     localStorage.removeItem("path")
                                 } else {
-                                    this.props.navigate("/paw-2019b-4");
+                                    this.props.navigate("/" + WEB_CONTEXT );
                                 }
                                 break;
                         }
@@ -99,7 +100,7 @@ class Login extends Component {
                             loading: false,
                             message: "Email or password are not correct. Try again"
                         });
-                        this.props.navigate("/paw-2019b-4/login")
+                        this.props.navigate(`/${WEB_CONTEXT}/login`)
                     }
                 },
                 error => {

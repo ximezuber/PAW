@@ -9,6 +9,7 @@ import {useTranslation} from "react-i18next";
 import {getPaths} from "../../utils/paginationHelper";
 import ApiCalls from "../../api/apiCalls";
 import {CURRENT, NEXT, PREV} from "./Constants";
+import {WEB_CONTEXT} from "../../Constants";
 
 
 function Prepaids(props) {
@@ -59,7 +60,7 @@ function Prepaids(props) {
         }
         if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
     }
 
@@ -70,7 +71,7 @@ function Prepaids(props) {
             setMessage("")
         } else if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         } else if (response.status === 409) {
             if (response.data === "prepaid-exists") {
                 setMessage("errors.prepaidExists")

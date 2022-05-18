@@ -11,6 +11,7 @@ import {dateToString} from "../../utils/dateHelper";
 import './Profile.css'
 import ApiCalls from "../../api/apiCalls";
 import DoctorCalls from "../../api/DoctorCalls";
+import {WEB_CONTEXT} from "../../Constants";
 
 function Profile(props) {
     const [selectedPrepaid, setSelectedPrepaid] = useState('')
@@ -57,7 +58,7 @@ function Profile(props) {
             setId(response.data.id)
         } else if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
     }
 
@@ -72,7 +73,7 @@ function Profile(props) {
         const email = localStorage.getItem('email')
         if (email === null) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
         const response = await AppointmentCalls.getAppointment(email, 0)
         if (response && response.ok) {
@@ -106,7 +107,7 @@ function Profile(props) {
         }
         if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
     }
     const handleProfileUpdateOk = async () => {
@@ -118,12 +119,12 @@ function Profile(props) {
         const email = localStorage.getItem('email')
         if (email === null) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
         const response = await PatientCalls.deleteProfile(email)
         if (response && response.ok) {
             props.logout()
-            navigate('/paw-2019b-4')
+            navigate('/' + WEB_CONTEXT)
         }
     }
 
@@ -193,7 +194,7 @@ function Profile(props) {
                         <Link
                             className="edit-remove-button doc-button-color shadow-sm edit-button btn app-btn"
                             role="button"
-                            to="/paw-2019b-4/appointments">{t('NAVBAR.appointments')}
+                            to={`/${WEB_CONTEXT}/appointments`}>{t('NAVBAR.appointments')}
                         </Link>
                     </Col>
                 </Row>

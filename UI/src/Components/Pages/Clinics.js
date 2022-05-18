@@ -10,7 +10,7 @@ import "../../i18n/i18n";
 import {getPaths} from "../../utils/paginationHelper";
 import {CURRENT, NEXT, PREV} from "./Constants";
 import ApiCalls from "../../api/apiCalls";
-import api from "../../api";
+import {WEB_CONTEXT} from "../../Constants";
 
 function Clinics(props) {
 
@@ -73,7 +73,7 @@ function Clinics(props) {
                 setMessage("errors.clinicNotFoundDelete")
         } else if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate("/" + WEB_CONTEXT + "/login")
         }
     }
 
@@ -91,7 +91,7 @@ function Clinics(props) {
         }
         if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate("/" + WEB_CONTEXT + "/login")
         }
         if (response.status === 404) {
             if (response.data === "location-not-found") {
@@ -119,7 +119,7 @@ function Clinics(props) {
         }
         if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate("/" + WEB_CONTEXT + "/login")
         }
         if (response.status === 404) {
             if (response.data === "clinic-not-found") {
@@ -209,7 +209,7 @@ function Clinics(props) {
                                 </Card.Body>
                                 <Link className="btn btn-outline-dark btn-lg see-prepaid-button shadow-sm"
                                       role="button"
-                                      to={'/paw-2019b-4/admin/clinics/' + clinic.id + '/prepaids'}>{t("ADMIN.seePrepaids")}
+                                      to={"/" + WEB_CONTEXT + "/admin/clinics/" + clinic.id + "/prepaids"}>{t("ADMIN.seePrepaids")}
                                 </Link>
                                 <div className="buttons-div">
                                     <Button className="edit-remove-button remove-button-color shadow-sm"

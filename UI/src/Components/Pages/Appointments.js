@@ -8,6 +8,7 @@ import {dateToString, getMonth, getWeekDate} from "../../utils/dateHelper";
 import {getPaths} from "../../utils/paginationHelper";
 import ApiCalls from "../../api/apiCalls";
 import {CURRENT, NEXT, PREV} from "./Constants";
+import {WEB_CONTEXT} from "../../Constants";
 
 function Appointments(props) {
     const [appointments, setAppointments] = useState([])
@@ -24,7 +25,7 @@ function Appointments(props) {
         const email = localStorage.getItem('email')
         if (email === null) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate("/" + WEB_CONTEXT + "/login")
         }
         setIsLoading(true)
         const response = await AppointmentCalls.getAppointment(email, 0)
@@ -35,7 +36,7 @@ function Appointments(props) {
         const email = localStorage.getItem('email')
         if (email === null) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate("/" + WEB_CONTEXT + "/login")
         } else {
             setIsLoading(true)
             const response = await ApiCalls.makeGetCall(paths[page])
@@ -106,7 +107,7 @@ function Appointments(props) {
         }
         if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate("/" + WEB_CONTEXT + "/login")
         }
         if (response.status === 404) {
             if (response.data === "user-not-found")
@@ -131,7 +132,7 @@ function Appointments(props) {
         const email = localStorage.getItem('email')
         if (email === null) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate("/" + WEB_CONTEXT + "/login")
         }
         const response = await AppointmentCalls.deleteAppointment(email, app.id)
         if (response && response.ok) {
@@ -140,7 +141,7 @@ function Appointments(props) {
         }
         if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate("/" + WEB_CONTEXT + "/login")
         }
         if (response.status === 404) {
             if (response.data === "doctor-clinic-not-found")

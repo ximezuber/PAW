@@ -9,6 +9,7 @@ import "../../i18n/i18n"
 import {getPaths} from "../../utils/paginationHelper";
 import ApiCalls from "../../api/apiCalls";
 import {CURRENT, NEXT, PREV} from "./Constants";
+import {WEB_CONTEXT} from "../../Constants";
 
 function Locations(props){
     const [locations, setLocations] = useState([])
@@ -58,7 +59,7 @@ function Locations(props){
         }
         if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
         if (response.status === 409) {
             if (response.data === "clinics-dependency") {
@@ -74,7 +75,7 @@ function Locations(props){
             setMessage("")
         } else if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         } else if (response.status === 409) {
             if (response.data === "location-exists") {
                 setMessage("errors.locationExists")

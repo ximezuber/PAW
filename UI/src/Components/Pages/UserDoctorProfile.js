@@ -1,6 +1,6 @@
 import {useNavigate, useParams} from "react-router-dom";
 import {Button, Col, Container, Form, Row, Table} from "react-bootstrap";
-import {BASE_URL} from "../../Constants";
+import {BASE_URL, WEB_CONTEXT} from "../../Constants";
 import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import DoctorCalls from "../../api/DoctorCalls";
@@ -161,7 +161,7 @@ function UserDoctorProfile(props) {
     const handleMakeApp = async () => {
         if (localStorage.getItem('email') === null) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
         if (selectedClinic === null) {
             setMessage("errors.selectTime")
@@ -181,12 +181,12 @@ function UserDoctorProfile(props) {
             }
             const response = await AppointmentCalls.makeAppointment(data);
             if (response && response.ok) {
-                navigate("/paw-2019b-4/appointments")
+                navigate(`/${WEB_CONTEXT}/appointments`)
             }
             if (response.status === 401) {
-                localStorage.setItem('path', "/paw-2019b-4/" + license + "/profile")
+                localStorage.setItem('path', "/" + WEB_CONTEXT + "/" + license + "/profile")
                 props.logout()
-                navigate('/paw-2019b-4/login')
+                navigate(`/${WEB_CONTEXT}/login`)
             }
             if (response.status === 400) {
                 if (response.data === "past-date")
@@ -209,7 +209,7 @@ function UserDoctorProfile(props) {
     const makeFavorite = async () => {
         if (localStorage.getItem('email') === null) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
         const response = await PatientCalls.addFavoriteDoctor(localStorage.getItem('email'), license)
         if (response && response.ok) {
@@ -227,16 +227,16 @@ function UserDoctorProfile(props) {
                 setMessage("errors.favExists")
         }
         if (response.status === 401) {
-            localStorage.setItem('path', "/paw-2019b-4/" + license + "/profile")
+            localStorage.setItem('path', "/" + WEB_CONTEXT + "/" + license + "/profile")
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
     }
 
     const deleteFavorite = async () => {
         if (localStorage.getItem('email') === null) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
         const response = await PatientCalls.deleteFavoriteDoctor(localStorage.getItem('email'), license)
         if (response && response.ok) {
@@ -250,9 +250,9 @@ function UserDoctorProfile(props) {
                 setMessage("errors.noPatientEmail")
         }
         if (response.status === 401) {
-            localStorage.setItem('path', "/paw-2019b-4/" + license + "/profile")
+            localStorage.setItem('path', "/" + WEB_CONTEXT+ "/" + license + "/profile")
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
     }
 
@@ -306,9 +306,9 @@ function UserDoctorProfile(props) {
                         <h4 style={{display: "flex"}}>
                             <div style={{alignSelf: "center"}}>{t('USER.dataProfile')}</div>
                             {isFavorite ? <Button className="m-2 fav-button" onClick={deleteFavorite}>
-                                <img src="/paw-2019b-4/images/yesfav.png"/>
+                                <img src={"/" + WEB_CONTEXT + "/images/yesfav.png"}/>
                             </Button>:<Button className="m-2 fav-button" onClick={makeFavorite}>
-                                <img src="/paw-2019b-4/images/nofav.png"/>
+                                <img src={"/" + WEB_CONTEXT + "/images/nofav.png"}/>
                             </Button>}
                         </h4>
                         <div className="user-info-label">
@@ -330,7 +330,7 @@ function UserDoctorProfile(props) {
                     <Col className="img-col-user mx-3">
                         <img className="user-img-size"
                              src={image === null?
-                                 "/paw-2019b-4/images/docpic.jpg": BASE_URL + "/doctors/" + license + "/image"} />
+                                 "/" + WEB_CONTEXT + "/images/docpic.jpg": BASE_URL + "/doctors/" + license + "/image"} />
                     </Col>
                 </Row>
                 <hr/>

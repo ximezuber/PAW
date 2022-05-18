@@ -8,6 +8,7 @@ import {Link, useLocation, useNavigate} from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../i18n/i18n";
 import {changeLanguage} from "i18next";
+import {WEB_CONTEXT} from "../Constants";
 
 
 function NavBar(props) {
@@ -20,26 +21,26 @@ function NavBar(props) {
 
     const userNavbarItems = [
         {
-            link: '/paw-2019b-4/favorites',
+            link: "/"  + WEB_CONTEXT + "/favorites",
             text: "favourites"
         },
         {
-            link: '/paw-2019b-4/appointments',
+            link: "/"  + WEB_CONTEXT + "/appointments",
             text: 'appointments'
         },
         {
-            link: '/paw-2019b-4/profile',
+            link: "/"  + WEB_CONTEXT + "/profile",
             text: 'profile'
         }
     ]
 
     const docNavBarItems = [
         {
-            link: '/paw-2019b-4/doctor/clinics',
+            link: "/"  + WEB_CONTEXT + "/doctor/clinics",
             text: "clinics"
         },
         {
-            link: '/paw-2019b-4/doctor/appointments',
+            link: "/"  + WEB_CONTEXT + "/doctor/appointments",
             text: 'appointments'
         }
     ]
@@ -75,19 +76,19 @@ function NavBar(props) {
     const handleLogout = () => {
         props.setRole(null)
         ApiCalls.logout()
-        navigate("/paw-2019b-4");
+        navigate("/"  + WEB_CONTEXT);
 
     }
 
     const getRoleHome = (role) => {
-        if (!props.isAuth()) return "/paw-2019b-4";
+        if (!props.isAuth()) return "/"  + WEB_CONTEXT;
         switch (role) {
             case "ROLE_ADMIN":
-                return '/paw-2019b-4/admin';
+                return "/"  + WEB_CONTEXT + "/admin";
             case "ROLE_DOCTOR":
-                return '/paw-2019b-4/doctor';
+                return "/"  + WEB_CONTEXT + "/doctor";
             case "ROLE_USER":
-                return '/paw-2019b-4';
+                return "/"  + WEB_CONTEXT;
         }
     }
 
@@ -111,13 +112,13 @@ function NavBar(props) {
                         </Nav.Item>
                         :
                         <Nav.Item  class="ml-auto">
-                            <Nav.Link as={Link} to="/paw-2019b-4/signUp" style={{color: "white"}}>{t('NAVBAR.signUp')}</Nav.Link>
+                            <Nav.Link as={Link} to={"/"  + WEB_CONTEXT + "/signUp"} style={{color: "white"}}>{t('NAVBAR.signUp')}</Nav.Link>
                         </Nav.Item>}
                     {loggedIn ?
                         ''
                         :
                         <Nav.Item class="ml-auto">
-                            <Nav.Link as={Link} to="/paw-2019b-4/login" style={{color: "white"}}>{t('NAVBAR.login')}</Nav.Link>
+                            <Nav.Link as={Link} to={"/"  + WEB_CONTEXT + "/login"} style={{color: "white"}}>{t('NAVBAR.login')}</Nav.Link>
                         </Nav.Item>}
                     <ButtonGroup aria-label="Basic example">
                         <Button className="lang-buttons" onClick={() => changeLanguage('en')}>EN</Button>

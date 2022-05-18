@@ -9,6 +9,7 @@ import EditPriceModal from "../Modals/EditPriceModal";
 import ApiCalls from "../../api/apiCalls";
 import {getPaths} from "../../utils/paginationHelper";
 import {CURRENT, NEXT, PREV} from "./Constants";
+import {WEB_CONTEXT} from "../../Constants";
 
 function DoctorClinics(props) {
     const [clinics, setClinics] = useState([]);
@@ -125,7 +126,7 @@ function DoctorClinics(props) {
         }
         if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate("/" + WEB_CONTEXT + "/login")
         }
     }
     useEffect( () => {
@@ -193,7 +194,7 @@ function DoctorClinics(props) {
                                     </Card.Text>
                                     <Link className="btn btn-outline-dark btn-lg see-prepaid-button shadow-sm"
                                           role="button"
-                                          to={`/paw-2019b-4/doctor/${license}/clinics/${dc.clinic.id}/schedule`}>
+                                          to={`/${WEB_CONTEXT}/doctor/${license}/clinics/${dc.clinic.id}/schedule`}>
                                         {t('scheduleButton')}
                                     </Link>
                                 </Card.Body>

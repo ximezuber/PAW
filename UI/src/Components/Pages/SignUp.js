@@ -7,6 +7,7 @@ import '../../i18n/i18n'
 import ApiCalls from "../../api/apiCalls"
 import {useNavigate} from "react-router-dom";
 import PrepaidCalls from "../../api/PrepaidCalls";
+import {WEB_CONTEXT} from "../../Constants";
 
 function SignUp(props) {
     const [selectedPrepaid, setSelectedPrepaid] = useState('-')
@@ -143,7 +144,7 @@ function SignUp(props) {
                     navigate(localStorage.getItem("path"));
                     localStorage.removeItem("path")
                 } else {
-                    navigate("/paw-2019b-4");
+                    navigate("/" + WEB_CONTEXT);
                 }
             }
         }

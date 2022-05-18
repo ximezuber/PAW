@@ -11,6 +11,7 @@ import {useTranslation} from "react-i18next";
 import {getPaths} from "../../utils/paginationHelper";
 import '../Pages/Constants'
 import {CURRENT, NEXT, PREV} from "./Constants";
+import {WEB_CONTEXT} from "../../Constants";
 
 
 function Doctors(props) {
@@ -65,7 +66,7 @@ function Doctors(props) {
 
         } else if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         } else if (response.status === 409) {
             if (response.data === 'license-in-use')
                 setMessage("errors.licenseInUse")
@@ -94,7 +95,7 @@ function Doctors(props) {
             }
         } else if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
     }
 

@@ -7,6 +7,7 @@ import './Favorites.css'
 import {getPaths} from "../../utils/paginationHelper";
 import ApiCalls from "../../api/apiCalls";
 import {CURRENT, NEXT, PREV} from "./Constants";
+import {WEB_CONTEXT} from "../../Constants";
 
 function Favorites(props) {
     const [doctors, setDoctors] = useState([])
@@ -25,7 +26,7 @@ function Favorites(props) {
         let id = localStorage.getItem('email')
         if (id === null) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
         setIsLoading(true)
         const response = await PatientCalls.getFavoriteDoctors(id, 0)
@@ -36,7 +37,7 @@ function Favorites(props) {
         }
         if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
     }
 
@@ -44,7 +45,7 @@ function Favorites(props) {
         let id = localStorage.getItem('email')
         if (id === null) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
         setIsLoading(true)
         const response = await ApiCalls.makeGetCall(paths[page])
@@ -55,7 +56,7 @@ function Favorites(props) {
         }
         if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
     }
 
@@ -63,7 +64,7 @@ function Favorites(props) {
         let id = localStorage.getItem('email')
         if (id === null) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
         const response = await PatientCalls.deleteFavoriteDoctor(id, license);
         if (response && response.ok) {
@@ -72,7 +73,7 @@ function Favorites(props) {
         }
         if (response.status === 401) {
             props.logout()
-            navigate('/paw-2019b-4/login')
+            navigate(`/${WEB_CONTEXT}/login`)
         }
     }
 
@@ -138,7 +139,7 @@ function Favorites(props) {
                                         <div className="buttons-div">
                                             <Link className="doc-button-color btn m-1"
                                                   role="button"
-                                                  to={'/paw-2019b-4/' + doctor.license + '/profile'}>{t("USER.seeProfile")}
+                                                  to={'/' + WEB_CONTEXT + '/' + doctor.license + '/profile'}>{t("USER.seeProfile")}
                                             </Link>
                                             <Button className="edit-remove-button remove-button-color shadow-sm"
                                                     onClick={() => removeFromFavorites(doctor.license)}>
