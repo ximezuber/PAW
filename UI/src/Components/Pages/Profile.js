@@ -20,6 +20,8 @@ function Profile(props) {
     const [prepaidNumber, setPrepaidNumber] = useState('')
     const [prepaids, setPrepaids] = useState([])
     const [appointments, setAppointments] = useState([])
+    let cachedClinic = {}
+    let cachedDoctor = {}
 
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -77,8 +79,16 @@ function Profile(props) {
             const list = response.data.slice(0, 3)
             let apps = []
             for (let i = 0; i < list.length; i++) {
-                const doctor = await fetchEntity(list[i].doctor)
-                const clinic = await fetchEntity(list[i].clinic)
+                let doctor = cachedDoctor[list[i].doctor]
+                if (doctor === undefined) {
+                    doctor =  await fetchEntity(list[i].doctor)
+                    cachedDoctor[list[i].doctor] = doctor
+                }
+                let clinic = cachedClinic[list[i].clinic]
+                if (clinic === undefined) {
+                    clinic =  await fetchEntity(list[i].clinic)
+                    cachedClinic[list[i].clinic] = clinic
+                }
                 const app = {
                     id: list[i].id,
                     clinic: clinic,

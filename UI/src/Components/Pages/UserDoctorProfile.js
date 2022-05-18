@@ -26,6 +26,7 @@ function UserDoctorProfile(props) {
     const [selectedClinic, setSelectedClinic] = useState(null)
     const [selectedDateTime, setSelectedDateTime] = useState(null)
     const [isFavorite, setIsFavorite] = useState(false)
+    let cachedClinic = {}
 
     const fetchDoctor = async () => {
         const response = await DoctorCalls.getDocByLicense(license);
@@ -40,7 +41,11 @@ function UserDoctorProfile(props) {
             const list = response.data
             let apps = []
             for (let i = 0; i < list.length; i++) {
-                const clinic = await fetchClinic(list[i].clinic)
+                let clinic = cachedClinic[list[i].clinic];
+                if (clinic === undefined) {
+                    clinic = await fetchClinic(list[i].clinic)
+                    cachedClinic[list[i].clinic] = clinic
+                }
                 const app = {
                     clinic: clinic,
                     year: list[i].year,
@@ -62,7 +67,11 @@ function UserDoctorProfile(props) {
             const docClinic = response.data
             const getClinics = [];
             for (let i = 0; i < docClinic.length; i++) {
-                const clinic = await fetchClinic(docClinic[i].clinic)
+                let clinic = cachedClinic[docClinic[i].clinic];
+                if (clinic === undefined) {
+                    clinic = await fetchClinic(docClinic[i].clinic)
+                    cachedClinic[docClinic[i].clinic] = clinic
+                }
                 getClinics.push(clinic);
             }
             setClinics(getClinics)
@@ -99,7 +108,11 @@ function UserDoctorProfile(props) {
             const list = response.data;
             let sch = []
             for (let i = 0; i < list.length; i++) {
-                const clinic = await fetchClinic(list[i].clinic)
+                let clinic = cachedClinic[list[i].clinic];
+                if (clinic === undefined) {
+                    clinic = await fetchClinic(list[i].clinic)
+                    cachedClinic[list[i].clinic] = clinic
+                }
                 const sched = {
                     clinic: clinic,
                     day: list[i].day,

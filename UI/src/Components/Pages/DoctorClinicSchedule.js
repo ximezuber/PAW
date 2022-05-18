@@ -17,6 +17,7 @@ function DoctorClinicSchedule(props) {
     const navigate = useNavigate()
     let {id} = useParams();
     let {license} = useParams()
+    let cachedClinic = {}
 
     const fetchDoctor = async () => {
         const email = localStorage.getItem('email');
@@ -48,7 +49,11 @@ function DoctorClinicSchedule(props) {
             const list = response.data;
             let sch = []
             for (let i = 0; i < list.length; i++) {
-                const clinic = await fetchEntity(list[i].clinic)
+                let clinic = cachedClinic[list[i].clinic]
+                if (clinic === undefined) {
+                    clinic = await fetchEntity(list[i].clinic)
+                    cachedClinic[list[i].clinic] = clinic
+                }
                 const sched = {
                     clinic: clinic,
                     day: list[i].day,

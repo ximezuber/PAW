@@ -11,7 +11,6 @@ import {useNavigate} from "react-router-dom";
 import ImageSelectModal from "../Modals/ImageSelectModal";
 import ImageCalls from "../../api/ImageCalls";
 import {BASE_URL} from "../../Constants";
-import apiCalls from "../../api/apiCalls";
 
 function DoctorHome(props) {
     const [doctor, setDoctor] = useState({})

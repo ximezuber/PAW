@@ -9,7 +9,6 @@ import {useTranslation} from "react-i18next";
 import {getPaths} from "../../utils/paginationHelper";
 import {CURRENT, FIRST, NEXT, PREV} from "./Constants";
 import ApiCalls from "../../api/apiCalls";
-import * as path from "path";
 
 
 function Home(props) {

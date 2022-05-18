@@ -16,6 +16,9 @@ function Appointments(props) {
     const [isLoading, setIsLoading] = useState(false)
     const {t} = useTranslation()
     const navigate = useNavigate()
+    let cachedClinic = {}
+    let cachedPatient = {}
+    let cachedDoctors = {}
 
     const fetchAppointments = async () => {
         const email = localStorage.getItem('email')
@@ -46,8 +49,17 @@ function Appointments(props) {
             let apps = []
             if (props.user === "doctor") {
                 for (let i = 0; i < list.length; i++) {
-                    const patient = await fetchAuthEntity(list[i].patient)
-                    const clinic = await fetchEntity(list[i].clinic)
+                    let patient = cachedPatient[list[i].patient]
+                    if (patient === undefined) {
+                        patient = await fetchAuthEntity(list[i].patient)
+                        cachedPatient[list[i].patient] = patient
+                    }
+
+                    let clinic = cachedClinic[list[i].clinic]
+                    if (clinic === undefined) {
+                        clinic =  await fetchEntity(list[i].clinic)
+                        cachedClinic[list[i].clinic] = clinic
+                    }
                     const app = {
                         id: list[i].id,
                         clinic: clinic,
@@ -63,8 +75,16 @@ function Appointments(props) {
                 }
             } else {
                 for (let i = 0; i < list.length; i++) {
-                    const doctor = await fetchEntity(list[i].doctor)
-                    const clinic = await fetchEntity(list[i].clinic)
+                    let doctor = cachedDoctors[list[i].doctor]
+                    if (doctor === undefined) {
+                        doctor =  await fetchEntity(list[i].doctor)
+                        cachedDoctors[list[i].doctor] = doctor
+                    }
+                    let clinic = cachedClinic[list[i].clinic]
+                    if (clinic === undefined) {
+                        clinic =  await fetchEntity(list[i].clinic)
+                        cachedClinic[list[i].clinic] = clinic
+                    }
                     const app = {
                         id: list[i].id,
                         clinic: clinic,
