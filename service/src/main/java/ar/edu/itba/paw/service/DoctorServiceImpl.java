@@ -60,20 +60,6 @@ public class DoctorServiceImpl implements DoctorService {
         return doctorDao.getDoctorByEmail(email);
     }
 
-//    @Override
-//    public List<Doctor> getPaginatedDoctors(List<String> licenses, int page) {
-//        if (page < 0 || licenses.isEmpty()) {
-//            return Collections.emptyList();
-//        }
-//
-//        return doctorDao.getPaginatedDoctorsInList(licenses, page);
-//    }
-
-    @Override
-    public int getMaxAvailableDoctorsPage(List<String> licenses) {
-        return licenses.isEmpty() ? 0 : doctorDao.maxAvailableDoctorsInListPage(licenses);
-    }
-
     @Override
     public List<Doctor> getPaginatedObjects(int page) {
         if (page < 0) {

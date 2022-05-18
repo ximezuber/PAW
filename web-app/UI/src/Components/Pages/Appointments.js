@@ -153,7 +153,7 @@ function Appointments(props) {
 
     useEffect( () => {
         async function fetchData () {
-            await fetchAppointments();
+            fetchAppointments();
         }
         fetchData();
     }, [])
@@ -195,6 +195,11 @@ function Appointments(props) {
                 )}
                 {appointments.length === 0 && !isLoading && <h4 className="m-3 no-fav">{t("USER.noApp")}</h4>}
             </Row>
+            <div>
+                {isLoading && (
+                    <span className="spinner-border spinner-border-sm mt-3" style={{marginRight:"1rem"}}/>
+                )}
+            </div>
             <Container>
                 <div className="admin-info-container app-user-container">
                     {appointments.map((ap) => {

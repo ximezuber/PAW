@@ -29,9 +29,9 @@ function Profile(props) {
 
     useEffect( () => {
         async function fetchData () {
-            await fetchProfile()
-            await fetchPrepaids()
-            await fetchAppointments()
+            fetchProfile()
+            fetchPrepaids()
+            fetchAppointments()
         }
         fetchData();
 

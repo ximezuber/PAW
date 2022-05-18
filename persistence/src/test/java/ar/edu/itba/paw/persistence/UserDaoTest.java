@@ -9,9 +9,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -35,10 +32,6 @@ public class UserDaoTest {
     private static final String lastName2 = "patLastName";
 
     private static final String email2 = "patient@mail.com";
-
-
-//    @PersistenceContext
-//    private EntityManager entityManager;
 
      @Autowired
     private UserDaoImpl userDao;

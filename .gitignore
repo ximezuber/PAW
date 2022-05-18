@@ -25,7 +25,7 @@ UI/node_modules
 /coverage
 
 # production
-UI/build
+web-app/UI/build
 
 # misc
 .DS_Store

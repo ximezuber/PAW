@@ -15,9 +15,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 import java.util.Optional;
 
 @RunWith(MockitoJUnitRunner.class)

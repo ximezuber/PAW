@@ -184,6 +184,8 @@ export const TRANSLATION_ES = {
     deleteProfile: "Eliminar Cuenta",
     cancelButton: "Cancelar",
     with: "con",
-    nextApp: "Próximos turnos"
+    nextApp: "Próximos turnos",
+    searchButton: "Buscar",
+    clearButton: "Limpiar"
 
 }

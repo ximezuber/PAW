@@ -3,7 +3,6 @@ package ar.edu.itba.paw.interfaces.dao;
 import ar.edu.itba.paw.model.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface DoctorDao extends PaginationDao<Doctor> {
@@ -20,6 +19,4 @@ public interface DoctorDao extends PaginationDao<Doctor> {
     void updateDoctor(Doctor doctor, String license, Specialty specialty, String phoneNumber);
 
     List<Doctor> getPaginatedDoctorsInList(List<String> licenses, int page);
-
-    int maxAvailableDoctorsInListPage(List<String> licenses);
 }

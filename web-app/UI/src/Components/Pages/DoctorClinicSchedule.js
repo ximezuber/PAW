@@ -98,9 +98,9 @@ function DoctorClinicSchedule(props) {
 
     useEffect (() => {
         async function fetchData () {
-            await fetchDoctor();
-            await fetchClinic();
-            await fetchSchedule()
+             fetchDoctor();
+             fetchClinic();
+             fetchSchedule()
         }
         fetchData();
 

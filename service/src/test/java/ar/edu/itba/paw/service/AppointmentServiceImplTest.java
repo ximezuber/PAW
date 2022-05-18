@@ -60,9 +60,6 @@ public class AppointmentServiceImplTest {
     DoctorService doctorService;
 
     @Mock
-    DoctorClinicService doctorClinicService;
-
-    @Mock
     UserService userService;
 
     @Mock
@@ -182,7 +179,7 @@ public class AppointmentServiceImplTest {
     }
 
     @Test
-    public void testCancelAppDoc() throws EntityNotFoundException, RequestEntityNotFoundException {
+    public void testCancelAppDoc() throws EntityNotFoundException {
         // Set up
         LocalDateTime appDate = LocalDateTime.of(year, month, day, time, 0);
         Appointment app = new Appointment(appDate, dc, user2);
@@ -195,7 +192,7 @@ public class AppointmentServiceImplTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void testCancelNoApp() throws EntityNotFoundException, RequestEntityNotFoundException {
+    public void testCancelNoApp() throws EntityNotFoundException {
         // Set up
         LocalDateTime appDate = LocalDateTime.of(year, month, day, time, 0);
 

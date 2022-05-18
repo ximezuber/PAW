@@ -4,20 +4,13 @@ import ar.edu.itba.paw.model.Doctor;
 import ar.edu.itba.paw.model.Specialty;
 import ar.edu.itba.paw.model.User;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.sql.DataSource;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,9 +36,6 @@ public class DoctorDaoImplTest {
     private static final User user = new User("patFirstName", "patLastName", "password", "patient@mail.com");
 
     private static final User docUser2 = new User("docFirstName", "docLastName", "password", "doctor@mail.com");
-
-//    @PersistenceContext
-//    private EntityManager entityManager;
 
     @Autowired
     private DoctorDaoImpl doctorDao;

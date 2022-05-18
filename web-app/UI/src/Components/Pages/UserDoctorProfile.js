@@ -148,12 +148,12 @@ function UserDoctorProfile(props) {
 
     useEffect( () => {
         async function fetchData () {
-            await fetchDoctor();
-            await fetchImage();
-            await fetchSchedule();
-            await fetchClinics();
-            await fetchIsFavorite();
-            await fetchAvailableAppointments();
+            fetchDoctor();
+            fetchImage();
+            fetchSchedule();
+            fetchClinics();
+            fetchIsFavorite();
+            fetchAvailableAppointments();
         }
         fetchData();
     },[])

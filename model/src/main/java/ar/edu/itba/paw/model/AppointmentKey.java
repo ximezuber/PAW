@@ -15,7 +15,6 @@ public class AppointmentKey implements Serializable {
     @Column
     private LocalDateTime date;
 
-    // DO NOT DELETE
     public AppointmentKey(){
 
     }

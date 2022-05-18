@@ -40,7 +40,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Autowired
     private UserService userService;
 
-    // TODO: Check if this is right (necessary) and if it should just be a private method
     @Override
     public LocalDateTime createAppointmentCalendar(int year, int month, int day, int time) {
         return LocalDateTime.of(year, Month.of(month), day, time, 0);
@@ -196,15 +195,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         return false;
-    }
-
-
-    private boolean hasAppointment(Doctor doctor, LocalDateTime date) {
-        return appointmentDao.hasAppointment(doctor, date);
-    }
-
-    private boolean hasAppointment(User patient, LocalDateTime date) {
-        return appointmentDao.hasAppointment(patient, date);
     }
 
     private List<Appointment> getAllDoctorsAppointments(Doctor doctor) {

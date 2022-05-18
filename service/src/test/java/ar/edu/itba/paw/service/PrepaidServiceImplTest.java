@@ -4,7 +4,6 @@ import ar.edu.itba.paw.interfaces.dao.PrepaidDao;
 import ar.edu.itba.paw.interfaces.service.PatientService;
 import ar.edu.itba.paw.model.Prepaid;
 import ar.edu.itba.paw.model.exceptions.DuplicateEntityException;
-import ar.edu.itba.paw.model.exceptions.EntityNotFoundException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

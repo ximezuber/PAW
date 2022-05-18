@@ -48,8 +48,6 @@ public class DoctorClinicServiceImplTest {
 
     private static final Doctor doc2 = new Doctor(specialty, "3", "1234", user2);
 
-
-
     @InjectMocks
     private DoctorClinicServiceImpl doctorClinicService = new DoctorClinicServiceImpl();
 
@@ -59,14 +57,8 @@ public class DoctorClinicServiceImplTest {
     @Mock
     private ScheduleService scheduleService;
 
-    @Mock
-    private DoctorService doctorService;
-
-    @Mock
-    private ClinicService clinicService;
-
     @Test
-    public void testCreate() throws EntityNotFoundException, DuplicateEntityException {
+    public void testCreate() throws DuplicateEntityException {
         //Set Up
         Mockito.when(mockDao.createDoctorClinic(Mockito.eq(doc), Mockito.eq(clinic), Mockito.eq(consultPrice)))
                 .thenReturn(new DoctorClinic(doc, clinic, consultPrice));

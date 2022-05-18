@@ -120,26 +120,6 @@ public class AppointmentDaoImpl implements AppointmentDao {
         return query.getResultList().stream().findFirst();
     }
 
-    @Override
-    public boolean hasAppointment(Doctor doctor, LocalDateTime date) {
-        TypedQuery<Appointment> query = entityManager.createQuery("FROM Appointment AS ap" +
-                " WHERE ap.doctorClinic.doctor.license = :doctor " +
-                "AND ap.appointmentKey.date = :date", Appointment.class);
-        query.setParameter("doctor", doctor.getLicense());
-        query.setParameter("date", date);
-        return !query.getResultList().isEmpty();
-    }
-
-    @Override
-    public boolean hasAppointment(User patient, LocalDateTime date) {
-        TypedQuery<Appointment> query = entityManager.createQuery("FROM Appointment AS ap" +
-                " WHERE ap.patient = :email " +
-                "AND ap.appointmentKey.date = :date", Appointment.class);
-        query.setParameter("email", patient.getEmail());
-        query.setParameter("date", date);
-        return !query.getResultList().isEmpty();
-    }
-
     private List<Appointment> getPatientsAppointments(User patient) {
         TypedQuery<Appointment> query = entityManager.createQuery("FROM Appointment AS ap " +
                 "WHERE ap.patient = :email", Appointment.class);

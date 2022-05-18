@@ -184,5 +184,7 @@ export const TRANSLATION_EN = {
     deleteProfile: "Delete Account",
     cancelButton: "Cancel",
     with: "with",
-    nextApp: "Next Appointments"
+    nextApp: "Next Appointments",
+    searchButton: "Search",
+    clearButton: "Clear"
 }

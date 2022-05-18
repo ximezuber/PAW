@@ -32,9 +32,6 @@ public class ScheduleServiceImplTest {
     @Mock
     private ScheduleDao scheduleDao;
 
-    @Mock
-    private DoctorClinicService doctorClinicService;
-
     @Test
     public void testCreate() throws ConflictException {
         // Set up

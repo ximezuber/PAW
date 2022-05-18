@@ -79,7 +79,7 @@ function Favorites(props) {
 
     useEffect( () => {
         async function fetchData () {
-            await fetchFavorites();
+            fetchFavorites();
         }
         fetchData();
 
@@ -122,6 +122,11 @@ function Favorites(props) {
                 )}
                 {doctors.length === 0 && !isLoading && <h4 className="m-3 no-fav">{t("USER.emptyFavorites")}</h4>}
             </Row>
+            <div>
+                {isLoading && (
+                    <span className="spinner-border spinner-border-sm mt-3" style={{marginRight:"1rem"}}/>
+                )}
+            </div>
             <Row>
                 <Col>
                     <Container>

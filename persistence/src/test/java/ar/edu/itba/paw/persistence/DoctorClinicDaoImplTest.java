@@ -36,9 +36,6 @@ public class DoctorClinicDaoImplTest {
 
     private static final int consultPrice = 1;
 
-//    @PersistenceContext
-//    private EntityManager entityManager;
-
     @Autowired
     private DoctorClinicDaoImpl doctorClinicDao;
 

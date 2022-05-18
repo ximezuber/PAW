@@ -178,10 +178,10 @@ function SearchBar(props) {
                                 consultPrice: consultPrice
                             }, FIRST
                         )}>
-                            Search
+                            {t("searchButton")}
                         </Button>
                         <Button className="doc-button-color" onClick={() => handleClear()}>
-                            Clear
+                            {t("clearButton")}
                         </Button>
                     </div>
                 </Form>

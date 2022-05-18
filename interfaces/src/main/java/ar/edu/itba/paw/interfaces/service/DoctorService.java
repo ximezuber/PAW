@@ -19,10 +19,6 @@ public interface DoctorService extends PaginationService<Doctor> {
 
     Optional<Doctor> getDoctorByEmail(String email);
 
-//    List<Doctor> getPaginatedDoctors(List<String> licenses, int page);
-
-    int getMaxAvailableDoctorsPage(List<String> licenses);
-
     void deleteDoctor(String license) throws EntityNotFoundException;
 
     void updateDoctorProfile (Doctor doctor,

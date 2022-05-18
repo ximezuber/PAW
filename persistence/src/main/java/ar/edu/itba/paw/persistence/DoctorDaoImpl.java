@@ -5,7 +5,6 @@ import ar.edu.itba.paw.model.Doctor;
 import ar.edu.itba.paw.model.Specialty;
 import ar.edu.itba.paw.model.User;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -100,10 +99,5 @@ public class DoctorDaoImpl implements DoctorDao {
                 .setFirstResult(page * MAX_DOCTORS_PER_PAGE_USER)
                 .setMaxResults(MAX_DOCTORS_PER_PAGE_USER)
                 .getResultList();
-    }
-
-    @Override
-    public int maxAvailableDoctorsInListPage(List<String> licenses) {
-        return (int) (Math.ceil(( ((double)licenses.size()) / (double)MAX_DOCTORS_PER_PAGE_USER)));
     }
 }

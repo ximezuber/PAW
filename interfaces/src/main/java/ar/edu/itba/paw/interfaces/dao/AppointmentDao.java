@@ -30,8 +30,4 @@ public interface AppointmentDao {
 
     Optional<Appointment> getAppointment(Doctor doctor, Patient patient, LocalDateTime date);
 
-    boolean hasAppointment(Doctor doctor, LocalDateTime date);
-
-    boolean hasAppointment(User patient, LocalDateTime date);
-
 }

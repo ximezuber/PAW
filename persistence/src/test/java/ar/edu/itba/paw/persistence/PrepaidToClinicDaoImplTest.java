@@ -5,20 +5,13 @@ import ar.edu.itba.paw.model.Location;
 import ar.edu.itba.paw.model.Prepaid;
 import ar.edu.itba.paw.model.PrepaidToClinic;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.sql.DataSource;
 
 import java.util.Optional;
 
@@ -40,9 +33,6 @@ public class PrepaidToClinicDaoImplTest {
     private static final Clinic clinic = new Clinic(1, "clinic", "address", location);
 
     private static final Clinic clinic2 = new Clinic(2, "clinic2", "address2", location);
-
-//    @PersistenceContext
-//    private EntityManager entityManager;
 
     @Autowired
     private PrepaidToClinicDaoImpl prepaidToClinicDao;

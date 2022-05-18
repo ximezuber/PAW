@@ -16,7 +16,6 @@ public interface AppointmentService {
 
     List<Appointment> getDoctorsAvailableAppointments(Doctor doctor);
 
-    // TODO: See what to do with Pagination service interface
     List<Appointment> getPaginatedAppointments(User user, int page) throws EntityNotFoundException;
 
     Optional<Appointment> getAppointment(Doctor doctor, int year, int month, int day, int time);
