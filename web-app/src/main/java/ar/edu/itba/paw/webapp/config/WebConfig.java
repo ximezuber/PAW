@@ -59,12 +59,6 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 
     private String jdbcPath = "jdbc:postgresql://localhost/paw-2019b-4";
 
-//    private String dbUser = "root";
-//
-//    private String dbPassword = "root";
-//
-//    private String jdbcPath = "jdbc:postgresql://localhost/paw";
-
     @Value("classpath:schema.sql")
     private Resource schemaSql;
 
