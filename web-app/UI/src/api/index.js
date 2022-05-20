@@ -14,8 +14,19 @@ const api = applyCaseMiddleware(axios.create({
 api.interceptors.request.use(
     config => {
         const token = localStorage.getItem('token');
+
         if (token) {
-            config.headers['X-AUTH-TOKEN'] = token
+            const tokenParts = JSON.parse(atob(token.split('.')[1]));
+
+            // exp date in token is expressed in seconds, while now() returns milliseconds:
+            const now = Math.ceil(Date.now() / 1000);
+            if(tokenParts.exp > now) {
+                config.headers['X-AUTH-TOKEN'] = token
+            } else {
+                localStorage.removeItem('token')
+                localStorage.removeItem('role')
+            }
+
         }
         return config;
     },
