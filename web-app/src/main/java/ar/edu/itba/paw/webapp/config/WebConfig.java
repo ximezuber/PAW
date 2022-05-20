@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
@@ -36,10 +37,10 @@ import org.springframework.web.servlet.view.JstlView;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.Properties;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 @EnableWebMvc
 @EnableTransactionManagement
@@ -135,11 +136,14 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     @Override
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/resources/**").addResourceLocations("/resources/");
-        registry.addResourceHandler("/images/**").addResourceLocations("/images/");
-        registry.addResourceHandler("/static/css/**").addResourceLocations("/static/css");
-        registry.addResourceHandler("/static/js/**").addResourceLocations("/static/js");
-        registry.addResourceHandler("/index.html").addResourceLocations("/index.html");
-
+        registry.addResourceHandler("/images/**").addResourceLocations("/images/")
+                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
+        registry.addResourceHandler("/static/css/**").addResourceLocations("/static/css")
+                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
+        registry.addResourceHandler("/static/js/**").addResourceLocations("/static/js")
+                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
+        registry.addResourceHandler("/index.html").addResourceLocations("/index.html")
+                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
     }
 
     @Bean
