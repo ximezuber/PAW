@@ -3,9 +3,8 @@
 
 ### What is this repository for? ###
 
-This repository holds an application for searching doctor services and booking appointments.
-On the other hand, doctors have a user and they can manage their own appointments from the application.
-An admin user manages the entire application.
+This repository holds a web application for searching doctor services and booking appointments.
+It also allows doctors to manage their own appointments from the application.
 
 ### How do I get set up? ###
 
